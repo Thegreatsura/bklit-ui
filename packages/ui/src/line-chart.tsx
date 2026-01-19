@@ -7,7 +7,7 @@ import { curveNatural } from "@visx/curve";
 import { scaleTime, scaleLinear } from "@visx/scale";
 import { ParentSize } from "@visx/responsive";
 import { localPoint } from "@visx/event";
-import { useSpring, motion } from "motion/react";
+import { useSpring, motion, AnimatePresence } from "motion/react";
 // @ts-expect-error - d3-array types not installed
 import { bisector } from "d3-array";
 import {
@@ -70,6 +70,107 @@ const cssVars = {
   grid: "var(--chart-grid)",
 };
 
+// X-Axis label that fades when crosshair is near
+interface XAxisLabelProps {
+  label: string;
+  x: number;
+  crosshairX: number | null;
+  isHovering: boolean;
+  /** Width of the date ticker box - labels within this radius fade completely */
+  tickerHalfWidth?: number;
+}
+
+function XAxisLabel({
+  label,
+  x,
+  crosshairX,
+  isHovering,
+  tickerHalfWidth = 50,
+}: XAxisLabelProps) {
+  // Calculate opacity based on distance from crosshair
+  // Labels under the date ticker box should be fully hidden
+  // Labels nearby should fade out smoothly
+  const fadeBuffer = 20; // Extra buffer for smooth transition
+  const fadeRadius = tickerHalfWidth + fadeBuffer;
+
+  let opacity = 1;
+  if (isHovering && crosshairX !== null) {
+    const distance = Math.abs(x - crosshairX);
+    if (distance < tickerHalfWidth) {
+      // Fully hidden when under the ticker
+      opacity = 0;
+    } else if (distance < fadeRadius) {
+      // Smooth fade in the buffer zone
+      opacity = (distance - tickerHalfWidth) / fadeBuffer;
+    }
+  }
+
+  return (
+    <motion.div
+      className="absolute text-xs whitespace-nowrap"
+      style={{
+        left: x,
+        bottom: 12,
+        transform: "translateX(-50%)",
+        color: cssVars.foregroundMuted,
+      }}
+      animate={{ opacity }}
+      transition={{ duration: 0.4, ease: "easeInOut" }}
+    >
+      {label}
+    </motion.div>
+  );
+}
+
+// X-Axis labels container
+interface XAxisLabelsProps {
+  /** The time scale from visx - we use its .ticks() method */
+  xScale: ReturnType<typeof scaleTime<number>>;
+  marginLeft: number;
+  crosshairX: number | null;
+  isHovering: boolean;
+  /** Number of ticks to show. Default: 6 */
+  numTicks?: number;
+}
+
+function XAxisLabels({
+  xScale,
+  marginLeft,
+  crosshairX,
+  isHovering,
+  numTicks = 6,
+}: XAxisLabelsProps) {
+  // Use xScale.ticks() for intelligent tick placement
+  // This handles spacing and avoids overlaps automatically
+  const labelsToShow = useMemo(() => {
+    // Get tick values from the scale (dates)
+    const tickValues = xScale.ticks(numTicks);
+
+    return tickValues.map((date) => ({
+      date,
+      x: xScale(date) + marginLeft,
+      label: date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+    }));
+  }, [xScale, marginLeft, numTicks]);
+
+  return (
+    <div className="absolute inset-0 pointer-events-none">
+      {labelsToShow.map((item, index) => (
+        <XAxisLabel
+          key={index}
+          label={item.label}
+          x={item.x}
+          crosshairX={crosshairX}
+          isHovering={isHovering}
+        />
+      ))}
+    </div>
+  );
+}
+
 interface ChartProps {
   width: number;
   height: number;
@@ -79,6 +180,10 @@ interface ChartProps {
   showGrid?: boolean;
   /** Markers to display on the chart */
   markers?: ChartMarker[];
+  /** Show X-axis labels. Default: true */
+  showXAxisLabels?: boolean;
+  /** Ref to chart container for positioning */
+  containerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 function Chart({
@@ -88,6 +193,8 @@ function Chart({
   animationDuration = 1100,
   showGrid = false,
   markers = [],
+  showXAxisLabels = true,
+  containerRef,
 }: ChartProps) {
   // Theme colors come from CSS variables
 
@@ -321,9 +428,6 @@ function Chart({
     setTooltipData(null);
   }, []);
 
-  // Container ref for marker portals
-  const containerRef = useRef<HTMLDivElement>(null);
-
   // Early return if dimensions not ready (after all hooks)
   if (width < 10 || height < 10) return null;
 
@@ -406,57 +510,6 @@ function Chart({
               style={{ stopColor: cssVars.lineSecondary, stopOpacity: 0 }}
             />
           </linearGradient>
-
-          {/* Dimmed gradients for hover state */}
-          <linearGradient
-            id="line-primary-gradient-dim"
-            x1="0%"
-            y1="0%"
-            x2="100%"
-            y2="0%"
-          >
-            <stop
-              offset="0%"
-              style={{ stopColor: cssVars.linePrimary, stopOpacity: 0 }}
-            />
-            <stop
-              offset="15%"
-              style={{ stopColor: cssVars.linePrimary, stopOpacity: 0.3 }}
-            />
-            <stop
-              offset="85%"
-              style={{ stopColor: cssVars.linePrimary, stopOpacity: 0.3 }}
-            />
-            <stop
-              offset="100%"
-              style={{ stopColor: cssVars.linePrimary, stopOpacity: 0 }}
-            />
-          </linearGradient>
-
-          <linearGradient
-            id="line-secondary-gradient-dim"
-            x1="0%"
-            y1="0%"
-            x2="100%"
-            y2="0%"
-          >
-            <stop
-              offset="0%"
-              style={{ stopColor: cssVars.lineSecondary, stopOpacity: 0 }}
-            />
-            <stop
-              offset="15%"
-              style={{ stopColor: cssVars.lineSecondary, stopOpacity: 0.3 }}
-            />
-            <stop
-              offset="85%"
-              style={{ stopColor: cssVars.lineSecondary, stopOpacity: 0.3 }}
-            />
-            <stop
-              offset="100%"
-              style={{ stopColor: cssVars.lineSecondary, stopOpacity: 0 }}
-            />
-          </linearGradient>
         </defs>
 
         <rect x={0} y={0} width={width} height={height} fill="transparent" />
@@ -475,43 +528,6 @@ function Chart({
             />
           )}
 
-          {/* Lines group with clip path for grow animation */}
-          <g clipPath="url(#grow-clip)">
-            {/* Pageviews base line */}
-            <LinePath
-              innerRef={pageviewsPathRef}
-              data={data}
-              x={(d) => xScale(getDate(d)) ?? 0}
-              y={(d) => yScalePageviews(d.pageviews) ?? 0}
-              stroke={
-                isHovering
-                  ? "url(#line-secondary-gradient-dim)"
-                  : "url(#line-secondary-gradient)"
-              }
-              strokeWidth={2.5}
-              strokeLinecap="round"
-              curve={curveNatural}
-              style={{ transition: "stroke 0.15s ease" }}
-            />
-
-            {/* Users base line */}
-            <LinePath
-              innerRef={usersPathRef}
-              data={data}
-              x={(d) => xScale(getDate(d)) ?? 0}
-              y={(d) => yScaleUsers(d.uniqueUsers) ?? 0}
-              stroke={
-                isHovering
-                  ? "url(#line-primary-gradient-dim)"
-                  : "url(#line-primary-gradient)"
-              }
-              strokeWidth={2.5}
-              strokeLinecap="round"
-              curve={curveNatural}
-              style={{ transition: "stroke 0.15s ease" }}
-            />
-          </g>
-
           <TooltipIndicator
             x={tooltipData?.x ?? 0}
             height={innerHeight}
@@ -524,31 +540,71 @@ function Chart({
             fadeEdges
           />
 
+          {/* Lines group with clip path for grow animation */}
+          <g clipPath="url(#grow-clip)">
+            {/* Base lines - animate opacity when hovering */}
+            <motion.g
+              animate={{ opacity: isHovering ? 0.3 : 1 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+            >
+              {/* Pageviews base line */}
+              <LinePath
+                innerRef={pageviewsPathRef}
+                data={data}
+                x={(d) => xScale(getDate(d)) ?? 0}
+                y={(d) => yScalePageviews(d.pageviews) ?? 0}
+                stroke="url(#line-secondary-gradient)"
+                strokeWidth={2.5}
+                strokeLinecap="round"
+                curve={curveNatural}
+              />
+
+              {/* Users base line */}
+              <LinePath
+                innerRef={usersPathRef}
+                data={data}
+                x={(d) => xScale(getDate(d)) ?? 0}
+                y={(d) => yScaleUsers(d.uniqueUsers) ?? 0}
+                stroke="url(#line-primary-gradient)"
+                strokeWidth={2.5}
+                strokeLinecap="round"
+                curve={curveNatural}
+              />
+            </motion.g>
+          </g>
+
           {/* Highlighted segment using stroke-dasharray with spring animation */}
-          {canInteract && isHovering && (
-            <>
-              {/* Pageviews highlight - use motion.path for spring animation */}
-              <motion.path
-                d={pageviewsPathRef.current?.getAttribute("d") || ""}
-                stroke={cssVars.lineSecondary}
-                strokeWidth={2.5}
-                strokeLinecap="round"
-                fill="none"
-                strokeDasharray={pageviewsDashProps.strokeDasharray}
-                style={{ strokeDashoffset: pageviewsOffsetSpring }}
-              />
-              {/* Users highlight - use motion.path for spring animation */}
-              <motion.path
-                d={usersPathRef.current?.getAttribute("d") || ""}
-                stroke={cssVars.linePrimary}
-                strokeWidth={2.5}
-                strokeLinecap="round"
-                fill="none"
-                strokeDasharray={usersDashProps.strokeDasharray}
-                style={{ strokeDashoffset: usersOffsetSpring }}
-              />
-            </>
-          )}
+          <AnimatePresence>
+            {canInteract && isHovering && (
+              <motion.g
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+              >
+                {/* Pageviews highlight - use motion.path for spring animation */}
+                <motion.path
+                  d={pageviewsPathRef.current?.getAttribute("d") || ""}
+                  stroke={cssVars.lineSecondary}
+                  strokeWidth={2.5}
+                  strokeLinecap="round"
+                  fill="none"
+                  strokeDasharray={pageviewsDashProps.strokeDasharray}
+                  style={{ strokeDashoffset: pageviewsOffsetSpring }}
+                />
+                {/* Users highlight - use motion.path for spring animation */}
+                <motion.path
+                  d={usersPathRef.current?.getAttribute("d") || ""}
+                  stroke={cssVars.linePrimary}
+                  strokeWidth={2.5}
+                  strokeLinecap="round"
+                  fill="none"
+                  strokeDasharray={usersDashProps.strokeDasharray}
+                  style={{ strokeDashoffset: usersOffsetSpring }}
+                />
+              </motion.g>
+            )}
+          </AnimatePresence>
 
           <TooltipDot
             x={tooltipData?.x ?? 0}
@@ -632,6 +688,17 @@ function Chart({
           ) : undefined
         }
       />
+
+      {/* X-Axis Labels - fade as crosshair passes */}
+      {showXAxisLabels && (
+        <XAxisLabels
+          xScale={xScale}
+          marginLeft={margin.left}
+          crosshairX={tooltipData ? tooltipData.x + margin.left : null}
+          isHovering={isHovering}
+          numTicks={6}
+        />
+      )}
     </div>
   );
 }
@@ -651,6 +718,8 @@ export interface CurvedLineChartProps {
   showGrid?: boolean;
   /** Markers to display on the chart */
   markers?: ChartMarker[];
+  /** Show X-axis labels that fade as crosshair passes. Default: true */
+  showXAxisLabels?: boolean;
 }
 
 // Re-export ChartMarker type for consumers
@@ -660,10 +729,12 @@ export default function CurvedLineChart({
   animationDuration: initialDuration = 1500,
   showGrid = true,
   markers: propMarkers,
+  showXAxisLabels = true,
 }: CurvedLineChartProps = {}) {
   const data = useMemo(() => generateData(), []);
   const [animationDuration, setAnimationDuration] = useState(initialDuration);
   const [chartKey, setChartKey] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Demo markers - use prop markers or generate sample ones
   const markers = useMemo(() => {
@@ -754,7 +825,12 @@ export default function CurvedLineChart({
         </button>
 
         {/* Responsive chart container - ParentSize handles resize detection */}
-        <div key={chartKey} className="w-full" style={{ aspectRatio: "2 / 1" }}>
+        <div
+          key={chartKey}
+          ref={containerRef}
+          className="w-full relative"
+          style={{ aspectRatio: "2 / 1" }}
+        >
           <ParentSize debounceTime={10}>
             {({ width, height }) => (
               <Chart
@@ -764,6 +840,8 @@ export default function CurvedLineChart({
                 animationDuration={animationDuration}
                 showGrid={showGrid}
                 markers={markers}
+                showXAxisLabels={showXAxisLabels}
+                containerRef={containerRef}
               />
             )}
           </ParentSize>

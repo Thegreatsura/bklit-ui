@@ -268,13 +268,14 @@ export function ChartTooltip({
         </motion.div>
       </motion.div>
 
-      {/* Animated Date Ticker at bottom */}
+      {/* Animated Date Ticker at bottom - aligned with X-axis labels */}
       {showDatePill && dateLabels.length > 0 && (
         <motion.div
-          className="absolute pointer-events-none z-50 bottom-3"
+          className="absolute pointer-events-none z-50"
           style={{
             left: animatedX,
             x: "-50%", // Center on the crosshair
+            bottom: 4, // Align with X-axis tick labels
           }}
         >
           <DateTicker
