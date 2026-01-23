@@ -67,14 +67,14 @@ function DateTicker({
   const monthIndices = React.useMemo(() => {
     const uniqueMonths: string[] = [];
     const indices: number[] = [];
-    
+
     parsedLabels.forEach((label, index) => {
       if (uniqueMonths.length === 0 || uniqueMonths.at(-1) !== label.month) {
         uniqueMonths.push(label.month);
         indices.push(index);
       }
     });
-    
+
     return { uniqueMonths, indices };
   }, [parsedLabels]);
 
@@ -89,10 +89,10 @@ function DateTicker({
 
   // Track previous month index to detect changes (initialize with -1 to detect first render)
   const prevMonthIndexRef = React.useRef(-1);
-  
+
   // Animated Y offset for day - always animates
   const dayY = useSpring(0, { stiffness: 400, damping: 35 });
-  
+
   // Animated Y offset for month - only animates when month changes
   const monthY = useSpring(0, { stiffness: 400, damping: 35 });
 
@@ -106,7 +106,7 @@ function DateTicker({
     if (currentMonthIndex >= 0) {
       const isFirstRender = prevMonthIndexRef.current === -1;
       const monthChanged = prevMonthIndexRef.current !== currentMonthIndex;
-      
+
       if (isFirstRender || monthChanged) {
         monthY.set(-currentMonthIndex * TICKER_ITEM_HEIGHT);
         prevMonthIndexRef.current = currentMonthIndex;
@@ -146,7 +146,7 @@ function DateTicker({
               ))}
             </motion.div>
           </div>
-          
+
           {/* Day stack - always animates */}
           <div className="relative h-6 overflow-hidden">
             <motion.div className="flex flex-col" style={{ y: dayY }}>
