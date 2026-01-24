@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { chartCssVars, useChart } from "./chart-context";
 
 export interface XAxisProps {
-  /** Number of ticks to show. Default: 6 */
+  /** Number of ticks to show (including first and last). Default: 5 */
   numTicks?: number;
   /** Width of the date ticker box for fade calculation. Default: 50 */
   tickerHalfWidth?: number;
@@ -39,25 +39,34 @@ function XAxisLabel({
     }
   }
 
+  // Zero-width container approach for perfect centering
+  // The wrapper is positioned exactly at x with width:0
+  // The inner span overflows and is centered via text-align
   return (
-    <motion.div
-      animate={{ opacity }}
-      className="absolute whitespace-nowrap text-xs"
-      initial={{ opacity: 1 }}
+    <div
+      className="absolute"
       style={{
         left: x,
         bottom: 12,
-        transform: "translateX(-50%)",
-        color: chartCssVars.foregroundMuted,
+        width: 0,
+        display: "flex",
+        justifyContent: "center",
       }}
-      transition={{ duration: 0.4, ease: "easeInOut" }}
     >
-      {label}
-    </motion.div>
+      <motion.span
+        animate={{ opacity }}
+        className="whitespace-nowrap text-xs"
+        initial={{ opacity: 1 }}
+        style={{ color: chartCssVars.foregroundMuted }}
+        transition={{ duration: 0.4, ease: "easeInOut" }}
+      >
+        {label}
+      </motion.span>
+    </div>
   );
 }
 
-export function XAxis({ numTicks = 6, tickerHalfWidth = 50 }: XAxisProps) {
+export function XAxis({ numTicks = 5, tickerHalfWidth = 50 }: XAxisProps) {
   const { xScale, margin, tooltipData, containerRef } = useChart();
   const [mounted, setMounted] = useState(false);
 
@@ -66,10 +75,31 @@ export function XAxis({ numTicks = 6, tickerHalfWidth = 50 }: XAxisProps) {
     setMounted(true);
   }, []);
 
+  // Generate evenly spaced tick values, always including first and last dates
   const labelsToShow = useMemo(() => {
-    const tickValues = xScale.ticks(numTicks);
+    const domain = xScale.domain();
+    const startDate = domain[0];
+    const endDate = domain[1];
 
-    return tickValues.map((date) => ({
+    if (!(startDate && endDate)) {
+      return [];
+    }
+
+    const startTime = startDate.getTime();
+    const endTime = endDate.getTime();
+    const timeRange = endTime - startTime;
+
+    // Create evenly spaced dates from start to end
+    const tickCount = Math.max(2, numTicks); // At least first and last
+    const dates: Date[] = [];
+
+    for (let i = 0; i < tickCount; i++) {
+      const t = i / (tickCount - 1); // 0 to 1
+      const time = startTime + t * timeRange;
+      dates.push(new Date(time));
+    }
+
+    return dates.map((date) => ({
       date,
       x: (xScale(date) ?? 0) + margin.left,
       label: date.toLocaleDateString("en-US", {

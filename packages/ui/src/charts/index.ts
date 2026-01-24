@@ -1,4 +1,8 @@
 // Chart context and hooks
+
+// Area chart components
+export { Area, type AreaProps } from "./area";
+export { AreaChart, type AreaChartProps } from "./area-chart";
 export {
   type ChartContextValue,
   ChartProvider,
@@ -8,9 +12,10 @@ export {
   type TooltipData,
   useChart,
 } from "./chart-context";
+// Shared chart elements
 export { Grid, type GridProps } from "./grid";
+// Line chart components
 export { Line, type LineProps } from "./line";
-// Main chart components
 export { LineChart, type LineChartProps } from "./line-chart";
 // Marker components
 export {

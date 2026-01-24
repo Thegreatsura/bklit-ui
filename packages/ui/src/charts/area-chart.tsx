@@ -15,13 +15,13 @@ import {
   useRef,
   useState,
 } from "react";
+import { Area, type AreaProps } from "./area";
 import {
   ChartProvider,
   type LineConfig,
   type Margin,
   type TooltipData,
 } from "./chart-context";
-import { Line, type LineProps } from "./line";
 
 // Check if a component should render after the mouse overlay (markers need to be on top for interaction)
 function isPostOverlayComponent(child: ReactElement): boolean {
@@ -45,7 +45,7 @@ function isPostOverlayComponent(child: ReactElement): boolean {
   return componentName === "ChartMarkers" || componentName === "MarkerGroup";
 }
 
-export interface LineChartProps {
+export interface AreaChartProps {
   /** Data array - each item should have a date field and numeric values */
   data: Record<string, unknown>[];
   /** Key in data for the x-axis (date). Default: "date" */
@@ -58,14 +58,14 @@ export interface LineChartProps {
   aspectRatio?: string;
   /** Additional class name for the container */
   className?: string;
-  /** Child components (Line, Grid, ChartTooltip, etc.) */
+  /** Child components (Area, Grid, ChartTooltip, etc.) */
   children: ReactNode;
 }
 
 const DEFAULT_MARGIN: Margin = { top: 40, right: 40, bottom: 40, left: 40 };
 
-// Extract line configs from children synchronously to avoid render timing issues
-function extractLineConfigs(children: ReactNode): LineConfig[] {
+// Extract area/line configs from children synchronously to avoid render timing issues
+function extractAreaConfigs(children: ReactNode): LineConfig[] {
   const configs: LineConfig[] = [];
 
   Children.forEach(children, (child) => {
@@ -73,7 +73,7 @@ function extractLineConfigs(children: ReactNode): LineConfig[] {
       return;
     }
 
-    // Check if it's a Line component by displayName, function reference, or props structure
+    // Check if it's an Area component by displayName, function reference, or props structure
     const childType = child.type as {
       displayName?: string;
       name?: string;
@@ -84,17 +84,17 @@ function extractLineConfigs(children: ReactNode): LineConfig[] {
         : "";
 
     // Check by displayName, or by props having dataKey (duck typing)
-    const props = child.props as LineProps | undefined;
-    const isLineComponent =
-      componentName === "Line" ||
-      child.type === Line ||
+    const props = child.props as AreaProps | undefined;
+    const isAreaComponent =
+      componentName === "Area" ||
+      child.type === Area ||
       (props && typeof props.dataKey === "string" && props.dataKey.length > 0);
 
-    if (isLineComponent && props?.dataKey) {
+    if (isAreaComponent && props?.dataKey) {
       configs.push({
         dataKey: props.dataKey,
-        stroke: props.stroke || "var(--chart-line-primary)",
-        strokeWidth: props.strokeWidth || 2.5,
+        stroke: props.stroke || props.fill || "var(--chart-line-primary)",
+        strokeWidth: props.strokeWidth || 2,
       });
     }
   });
@@ -126,8 +126,8 @@ function ChartInner({
   const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Extract line configs synchronously from children
-  const lines = useMemo(() => extractLineConfigs(children), [children]);
+  // Extract area configs synchronously from children
+  const lines = useMemo(() => extractAreaConfigs(children), [children]);
 
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
@@ -167,9 +167,9 @@ function ChartInner({
     return innerWidth / (data.length - 1);
   }, [innerWidth, data.length]);
 
-  // Y scale - computed from extracted line configs (available immediately)
+  // Y scale - computed from extracted area configs (available immediately)
   const yScale = useMemo(() => {
-    // Find max value across all line dataKeys
+    // Find max value across all area dataKeys
     let maxValue = 0;
     for (const line of lines) {
       for (const d of data) {
@@ -242,7 +242,7 @@ function ChartInner({
         }
       }
 
-      // Calculate y positions for each line
+      // Calculate y positions for each area
       const yPositions: Record<string, number> = {};
       for (const line of lines) {
         const value = d[line.dataKey];
@@ -272,7 +272,7 @@ function ChartInner({
 
   const canInteract = isLoaded;
 
-  // Separate children into pre-overlay (Grid, Line) and post-overlay (ChartMarkers)
+  // Separate children into pre-overlay (Grid, Area) and post-overlay (ChartMarkers)
   const preOverlayChildren: ReactElement[] = [];
   const postOverlayChildren: ReactElement[] = [];
 
@@ -313,7 +313,7 @@ function ChartInner({
       <svg aria-hidden="true" height={height} width={width}>
         <defs>
           {/* Clip path for grow animation */}
-          <clipPath id="chart-grow-clip">
+          <clipPath id="chart-area-grow-clip">
             <rect
               height={innerHeight + 20}
               style={{
@@ -337,7 +337,7 @@ function ChartInner({
           style={{ cursor: canInteract ? "crosshair" : "default" }}
           transform={`translate(${margin.left},${margin.top})`}
         >
-          {/* Background rect for mouse event detection - markers rendered after this will receive events on top */}
+          {/* Background rect for mouse event detection */}
           <rect
             fill="transparent"
             height={innerHeight}
@@ -346,7 +346,7 @@ function ChartInner({
             y={0}
           />
 
-          {/* SVG children rendered before markers (Grid, Line, etc.) */}
+          {/* SVG children rendered before markers (Grid, Area, etc.) */}
           {preOverlayChildren}
 
           {/* Markers rendered last so they're on top for interaction */}
@@ -357,7 +357,7 @@ function ChartInner({
   );
 }
 
-export function LineChart({
+export function AreaChart({
   data,
   xDataKey = "date",
   margin: marginProp,
@@ -365,7 +365,7 @@ export function LineChart({
   aspectRatio = "2 / 1",
   className = "",
   children,
-}: LineChartProps) {
+}: AreaChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const margin = { ...DEFAULT_MARGIN, ...marginProp };
 
@@ -394,7 +394,7 @@ export function LineChart({
   );
 }
 
-// Re-export Line for convenience
-export { Line, type LineProps } from "./line";
+// Re-export Area for convenience
+export { Area, type AreaProps } from "./area";
 
-export default LineChart;
+export default AreaChart;
