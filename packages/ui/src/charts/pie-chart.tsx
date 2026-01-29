@@ -22,6 +22,9 @@ import {
   PieProvider,
 } from "./pie-context";
 
+/** Default hover offset in pixels */
+export const DEFAULT_HOVER_OFFSET = 10;
+
 export interface PieChartProps {
   /** Data array - each item represents a slice */
   data: PieData[];
@@ -43,6 +46,12 @@ export interface PieChartProps {
   hoveredIndex?: number | null;
   /** Callback when hover state changes */
   onHoverChange?: (index: number | null) => void;
+  /**
+   * Hover offset in pixels for slice hover effects.
+   * This also determines the padding around the chart to prevent clipping.
+   * Default: 10
+   */
+  hoverOffset?: number;
   /** Child components (PieSlice, PieCenter, patterns, gradients, etc.) */
   children: ReactNode;
 }
@@ -56,6 +65,7 @@ interface PieChartInnerProps {
   cornerRadius: number;
   startAngle: number;
   endAngle: number;
+  hoverOffset: number;
   children: ReactNode;
   containerRef: React.RefObject<HTMLDivElement | null>;
   hoveredIndexProp?: number | null;
@@ -95,6 +105,7 @@ function PieChartInner({
   cornerRadius,
   startAngle,
   endAngle,
+  hoverOffset,
   children,
   containerRef,
   hoveredIndexProp,
@@ -124,8 +135,8 @@ function PieChartInner({
   const size = Math.min(width, height);
   const center = size / 2;
 
-  // Calculate radii with padding
-  const padding = 8;
+  // Calculate radii with padding based on hover offset to prevent clipping
+  const padding = hoverOffset;
   const outerRadius = center - padding;
   const innerRadius = innerRadiusProp;
 
@@ -232,6 +243,7 @@ function PieChartInner({
     innerRadius,
     padAngle,
     cornerRadius,
+    hoverOffset,
     hoveredIndex,
     setHoveredIndex,
     animationKey,
@@ -295,6 +307,7 @@ export function PieChart({
   className = "",
   hoveredIndex,
   onHoverChange,
+  hoverOffset = DEFAULT_HOVER_OFFSET,
   children,
 }: PieChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -314,6 +327,7 @@ export function PieChart({
           endAngle={endAngle}
           height={fixedSize}
           hoveredIndexProp={hoveredIndex}
+          hoverOffset={hoverOffset}
           innerRadius={innerRadius}
           onHoverChange={onHoverChange}
           padAngle={padAngle}
@@ -341,6 +355,7 @@ export function PieChart({
             endAngle={endAngle}
             height={height}
             hoveredIndexProp={hoveredIndex}
+            hoverOffset={hoverOffset}
             innerRadius={innerRadius}
             onHoverChange={onHoverChange}
             padAngle={padAngle}

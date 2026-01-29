@@ -39,9 +39,6 @@ function getSliceOffset(
   };
 }
 
-/** Distance in pixels for hover effects */
-const DEFAULT_HOVER_OFFSET = 10;
-
 /** Hover effect types */
 export type PieSliceHoverEffect = "translate" | "grow" | "none";
 
@@ -63,7 +60,7 @@ export interface PieSliceProps {
    * - "none": No hover animation
    */
   hoverEffect?: PieSliceHoverEffect;
-  /** Distance in pixels for hover effect (translate distance or grow amount). Default: 10 */
+  /** Distance in pixels for hover effect (translate distance or grow amount). Defaults to PieChart's hoverOffset */
   hoverOffset?: number;
   /** Additional CSS class */
   className?: string;
@@ -266,19 +263,23 @@ export function PieSlice({
   animate = true,
   showGlow = true,
   hoverEffect = "translate",
-  hoverOffset = DEFAULT_HOVER_OFFSET,
+  hoverOffset: hoverOffsetProp,
 }: PieSliceProps) {
   const {
     arcs,
     innerRadius,
     outerRadius,
     cornerRadius,
+    hoverOffset: contextHoverOffset,
     hoveredIndex,
     setHoveredIndex,
     animationKey,
     getColor,
     getFill,
   } = usePie();
+
+  // Use prop if provided, otherwise use context value
+  const hoverOffset = hoverOffsetProp ?? contextHoverOffset;
 
   // Track if initial mount animation is complete
   const hasAnimated = useRef(false);

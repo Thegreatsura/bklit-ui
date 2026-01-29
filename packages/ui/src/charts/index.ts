@@ -87,7 +87,11 @@ export {
 } from "./markers";
 // Pie chart components
 export { PieCenter, type PieCenterProps } from "./pie-center";
-export { PieChart, type PieChartProps } from "./pie-chart";
+export {
+  DEFAULT_HOVER_OFFSET,
+  PieChart,
+  type PieChartProps,
+} from "./pie-chart";
 export {
   defaultPieColors,
   type PieArcData,

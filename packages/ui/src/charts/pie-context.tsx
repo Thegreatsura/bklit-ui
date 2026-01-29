@@ -59,6 +59,9 @@ export interface PieContextValue {
   padAngle: number;
   cornerRadius: number;
 
+  // Hover effect
+  hoverOffset: number;
+
   // Hover state
   hoveredIndex: number | null;
   setHoveredIndex: (index: number | null) => void;
