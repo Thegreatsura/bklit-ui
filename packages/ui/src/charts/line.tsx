@@ -7,7 +7,7 @@ import { LinePath } from "@visx/shape";
 // biome-ignore lint/suspicious/noExplicitAny: d3 curve factory type
 type CurveFactory = any;
 
-import { motion, useSpring } from "motion/react";
+import { motion, useMotionTemplate, useSpring } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { chartCssVars, useChart } from "./chart-context";
 
@@ -74,10 +74,10 @@ export function Line({
     }
   }, [animate, innerWidth, isLoaded]);
 
-  // Calculate dash props for highlight segment
-  const getDashProps = useCallback(() => {
+  // Calculate segment bounds for highlight (returns numeric values for animation)
+  const segmentBounds = useMemo(() => {
     if (!(tooltipData && pathRef.current) || pathLength === 0) {
-      return { strokeDasharray: "none", strokeDashoffset: 0 };
+      return { startLength: 0, segmentLength: 0, isActive: false };
     }
 
     const idx = tooltipData.index;
@@ -107,7 +107,7 @@ export function Line({
     const startPoint = data[startIdx];
     const endPoint = data[endIdx];
     if (!(startPoint && endPoint)) {
-      return { strokeDasharray: "none", strokeDashoffset: 0 };
+      return { startLength: 0, segmentLength: 0, isActive: false };
     }
 
     const startX = xScale(xAccessor(startPoint)) ?? 0;
@@ -117,21 +117,27 @@ export function Line({
     const endLength = findLengthAtX(endX);
     const segmentLength = endLength - startLength;
 
-    return {
-      strokeDasharray: `${segmentLength} ${pathLength}`,
-      strokeDashoffset: -startLength,
-    };
+    return { startLength, segmentLength, isActive: true };
   }, [tooltipData, data, xScale, pathLength, xAccessor]);
 
-  const dashProps = getDashProps();
+  // Springs for smooth highlight animation (both offset AND segment length)
+  const springConfig = { stiffness: 180, damping: 28 };
+  const offsetSpring = useSpring(0, springConfig);
+  const segmentLengthSpring = useSpring(0, springConfig);
 
-  // Spring for smooth highlight animation
-  const dashSpringConfig = { stiffness: 180, damping: 28 };
-  const offsetSpring = useSpring(dashProps.strokeDashoffset, dashSpringConfig);
-
+  // Update springs when segment bounds change
   useEffect(() => {
-    offsetSpring.set(dashProps.strokeDashoffset);
-  }, [dashProps.strokeDashoffset, offsetSpring]);
+    offsetSpring.set(-segmentBounds.startLength);
+    segmentLengthSpring.set(segmentBounds.segmentLength);
+  }, [
+    segmentBounds.startLength,
+    segmentBounds.segmentLength,
+    offsetSpring,
+    segmentLengthSpring,
+  ]);
+
+  // Create animated strokeDasharray using motion template
+  const animatedDasharray = useMotionTemplate`${segmentLengthSpring} ${pathLength}`;
 
   // Get y value for a data point
   const getY = useCallback(
@@ -208,10 +214,12 @@ export function Line({
           fill="none"
           initial={{ opacity: 0 }}
           stroke={stroke}
-          strokeDasharray={dashProps.strokeDasharray}
           strokeLinecap="round"
           strokeWidth={strokeWidth}
-          style={{ strokeDashoffset: offsetSpring }}
+          style={{
+            strokeDasharray: animatedDasharray,
+            strokeDashoffset: offsetSpring,
+          }}
           transition={{ duration: 0.4, ease: "easeInOut" }}
         />
       )}
