@@ -69,6 +69,13 @@ export {
   useChoropleth,
   useChoroplethZoom,
 } from "./choropleth";
+// Funnel chart components
+export {
+  FunnelChart,
+  type FunnelChartProps,
+  type FunnelGradientStop,
+  type FunnelStage,
+} from "./funnel-chart";
 // Shared chart elements
 export { Grid, type GridProps } from "./grid";
 // Composable legend components

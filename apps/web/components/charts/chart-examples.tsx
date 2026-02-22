@@ -15,6 +15,8 @@ import {
   ChoroplethFeatureComponent,
   ChoroplethGraticule,
   ChoroplethTooltip,
+  FunnelChart,
+  type FunnelStage,
   Grid,
   Legend,
   LegendItemComponent,
@@ -2552,6 +2554,318 @@ function makeChoroplethHero(): ChartExample {
 }
 
 // ---------------------------------------------------------------------------
+// Funnel chart examples
+// ---------------------------------------------------------------------------
+
+const funnelData: FunnelStage[] = [
+  { label: "Visitors", value: 12_400, displayValue: "12.4k" },
+  { label: "Leads", value: 6800, displayValue: "6.8k" },
+  { label: "Qualified", value: 3200, displayValue: "3.2k" },
+  { label: "Proposals", value: 1500, displayValue: "1.5k" },
+  { label: "Closed", value: 620, displayValue: "620" },
+];
+
+const funnelDataColored: FunnelStage[] = [
+  { label: "Awareness", value: 4100, color: "var(--chart-1)" },
+  { label: "Interest", value: 2957, color: "var(--chart-2)" },
+  { label: "Consideration", value: 1084, color: "var(--chart-3)" },
+  { label: "Intent", value: 1038, color: "var(--chart-4)" },
+  { label: "Purchase", value: 320, color: "var(--chart-5)" },
+];
+
+const funnelDataGradient: FunnelStage[] = [
+  {
+    label: "Awareness",
+    value: 4100,
+    gradient: [
+      { offset: "0%", color: "var(--chart-1)" },
+      { offset: "100%", color: "var(--chart-2)" },
+    ],
+  },
+  {
+    label: "Interest",
+    value: 2957,
+    gradient: [
+      { offset: "0%", color: "var(--chart-2)" },
+      { offset: "100%", color: "var(--chart-3)" },
+    ],
+  },
+  {
+    label: "Consideration",
+    value: 1084,
+    gradient: [
+      { offset: "0%", color: "var(--chart-3)" },
+      { offset: "100%", color: "var(--chart-4)" },
+    ],
+  },
+  {
+    label: "Intent",
+    value: 1038,
+    gradient: [
+      { offset: "0%", color: "var(--chart-4)" },
+      { offset: "100%", color: "var(--chart-5)" },
+    ],
+  },
+  {
+    label: "Purchase",
+    value: 320,
+    gradient: [
+      { offset: "0%", color: "var(--chart-5)" },
+      { offset: "100%", color: "var(--chart-5)" },
+    ],
+  },
+];
+
+function FunnelHeroWithLegend() {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const legendItems = funnelData.map((d) => ({
+    label: d.label,
+    value: d.value,
+    color: "var(--chart-1)",
+  }));
+  return (
+    <div className="flex flex-col gap-4">
+      <FunnelChart
+        className="max-h-[350px]"
+        color="var(--chart-1)"
+        data={funnelData}
+        hoveredIndex={hoveredIndex}
+        layers={3}
+        onHoverChange={setHoveredIndex}
+        orientation="horizontal"
+      />
+      <Legend
+        className="flex-row flex-wrap justify-center gap-x-4 gap-y-1"
+        hoveredIndex={hoveredIndex}
+        items={legendItems}
+        onHoverChange={setHoveredIndex}
+      >
+        <LegendItemComponent className="flex items-center gap-1.5">
+          <LegendMarker />
+          <LegendLabel className="text-xs" />
+        </LegendItemComponent>
+      </Legend>
+    </div>
+  );
+}
+
+function makeFunnelHero(): ChartExample {
+  return {
+    title: "Funnel Chart",
+    description:
+      "Animated funnel chart with multi-layer halo rings, hover interactions, and an interactive legend.",
+    code: `const [hoveredIndex, setHoveredIndex] = useState(null);
+
+const legendItems = data.map((d) => ({
+  label: d.label,
+  value: d.value,
+  color: "var(--chart-1)",
+}));
+
+<FunnelChart
+  data={data}
+  color="var(--chart-1)"
+  layers={3}
+  hoveredIndex={hoveredIndex}
+  onHoverChange={setHoveredIndex}
+/>
+<Legend
+  items={legendItems}
+  hoveredIndex={hoveredIndex}
+  onHoverChange={setHoveredIndex}
+>
+  <LegendItemComponent>
+    <LegendMarker />
+    <LegendLabel />
+  </LegendItemComponent>
+</Legend>`,
+    data: `const data: FunnelStage[] = [
+  { label: "Visitors", value: 12400, displayValue: "12.4k" },
+  { label: "Leads", value: 6800, displayValue: "6.8k" },
+  { label: "Qualified", value: 3200, displayValue: "3.2k" },
+  { label: "Proposals", value: 1500, displayValue: "1.5k" },
+  { label: "Closed", value: 620, displayValue: "620" },
+];`,
+    render: () => <FunnelHeroWithLegend />,
+  };
+}
+
+function makeFunnelExamples(): ChartExample[] {
+  return [
+    {
+      title: "Vertical",
+      description: "Vertical orientation with top-to-bottom flow",
+      code: `<FunnelChart
+  data={data}
+  orientation="vertical"
+  color="var(--chart-1)"
+  layers={3}
+/>`,
+      render: () => (
+        <FunnelChart
+          className="max-h-[400px]"
+          color="var(--chart-1)"
+          data={funnelData}
+          layers={3}
+          orientation="vertical"
+        />
+      ),
+    },
+    {
+      title: "Vertical Straight with Grid",
+      description: "Combining vertical orientation, straight edges, and grid",
+      code: `<FunnelChart
+  data={data}
+  orientation="vertical"
+  color="var(--chart-1)"
+  layers={3}
+  edges="straight"
+  grid={{ bands: false, lines: true }}
+/>`,
+      render: () => (
+        <FunnelChart
+          className="max-h-[360px]"
+          color="var(--chart-1)"
+          data={funnelData}
+          edges="straight"
+          grid={{ bands: false, lines: true }}
+          layers={3}
+          orientation="vertical"
+        />
+      ),
+    },
+    {
+      title: "Straight Edges",
+      description: "Sharp geometric edges instead of smooth curves",
+      code: `<FunnelChart
+  data={data}
+  orientation="horizontal"
+  color="var(--chart-1)"
+  layers={3}
+  edges="straight"
+/>`,
+      render: () => (
+        <FunnelChart
+          color="var(--chart-1)"
+          data={funnelData}
+          edges="straight"
+          layers={3}
+          orientation="horizontal"
+        />
+      ),
+    },
+    {
+      title: "Per-Segment Colors",
+      description: "Each segment with its own color from the chart palette",
+      code: `<FunnelChart
+  data={[
+    { label: "Awareness", value: 4100, color: "var(--chart-1)" },
+    { label: "Interest", value: 2957, color: "var(--chart-2)" },
+    { label: "Consideration", value: 1084, color: "var(--chart-3)" },
+    { label: "Intent", value: 1038, color: "var(--chart-4)" },
+    { label: "Purchase", value: 320, color: "var(--chart-5)" },
+  ]}
+  layers={3}
+/>`,
+      render: () => <FunnelChart data={funnelDataColored} layers={3} />,
+    },
+    {
+      title: "Gradient Segments",
+      description: "Linear gradients flowing between chart palette colors",
+      code: `<FunnelChart
+  data={[
+    {
+      label: "Awareness",
+      value: 4100,
+      gradient: [
+        { offset: "0%", color: "var(--chart-1)" },
+        { offset: "100%", color: "var(--chart-2)" },
+      ],
+    },
+    // ... more segments
+  ]}
+  layers={3}
+/>`,
+      render: () => <FunnelChart data={funnelDataGradient} layers={3} />,
+    },
+    {
+      title: "Pattern Fill",
+      description:
+        "Diagonal line pattern on the innermost ring via renderPattern",
+      code: `<FunnelChart
+  data={data}
+  color="var(--chart-3)"
+  layers={3}
+  renderPattern={(id, color) => (
+    <PatternLines
+      id={id}
+      height={8}
+      width={8}
+      stroke="rgba(255,255,255,0.35)"
+      strokeWidth={2}
+      orientation={["diagonal"]}
+      background={color}
+    />
+  )}
+/>`,
+      render: () => (
+        <FunnelChart
+          color="var(--chart-3)"
+          data={funnelData}
+          layers={3}
+          renderPattern={(id, color) => (
+            <PatternLines
+              background={color}
+              height={8}
+              id={id}
+              orientation={["diagonal"]}
+              stroke="rgba(255,255,255,0.35)"
+              strokeWidth={2}
+              width={8}
+            />
+          )}
+        />
+      ),
+    },
+    {
+      title: "Grouped Labels",
+      description: "Labels stacked together in a compact group",
+      code: `<FunnelChart
+  data={data}
+  color="var(--chart-1)"
+  layers={3}
+  labelLayout="grouped"
+  labelAlign="center"
+  labelOrientation="vertical"
+/>`,
+      render: () => (
+        <FunnelChart
+          color="var(--chart-1)"
+          data={funnelData}
+          labelAlign="center"
+          labelLayout="grouped"
+          labelOrientation="vertical"
+          layers={3}
+        />
+      ),
+    },
+    {
+      title: "Grid Background",
+      description: "Alternating bands and grid lines for easier comparison",
+      code: `<FunnelChart
+  data={data}
+  color="var(--chart-1)"
+  layers={3}
+  grid
+/>`,
+      render: () => (
+        <FunnelChart color="var(--chart-1)" data={funnelData} grid layers={3} />
+      ),
+    },
+  ];
+}
+
+// ---------------------------------------------------------------------------
 // Chart type navigation
 // ---------------------------------------------------------------------------
 
@@ -2559,6 +2873,7 @@ const chartTypes = [
   { label: "Area Chart", slug: "area-chart" },
   { label: "Bar Chart", slug: "bar-chart" },
   { label: "Choropleth Chart", slug: "choropleth-chart" },
+  { label: "Funnel Chart", slug: "funnel-chart" },
   { label: "Line Chart", slug: "line-chart" },
   { label: "Pie Chart", slug: "pie-chart" },
   { label: "Radar Chart", slug: "radar-chart" },
@@ -2612,6 +2927,11 @@ const chartExamplesRegistry: Record<string, RegistryEntry> = {
     factory: makeChoroplethExamples,
     columns: 2,
     hero: makeChoroplethHero,
+  },
+  "funnel-chart": {
+    factory: makeFunnelExamples,
+    columns: 2,
+    hero: makeFunnelHero,
   },
   "line-chart": { factory: makeLineExamples, hero: makeLineHero },
   "pie-chart": { factory: makePieExamples },
