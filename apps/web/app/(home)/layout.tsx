@@ -22,6 +22,10 @@ export default function Layout({ children }: { children: ReactNode }) {
             url: "/docs/components",
           },
           {
+            text: "Theming",
+            url: "/docs/theming",
+          },
+          {
             text: "Charts",
             url: "/charts",
           },

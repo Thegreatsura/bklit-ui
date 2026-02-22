@@ -4,6 +4,7 @@
     "line-chart",
     "area-chart",
     "bar-chart",
+    "funnel-chart",
     "ring-chart",
     "pie-chart",
     "radar-chart",
