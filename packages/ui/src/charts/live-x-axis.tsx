@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useSpring } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useChart } from "./chart-context";
 
 const TICKER_HALF_WIDTH = 50;
@@ -84,10 +84,12 @@ export function LiveXAxis({
   // so the pill and crosshair line move in lockstep
   const pillX = tooltipData ? tooltipData.x + margin.left : 0;
   const animatedPillX = useSpring(pillX, crosshairSpringConfig);
+  const springRef = useRef(animatedPillX);
+  springRef.current = animatedPillX;
 
   useEffect(() => {
-    animatedPillX.set(pillX);
-  }, [pillX, animatedPillX]);
+    springRef.current.set(pillX);
+  }, [pillX]);
 
   const container = containerRef.current;
   if (!(mounted && container)) {

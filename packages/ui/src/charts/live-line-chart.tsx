@@ -255,6 +255,11 @@ function LiveLineChartInner({
   });
 
   const pausedRef = useRef(paused);
+  const dataRef = useRef(data);
+  const dataKeyRef = useRef(dataKey);
+  dataRef.current = data;
+  dataKeyRef.current = dataKey;
+
   useEffect(() => {
     pausedRef.current = paused;
   }, [paused]);
@@ -266,7 +271,14 @@ function LiveLineChartInner({
 
   const lines = useMemo(() => extractLiveLineConfigs(children), [children]);
 
-  // ---- rAF loop ----
+  // Leading offset (used in rAF for tooltip)
+  const xTickUnitMs = windowMs / (numXTicks - 1);
+  const leadingMs = nowOffsetUnits * xTickUnitMs;
+
+  // ---- rAF loop: update frame and tooltip in one place to avoid effect→setState loops ----
+  const cursorXRef = useRef<number | null>(null);
+  const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
+
   useEffect(() => {
     let raf: number;
     const tick = () => {
@@ -278,16 +290,65 @@ function LiveLineChartInner({
         pausedRef.current
       );
       animRef.current = next;
+
+      const domainEndMsNext = next.now + leadingMs;
+      const cursorX = cursorXRef.current;
+      if (cursorX !== null && innerWidth > 0 && innerHeight > 0) {
+        const xScaleNext = scaleTime({
+          domain: [
+            new Date(domainEndMsNext - windowMs),
+            new Date(domainEndMsNext),
+          ],
+          range: [0, innerWidth],
+        });
+        const yScaleNext = scaleLinear({
+          domain: [next.yMin, next.yMax],
+          range: [innerHeight, 0],
+          nice: true,
+        });
+        const timeMs = xScaleNext.invert(cursorX).getTime();
+        const timeSec = timeMs / 1000;
+        const currentData = dataRef.current;
+        const visible = currentData.filter(
+          (p) => p.time >= (domainEndMsNext - windowMs) / 1000
+        );
+        visible.push({ time: next.now / 1000, value: next.displayValue });
+        visible.push({
+          time: (next.now + xTickUnitMs) / 1000,
+          value: next.displayValue,
+        });
+        const val = interpolateAtTime(visible, timeSec);
+        const key = dataKeyRef.current;
+        if (val !== null) {
+          setTooltipData({
+            point: { date: new Date(timeMs), [key]: val },
+            index: 0,
+            x: cursorX,
+            yPositions: { [key]: yScaleNext(val) ?? 0 },
+          });
+        } else {
+          setTooltipData(null);
+        }
+      } else {
+        setTooltipData(null);
+      }
+
       setFrame(next);
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [targetRange, value, lerpSpeed]);
+  }, [
+    targetRange,
+    value,
+    lerpSpeed,
+    leadingMs,
+    windowMs,
+    xTickUnitMs,
+    innerWidth,
+    innerHeight,
+  ]);
 
-  // ---- Leading offset ----
-  const xTickUnitMs = windowMs / (numXTicks - 1);
-  const leadingMs = nowOffsetUnits * xTickUnitMs;
   const domainEndMs = frame.now + leadingMs;
 
   // ---- Scales ----
@@ -353,11 +414,6 @@ function LiveLineChartInner({
     []
   );
 
-  // ---- Tooltip (crosshair) state ----
-  // Store raw cursor pixel X so we can recompute tooltip every frame as data scrolls
-  const cursorXRef = useRef<number | null>(null);
-  const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
-
   const handleMouseMove = useCallback(
     (event: React.MouseEvent<SVGGElement>) => {
       const coords = localPoint(event);
@@ -374,45 +430,6 @@ function LiveLineChartInner({
     cursorXRef.current = null;
     setTooltipData(null);
   }, []);
-
-  // Recompute tooltip from pinned cursor X every frame
-  useEffect(() => {
-    const cursorX = cursorXRef.current;
-    if (cursorX === null) {
-      return;
-    }
-    const timeMs = xScale.invert(cursorX).getTime();
-    const timeSec = timeMs / 1000;
-    const visible = data.filter(
-      (p) => p.time >= (domainEndMs - windowMs) / 1000
-    );
-    visible.push({ time: frame.now / 1000, value: frame.displayValue });
-    visible.push({
-      time: (frame.now + xTickUnitMs) / 1000,
-      value: frame.displayValue,
-    });
-    const val = interpolateAtTime(visible, timeSec);
-    if (val === null) {
-      setTooltipData(null);
-      return;
-    }
-    setTooltipData({
-      point: { date: new Date(timeMs), [dataKey]: val },
-      index: 0,
-      x: cursorX,
-      yPositions: { [dataKey]: yScale(val) ?? 0 },
-    });
-  }, [
-    xScale,
-    yScale,
-    data,
-    dataKey,
-    frame.now,
-    frame.displayValue,
-    domainEndMs,
-    windowMs,
-    xTickUnitMs,
-  ]);
 
   // Date labels (for ChartTooltip's DateTicker — not used in live but needed for context)
   const dateLabels = useMemo(
@@ -435,29 +452,47 @@ function LiveLineChartInner({
     return innerWidth / (contextData.length - 1);
   }, [innerWidth, contextData.length]);
 
+  const contextValue = useMemo(
+    () => ({
+      data: contextData,
+      xScale,
+      yScale,
+      width,
+      height,
+      innerWidth,
+      innerHeight,
+      margin,
+      columnWidth,
+      tooltipData,
+      setTooltipData,
+      containerRef,
+      lines,
+      isLoaded: true,
+      animationDuration: 0,
+      xAccessor,
+      dateLabels,
+    }),
+    [
+      contextData,
+      xScale,
+      yScale,
+      width,
+      height,
+      innerWidth,
+      innerHeight,
+      margin,
+      columnWidth,
+      tooltipData,
+      containerRef,
+      lines,
+      xAccessor,
+      dateLabels,
+    ]
+  );
+
   if (innerWidth <= 0 || innerHeight <= 0) {
     return null;
   }
-
-  const contextValue = {
-    data: contextData,
-    xScale,
-    yScale,
-    width,
-    height,
-    innerWidth,
-    innerHeight,
-    margin,
-    columnWidth,
-    tooltipData,
-    setTooltipData,
-    containerRef,
-    lines,
-    isLoaded: true,
-    animationDuration: 0,
-    xAccessor,
-    dateLabels,
-  };
 
   return (
     <ChartProvider value={contextValue}>
