@@ -43,6 +43,8 @@ export interface LiveLineChartProps {
   window?: number;
   /** Number of X-axis ticks (used to compute leading offset). Default: 5 */
   numXTicks?: number;
+  /** Leading offset in X-tick units (0 = now at right edge). Default: 0 */
+  nowOffsetUnits?: number;
   /** Tight Y-axis. Default: false */
   exaggerate?: boolean;
   /** Interpolation speed (0–1). Default: 0.08 */
@@ -207,6 +209,7 @@ interface InnerProps {
   dataKey: string;
   windowSecs: number;
   numXTicks: number;
+  nowOffsetUnits: number;
   exaggerate: boolean;
   lerpSpeed: number;
   margin: Margin;
@@ -223,6 +226,7 @@ function LiveLineChartInner({
   dataKey,
   windowSecs,
   numXTicks,
+  nowOffsetUnits,
   exaggerate,
   lerpSpeed,
   margin,
@@ -283,7 +287,7 @@ function LiveLineChartInner({
 
   // ---- Leading offset ----
   const xTickUnitMs = windowMs / (numXTicks - 1);
-  const leadingMs = 0;
+  const leadingMs = nowOffsetUnits * xTickUnitMs;
   const domainEndMs = frame.now + leadingMs;
 
   // ---- Scales ----
@@ -332,7 +336,15 @@ function LiveLineChartInner({
       [dataKey]: frame.displayValue,
     });
     return records;
-  }, [data, frame.now, frame.displayValue, domainEndMs, windowMs, dataKey, xTickUnitMs]);
+  }, [
+    data,
+    frame.now,
+    frame.displayValue,
+    domainEndMs,
+    windowMs,
+    dataKey,
+    xTickUnitMs,
+  ]);
 
   // ---- X accessor ----
   const xAccessor = useCallback(
@@ -390,7 +402,17 @@ function LiveLineChartInner({
       x: cursorX,
       yPositions: { [dataKey]: yScale(val) ?? 0 },
     });
-  }, [xScale, yScale, data, dataKey, frame.now, frame.displayValue, domainEndMs, windowMs, xTickUnitMs]);
+  }, [
+    xScale,
+    yScale,
+    data,
+    dataKey,
+    frame.now,
+    frame.displayValue,
+    domainEndMs,
+    windowMs,
+    xTickUnitMs,
+  ]);
 
   // Date labels (for ChartTooltip's DateTicker — not used in live but needed for context)
   const dateLabels = useMemo(
@@ -476,6 +498,7 @@ export function LiveLineChart({
   dataKey = "value",
   window: windowSecs = 30,
   numXTicks = 5,
+  nowOffsetUnits = 0,
   exaggerate = false,
   lerpSpeed = LERP_SPEED,
   margin: marginProp,
@@ -503,6 +526,7 @@ export function LiveLineChart({
             height={height}
             lerpSpeed={lerpSpeed}
             margin={margin}
+            nowOffsetUnits={nowOffsetUnits}
             numXTicks={numXTicks}
             paused={paused}
             value={value}

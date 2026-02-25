@@ -102,7 +102,13 @@ export {
 // Line chart components
 export { Line, type LineProps } from "./line";
 export { LineChart, type LineChartProps } from "./line-chart";
-export { LiveLine, type LiveLineProps } from "./live-line";
+export {
+  detectMomentum,
+  LiveLine,
+  type LiveLineProps,
+  type Momentum,
+  type MomentumColors,
+} from "./live-line";
 // Live line chart (real-time streaming)
 export {
   LiveLineChart,

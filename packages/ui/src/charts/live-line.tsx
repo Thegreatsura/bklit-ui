@@ -2,12 +2,19 @@
 
 import { curveMonotoneX } from "@visx/curve";
 import { AreaClosed, LinePath } from "@visx/shape";
+import { motion } from "motion/react";
 import { useCallback, useId, useMemo } from "react";
 import { chartCssVars, useChart } from "./chart-context";
 
-type Momentum = "up" | "down" | "flat";
+export type Momentum = "up" | "down" | "flat";
 
-function detectMomentum(
+export interface MomentumColors {
+  up: string;
+  down: string;
+  flat: string;
+}
+
+export function detectMomentum(
   data: Record<string, unknown>[],
   dataKey: string,
   lookback = 20
@@ -64,6 +71,11 @@ export interface LiveLineProps {
   badge?: boolean;
   /** Value label formatter for the badge */
   formatValue?: (v: number) => string;
+  /**
+   * When set, the line/fill color changes based on momentum direction.
+   * Overrides `stroke` for the line and fill (dot always uses momentum colors).
+   */
+  momentumColors?: MomentumColors;
 }
 
 LiveLine.displayName = "LiveLine";
@@ -77,9 +89,20 @@ export function LiveLine({
   dotSize = 4,
   badge = true,
   formatValue = (v: number) => v.toFixed(2),
+  momentumColors,
 }: LiveLineProps) {
-  const { data, xScale, yScale, innerWidth, innerHeight, xAccessor, lines } =
-    useChart();
+  const {
+    data,
+    xScale,
+    yScale,
+    innerWidth,
+    innerHeight,
+    xAccessor,
+    lines,
+    tooltipData,
+  } = useChart();
+
+  const isScrubbing = tooltipData !== null;
 
   const uid = useId();
   const gradientId = `live-line-grad-${uid}`;
@@ -116,16 +139,18 @@ export function LiveLine({
     [data, dataKey]
   );
 
-  const MOMENTUM_COLORS = {
+  const defaultMomentumColors: MomentumColors = {
     up: "var(--color-emerald-500)",
     down: "var(--color-red-500)",
     flat: stroke,
   };
-  const dotColor = MOMENTUM_COLORS[momentum];
+  const dotMomentumColors = momentumColors ?? defaultMomentumColors;
+  const dotColor = dotMomentumColors[momentum];
 
   // Find the line config for this dataKey to get the resolved stroke
   const lineConfig = lines.find((l) => l.dataKey === dataKey);
-  const resolvedStroke = lineConfig?.stroke ?? stroke;
+  const baseStroke = lineConfig?.stroke ?? stroke;
+  const resolvedStroke = momentumColors ? momentumColors[momentum] : baseStroke;
 
   return (
     <>
@@ -141,12 +166,18 @@ export function LiveLine({
         <linearGradient id={fadeId} x1="0" x2="1" y1="0" y2="0">
           <stop offset="0%" stopColor="white" stopOpacity={0} />
           <stop offset="4%" stopColor="white" stopOpacity={1} />
-          <stop
-            offset={`${innerWidth > 0 ? (liveDotX / innerWidth) * 100 : 100}%`}
-            stopColor="white"
-            stopOpacity={1}
-          />
-          <stop offset="100%" stopColor="white" stopOpacity={0} />
+          {liveDotX < innerWidth - 1 ? (
+            <>
+              <stop
+                offset={`${(liveDotX / innerWidth) * 100}%`}
+                stopColor="white"
+                stopOpacity={1}
+              />
+              <stop offset="100%" stopColor="white" stopOpacity={0} />
+            </>
+          ) : (
+            <stop offset="100%" stopColor="white" stopOpacity={1} />
+          )}
         </linearGradient>
         <mask id={fadeMaskId}>
           <rect
@@ -202,75 +233,81 @@ export function LiveLine({
         y2={liveDotY}
       />
 
-      {/* Live pulsing dot */}
-      <g>
-        {pulse && (
+      {/* Live indicator (dot + badge) — dims when crosshair is active */}
+      <motion.g
+        animate={{ opacity: isScrubbing ? 0.25 : 1 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+      >
+        {/* Pulsing dot */}
+        <g>
+          {pulse && (
+            <circle
+              cx={liveDotX}
+              cy={liveDotY}
+              fill="none"
+              opacity={0.4}
+              r={dotSize * 2}
+              stroke={dotColor}
+              strokeWidth={1.5}
+            >
+              <animate
+                attributeName="r"
+                dur="1.5s"
+                from={String(dotSize)}
+                repeatCount="indefinite"
+                to={String(dotSize * 3.5)}
+              />
+              <animate
+                attributeName="opacity"
+                dur="1.5s"
+                from="0.5"
+                repeatCount="indefinite"
+                to="0"
+              />
+            </circle>
+          )}
           <circle
             cx={liveDotX}
             cy={liveDotY}
-            fill="none"
-            opacity={0.4}
-            r={dotSize * 2}
-            stroke={dotColor}
-            strokeWidth={1.5}
-          >
-            <animate
-              attributeName="r"
-              dur="1.5s"
-              from={String(dotSize)}
-              repeatCount="indefinite"
-              to={String(dotSize * 3.5)}
-            />
-            <animate
-              attributeName="opacity"
-              dur="1.5s"
-              from="0.5"
-              repeatCount="indefinite"
-              to="0"
-            />
-          </circle>
-        )}
-        <circle
-          cx={liveDotX}
-          cy={liveDotY}
-          fill={dotColor}
-          opacity={0.1}
-          r={dotSize + 2}
-        />
-        <circle
-          cx={liveDotX}
-          cy={liveDotY}
-          fill={dotColor}
-          r={dotSize}
-          stroke={chartCssVars.background}
-          strokeWidth={2}
-        />
-      </g>
-
-      {/* Badge */}
-      {badge && (
-        <g transform={`translate(${liveDotX + 12},${liveDotY})`}>
-          <rect
-            fill={resolvedStroke}
-            height={24}
-            opacity={0.95}
-            rx={6}
-            width={formatValue(liveValue).length * 7.5 + 16}
-            x={0}
-            y={-12}
+            fill={dotColor}
+            opacity={0.1}
+            r={dotSize + 2}
           />
-          <text
-            fill="white"
-            fontFamily="SF Mono, Menlo, Monaco, monospace"
-            fontSize={11}
-            fontWeight={500}
-            x={8}
-            y={4}
-          >
-            {formatValue(liveValue)}
-          </text>
+          <circle
+            cx={liveDotX}
+            cy={liveDotY}
+            fill={dotColor}
+            r={dotSize}
+            stroke={chartCssVars.background}
+            strokeWidth={2}
+          />
         </g>
-      )}
+
+        {/* Badge */}
+        {badge && (
+          <g transform={`translate(${liveDotX + 12},${liveDotY})`}>
+            <rect
+              fill={resolvedStroke}
+              height={24}
+              opacity={0.95}
+              rx={6}
+              width={formatValue(liveValue).length * 7.5 + 16}
+              x={0}
+              y={-12}
+            />
+            <text
+              fill="white"
+              fontFamily="SF Mono, Menlo, Monaco, monospace"
+              fontSize={11}
+              fontWeight={500}
+              x={8}
+              y={4}
+            >
+              {formatValue(liveValue)}
+            </text>
+          </g>
+        )}
+      </motion.g>
     </>
   );
 }

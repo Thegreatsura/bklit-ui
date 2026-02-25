@@ -142,7 +142,15 @@ export function LiveYAxis({
       values.push(rounded);
     }
     return values;
-  }, [quantizedMin, quantizedMax, interval, minVal, maxVal, valRange, allowDecimals]);
+  }, [
+    quantizedMin,
+    quantizedMax,
+    interval,
+    minVal,
+    maxVal,
+    valRange,
+    allowDecimals,
+  ]);
 
   // Pixel positions update every frame for smooth movement
   const tickData = useMemo(
@@ -186,19 +194,19 @@ export function LiveYAxis({
         <AnimatePresence initial={false}>
           {tickData.map((tick) => (
             <motion.div
-              key={tick.key}
+              animate={{ opacity: tick.edgeAlpha, y: tick.y }}
               className="absolute w-full"
+              exit={{ opacity: 0 }}
+              initial={{ opacity: 0, y: tick.y }}
+              key={tick.key}
               style={{
                 ...(isLeft
                   ? { right: 0, paddingRight: 8, textAlign: "right" }
                   : { left: 0, paddingLeft: 8, textAlign: "left" }),
               }}
-              initial={{ opacity: 0, y: tick.y }}
-              animate={{ opacity: tick.edgeAlpha, y: tick.y }}
-              exit={{ opacity: 0 }}
               transition={tickSpring}
             >
-              <span className="font-mono text-chart-label text-xs">
+              <span className="whitespace-nowrap font-mono text-chart-label text-xs">
                 {tick.label}
               </span>
             </motion.div>
