@@ -13,6 +13,8 @@ export interface GridProps {
   numTicksRows?: number;
   /** Number of vertical grid lines. Default: 10 */
   numTicksColumns?: number;
+  /** Explicit tick values for horizontal grid lines. Overrides numTicksRows. */
+  rowTickValues?: number[];
   /** Grid line stroke color. Default: var(--chart-grid) */
   stroke?: string;
   /** Grid line stroke opacity. Default: 1 */
@@ -32,6 +34,7 @@ export function Grid({
   vertical = false,
   numTicksRows = 5,
   numTicksColumns = 10,
+  rowTickValues,
   stroke = chartCssVars.grid,
   strokeOpacity = 1,
   strokeWidth = 1,
@@ -113,12 +116,13 @@ export function Grid({
       {horizontal && (
         <g mask={fadeHorizontal ? `url(#${hMaskId})` : undefined}>
           <GridRows
-            numTicks={numTicksRows}
+            numTicks={rowTickValues ? undefined : numTicksRows}
             scale={yScale}
             stroke={stroke}
             strokeDasharray={strokeDasharray}
             strokeOpacity={strokeOpacity}
             strokeWidth={strokeWidth}
+            tickValues={rowTickValues}
             width={innerWidth}
           />
         </g>
