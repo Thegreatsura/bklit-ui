@@ -58,6 +58,8 @@ export interface LiveLineProps {
   fill?: boolean;
   /** Show pulsing live dot at the right edge. Default: true */
   pulse?: boolean;
+  /** Radius of the live dot. Default: 4 */
+  dotSize?: number;
   /** Show value badge pill at the live tip. Default: true */
   badge?: boolean;
   /** Value label formatter for the badge */
@@ -72,6 +74,7 @@ export function LiveLine({
   strokeWidth = 2,
   fill = true,
   pulse = true,
+  dotSize = 4,
   badge = true,
   formatValue = (v: number) => v.toFixed(2),
 }: LiveLineProps) {
@@ -97,14 +100,15 @@ export function LiveLine({
     [dataKey, yScale]
   );
 
-  // The last data point is the virtual "live tip" appended by LiveLineChart
-  const lastPoint = data.at(-1);
+  // The second-to-last point is the "now" position (live tip).
+  // The last point is the queued future point for the fade-out zone.
+  const nowPoint = data.length >= 2 ? data.at(-2) : data.at(-1);
   const liveValue =
-    lastPoint && typeof lastPoint[dataKey] === "number"
-      ? (lastPoint[dataKey] as number)
+    nowPoint && typeof nowPoint[dataKey] === "number"
+      ? (nowPoint[dataKey] as number)
       : 0;
 
-  const liveDotX = innerWidth;
+  const liveDotX = nowPoint ? (xScale(xAccessor(nowPoint)) ?? 0) : innerWidth;
   const liveDotY = yScale(liveValue) ?? 0;
 
   const momentum = useMemo(
@@ -137,7 +141,12 @@ export function LiveLine({
         <linearGradient id={fadeId} x1="0" x2="1" y1="0" y2="0">
           <stop offset="0%" stopColor="white" stopOpacity={0} />
           <stop offset="4%" stopColor="white" stopOpacity={1} />
-          <stop offset="100%" stopColor="white" stopOpacity={1} />
+          <stop
+            offset={`${innerWidth > 0 ? (liveDotX / innerWidth) * 100 : 100}%`}
+            stopColor="white"
+            stopOpacity={1}
+          />
+          <stop offset="100%" stopColor="white" stopOpacity={0} />
         </linearGradient>
         <mask id={fadeMaskId}>
           <rect
@@ -201,16 +210,16 @@ export function LiveLine({
             cy={liveDotY}
             fill="none"
             opacity={0.4}
-            r={8}
+            r={dotSize * 2}
             stroke={dotColor}
             strokeWidth={1.5}
           >
             <animate
               attributeName="r"
               dur="1.5s"
-              from="4"
+              from={String(dotSize)}
               repeatCount="indefinite"
-              to="14"
+              to={String(dotSize * 3.5)}
             />
             <animate
               attributeName="opacity"
@@ -226,13 +235,13 @@ export function LiveLine({
           cy={liveDotY}
           fill={dotColor}
           opacity={0.1}
-          r={5}
+          r={dotSize + 2}
         />
         <circle
           cx={liveDotX}
           cy={liveDotY}
           fill={dotColor}
-          r={3}
+          r={dotSize}
           stroke={chartCssVars.background}
           strokeWidth={2}
         />

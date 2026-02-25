@@ -41,6 +41,8 @@ export interface LiveLineChartProps {
   dataKey?: string;
   /** Visible time window in seconds. Default: 30 */
   window?: number;
+  /** Number of X-axis ticks (used to compute leading offset). Default: 5 */
+  numXTicks?: number;
   /** Tight Y-axis. Default: false */
   exaggerate?: boolean;
   /** Interpolation speed (0–1). Default: 0.08 */
@@ -204,6 +206,7 @@ interface InnerProps {
   value: number;
   dataKey: string;
   windowSecs: number;
+  numXTicks: number;
   exaggerate: boolean;
   lerpSpeed: number;
   margin: Margin;
@@ -219,6 +222,7 @@ function LiveLineChartInner({
   value,
   dataKey,
   windowSecs,
+  numXTicks,
   exaggerate,
   lerpSpeed,
   margin,
@@ -277,14 +281,19 @@ function LiveLineChartInner({
     return () => cancelAnimationFrame(raf);
   }, [targetRange, value, lerpSpeed]);
 
+  // ---- Leading offset ----
+  const xTickUnitMs = windowMs / (numXTicks - 1);
+  const leadingMs = 0;
+  const domainEndMs = frame.now + leadingMs;
+
   // ---- Scales ----
   const xScale = useMemo(
     () =>
       scaleTime({
-        domain: [new Date(frame.now - windowMs), new Date(frame.now)],
+        domain: [new Date(domainEndMs - windowMs), new Date(domainEndMs)],
         range: [0, innerWidth],
       }),
-    [frame.now, windowMs, innerWidth]
+    [domainEndMs, windowMs, innerWidth]
   );
 
   const yScale = useMemo(
@@ -298,9 +307,11 @@ function LiveLineChartInner({
   );
 
   // ---- Build context-compatible data ----
-  // Convert LiveLinePoint[] to Record<string, unknown>[] with a virtual tip
+  // Convert LiveLinePoint[] to Record<string, unknown>[] with 2 virtual points:
+  // 1. At "now" — the live tip where the dot sits
+  // 2. At "now + 1 unit" — a queued point that the line fades into
   const contextData = useMemo(() => {
-    const windowStart = frame.now - windowMs;
+    const windowStart = domainEndMs - windowMs;
     let startIdx = bisectTime(data, windowStart / 1000, 0);
     if (startIdx > 0) {
       startIdx--;
@@ -310,13 +321,18 @@ function LiveLineChartInner({
       date: new Date(p.time * 1000),
       [dataKey]: p.value,
     }));
-    // Virtual leading-edge point
+    // Virtual point 1: the "now" position (where the live dot sits)
     records.push({
       date: new Date(frame.now),
       [dataKey]: frame.displayValue,
     });
+    // Virtual point 2: queued ahead (the line extends and fades into this)
+    records.push({
+      date: new Date(frame.now + xTickUnitMs),
+      [dataKey]: frame.displayValue,
+    });
     return records;
-  }, [data, frame.now, frame.displayValue, windowMs, dataKey]);
+  }, [data, frame.now, frame.displayValue, domainEndMs, windowMs, dataKey, xTickUnitMs]);
 
   // ---- X accessor ----
   const xAccessor = useCallback(
@@ -355,8 +371,14 @@ function LiveLineChartInner({
     }
     const timeMs = xScale.invert(cursorX).getTime();
     const timeSec = timeMs / 1000;
-    const visible = data.filter((p) => p.time >= (frame.now - windowMs) / 1000);
+    const visible = data.filter(
+      (p) => p.time >= (domainEndMs - windowMs) / 1000
+    );
     visible.push({ time: frame.now / 1000, value: frame.displayValue });
+    visible.push({
+      time: (frame.now + xTickUnitMs) / 1000,
+      value: frame.displayValue,
+    });
     const val = interpolateAtTime(visible, timeSec);
     if (val === null) {
       setTooltipData(null);
@@ -368,7 +390,7 @@ function LiveLineChartInner({
       x: cursorX,
       yPositions: { [dataKey]: yScale(val) ?? 0 },
     });
-  }, [xScale, yScale, data, dataKey, frame.now, frame.displayValue, windowMs]);
+  }, [xScale, yScale, data, dataKey, frame.now, frame.displayValue, domainEndMs, windowMs, xTickUnitMs]);
 
   // Date labels (for ChartTooltip's DateTicker — not used in live but needed for context)
   const dateLabels = useMemo(
@@ -453,6 +475,7 @@ export function LiveLineChart({
   value,
   dataKey = "value",
   window: windowSecs = 30,
+  numXTicks = 5,
   exaggerate = false,
   lerpSpeed = LERP_SPEED,
   margin: marginProp,
@@ -480,6 +503,7 @@ export function LiveLineChart({
             height={height}
             lerpSpeed={lerpSpeed}
             margin={margin}
+            numXTicks={numXTicks}
             paused={paused}
             value={value}
             width={width}
