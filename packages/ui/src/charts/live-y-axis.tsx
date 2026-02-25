@@ -102,16 +102,16 @@ export function LiveYAxis({
         <AnimatePresence initial={false}>
           {tickData.map((tick) => (
             <motion.div
-              key={tick.key}
+              animate={{ opacity: 1, y: tick.y - margin.top }}
               className="absolute w-full"
+              exit={{ opacity: 0 }}
+              initial={{ opacity: 0, y: tick.y - margin.top }}
+              key={tick.key}
               style={{
                 ...(isLeft
                   ? { right: 0, paddingRight: 8, textAlign: "right" }
                   : { left: 0, paddingLeft: 8, textAlign: "left" }),
               }}
-              initial={{ opacity: 0, y: tick.y - margin.top }}
-              animate={{ opacity: 1, y: tick.y - margin.top }}
-              exit={{ opacity: 0 }}
               transition={yAxisSpring}
             >
               <span className="font-mono text-chart-label text-xs">

@@ -126,26 +126,26 @@ export function LiveLine({
   return (
     <>
       <defs>
-        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
           <stop offset="0%" stopColor={resolvedStroke} stopOpacity={1} />
           <stop offset="100%" stopColor={resolvedStroke} stopOpacity={0.6} />
         </linearGradient>
-        <linearGradient id={areaGradientId} x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={areaGradientId} x1="0" x2="0" y1="0" y2="1">
           <stop offset="0%" stopColor={resolvedStroke} stopOpacity={0.1} />
           <stop offset="100%" stopColor={resolvedStroke} stopOpacity={0} />
         </linearGradient>
-        <linearGradient id={fadeId} x1="0" y1="0" x2="1" y2="0">
+        <linearGradient id={fadeId} x1="0" x2="1" y1="0" y2="0">
           <stop offset="0%" stopColor="white" stopOpacity={0} />
           <stop offset="4%" stopColor="white" stopOpacity={1} />
           <stop offset="100%" stopColor="white" stopOpacity={1} />
         </linearGradient>
         <mask id={fadeMaskId}>
           <rect
+            fill={`url(#${fadeId})`}
+            height={innerHeight + 40}
+            width={innerWidth}
             x={0}
             y={-20}
-            width={innerWidth}
-            height={innerHeight + 40}
-            fill={`url(#${fadeId})`}
           />
         </mask>
       </defs>
@@ -154,13 +154,13 @@ export function LiveLine({
       {fill && data.length > 1 && (
         <g mask={`url(#${fadeMaskId})`}>
           <AreaClosed
+            curve={curveMonotoneX}
             data={data}
+            fill={`url(#${areaGradientId})`}
+            strokeWidth={0}
             x={getX}
             y={getY}
             yScale={yScale}
-            curve={curveMonotoneX}
-            fill={`url(#${areaGradientId})`}
-            strokeWidth={0}
           />
         </g>
       )}
@@ -169,28 +169,28 @@ export function LiveLine({
       {data.length > 1 && (
         <g mask={`url(#${fadeMaskId})`}>
           <LinePath
-            data={data}
-            x={getX}
-            y={getY}
             curve={curveMonotoneX}
+            data={data}
             stroke={`url(#${gradientId})`}
-            strokeWidth={strokeWidth}
             strokeLinecap="round"
             strokeLinejoin="round"
+            strokeWidth={strokeWidth}
+            x={getX}
+            y={getY}
           />
         </g>
       )}
 
       {/* Dashed horizontal line at current value */}
       <line
+        opacity={0.25}
+        stroke={resolvedStroke}
+        strokeDasharray="4,4"
+        strokeWidth={1}
         x1={0}
         x2={innerWidth}
         y1={liveDotY}
         y2={liveDotY}
-        stroke={resolvedStroke}
-        strokeWidth={1}
-        strokeDasharray="4,4"
-        opacity={0.25}
       />
 
       {/* Live pulsing dot */}
@@ -199,40 +199,40 @@ export function LiveLine({
           <circle
             cx={liveDotX}
             cy={liveDotY}
-            r={8}
             fill="none"
+            opacity={0.4}
+            r={8}
             stroke={dotColor}
             strokeWidth={1.5}
-            opacity={0.4}
           >
             <animate
               attributeName="r"
-              from="4"
-              to="14"
               dur="1.5s"
+              from="4"
               repeatCount="indefinite"
+              to="14"
             />
             <animate
               attributeName="opacity"
-              from="0.5"
-              to="0"
               dur="1.5s"
+              from="0.5"
               repeatCount="indefinite"
+              to="0"
             />
           </circle>
         )}
         <circle
           cx={liveDotX}
           cy={liveDotY}
-          r={5}
           fill={dotColor}
           opacity={0.1}
+          r={5}
         />
         <circle
           cx={liveDotX}
           cy={liveDotY}
-          r={3}
           fill={dotColor}
+          r={3}
           stroke={chartCssVars.background}
           strokeWidth={2}
         />
@@ -242,21 +242,21 @@ export function LiveLine({
       {badge && (
         <g transform={`translate(${liveDotX + 12},${liveDotY})`}>
           <rect
+            fill={resolvedStroke}
+            height={24}
+            opacity={0.95}
+            rx={6}
+            width={formatValue(liveValue).length * 7.5 + 16}
             x={0}
             y={-12}
-            width={formatValue(liveValue).length * 7.5 + 16}
-            height={24}
-            rx={6}
-            fill={resolvedStroke}
-            opacity={0.95}
           />
           <text
-            x={8}
-            y={4}
             fill="white"
+            fontFamily="SF Mono, Menlo, Monaco, monospace"
             fontSize={11}
             fontWeight={500}
-            fontFamily="SF Mono, Menlo, Monaco, monospace"
+            x={8}
+            y={4}
           >
             {formatValue(liveValue)}
           </text>

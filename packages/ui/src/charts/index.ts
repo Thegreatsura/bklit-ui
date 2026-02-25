@@ -102,13 +102,13 @@ export {
 // Line chart components
 export { Line, type LineProps } from "./line";
 export { LineChart, type LineChartProps } from "./line-chart";
+export { LiveLine, type LiveLineProps } from "./live-line";
 // Live line chart (real-time streaming)
 export {
   LiveLineChart,
   type LiveLineChartProps,
   type LiveLinePoint,
 } from "./live-line-chart";
-export { LiveLine, type LiveLineProps } from "./live-line";
 export { LiveXAxis, type LiveXAxisProps } from "./live-x-axis";
 export { LiveYAxis, type LiveYAxisProps } from "./live-y-axis";
 // Marker components

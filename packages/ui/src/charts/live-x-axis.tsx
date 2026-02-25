@@ -90,8 +90,8 @@ export function LiveXAxis({
       {/* Time labels */}
       {labels.map((l) => (
         <div
-          key={l.stableKey}
           className="absolute"
+          key={l.stableKey}
           style={{
             left: l.x,
             bottom: 12,

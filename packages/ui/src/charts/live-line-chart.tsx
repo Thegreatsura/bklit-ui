@@ -326,56 +326,51 @@ function LiveLineChartInner({
   );
 
   // ---- Tooltip (crosshair) state ----
+  // Store raw cursor pixel X so we can recompute tooltip every frame as data scrolls
+  const cursorXRef = useRef<number | null>(null);
   const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
 
-  // Custom interaction: pin crosshair to cursor pixel, interpolate value
   const handleMouseMove = useCallback(
     (event: React.MouseEvent<SVGGElement>) => {
       const coords = localPoint(event);
       if (!coords) {
         return;
       }
-      const cursorX = coords.x - margin.left;
-      if (cursorX < 0 || cursorX > innerWidth) {
-        setTooltipData(null);
-        return;
-      }
-      const timeMs = xScale.invert(cursorX).getTime();
-      const timeSec = timeMs / 1000;
-      const val = interpolateAtTime(
-        [
-          ...data.filter((p) => p.time >= (frame.now - windowMs) / 1000),
-          { time: frame.now / 1000, value: frame.displayValue },
-        ],
-        timeSec
-      );
-      if (val === null) {
-        setTooltipData(null);
-        return;
-      }
-      setTooltipData({
-        point: { date: new Date(timeMs), [dataKey]: val },
-        index: 0,
-        x: cursorX,
-        yPositions: { [dataKey]: yScale(val) ?? 0 },
-      });
+      const x = coords.x - margin.left;
+      cursorXRef.current = x >= 0 && x <= innerWidth ? x : null;
     },
-    [
-      margin.left,
-      innerWidth,
-      xScale,
-      yScale,
-      data,
-      dataKey,
-      frame.now,
-      frame.displayValue,
-      windowMs,
-    ]
+    [margin.left, innerWidth]
   );
 
   const handleMouseLeave = useCallback(() => {
+    cursorXRef.current = null;
     setTooltipData(null);
   }, []);
+
+  // Recompute tooltip from pinned cursor X every frame
+  useEffect(() => {
+    const cursorX = cursorXRef.current;
+    if (cursorX === null) {
+      return;
+    }
+    const timeMs = xScale.invert(cursorX).getTime();
+    const timeSec = timeMs / 1000;
+    const visible = data.filter(
+      (p) => p.time >= (frame.now - windowMs) / 1000
+    );
+    visible.push({ time: frame.now / 1000, value: frame.displayValue });
+    const val = interpolateAtTime(visible, timeSec);
+    if (val === null) {
+      setTooltipData(null);
+      return;
+    }
+    setTooltipData({
+      point: { date: new Date(timeMs), [dataKey]: val },
+      index: 0,
+      x: cursorX,
+      yPositions: { [dataKey]: yScale(val) ?? 0 },
+    });
+  }, [xScale, yScale, data, dataKey, frame.now, frame.displayValue, windowMs]);
 
   // Date labels (for ChartTooltip's DateTicker — not used in live but needed for context)
   const dateLabels = useMemo(
@@ -426,16 +421,16 @@ function LiveLineChartInner({
     <ChartProvider value={contextValue}>
       <svg
         aria-hidden="true"
+        className="overflow-visible"
         height={height}
         width={width}
-        className="overflow-visible"
       >
         {/* biome-ignore lint/a11y/noStaticElementInteractions: SVG group for mouse tracking */}
         <g
-          transform={`translate(${margin.left},${margin.top})`}
-          onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
+          onMouseMove={handleMouseMove}
           style={{ cursor: "crosshair" }}
+          transform={`translate(${margin.left},${margin.top})`}
         >
           <rect
             fill="transparent"
@@ -473,24 +468,24 @@ export function LiveLineChart({
 
   return (
     <div
-      ref={containerRef}
       className={cn("relative w-full", className)}
+      ref={containerRef}
       style={{ height: 300, touchAction: "none", ...style }}
     >
       <ParentSize debounceTime={10}>
         {({ width, height }) => (
           <LiveLineChartInner
+            containerRef={containerRef}
             data={data}
-            value={value}
             dataKey={dataKey}
-            windowSecs={windowSecs}
             exaggerate={exaggerate}
+            height={height}
             lerpSpeed={lerpSpeed}
             margin={margin}
             paused={paused}
+            value={value}
             width={width}
-            height={height}
-            containerRef={containerRef}
+            windowSecs={windowSecs}
           >
             {children}
           </LiveLineChartInner>
