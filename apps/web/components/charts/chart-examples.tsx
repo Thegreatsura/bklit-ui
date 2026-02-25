@@ -27,6 +27,12 @@ import {
   Line,
   LinearGradient,
   LineChart,
+  LiveLine,
+  LiveLineChart,
+  type LiveLinePoint,
+  LiveXAxis,
+  LiveYAxis,
+  type MomentumColors,
   PatternLines,
   PieCenter,
   PieChart,
@@ -62,7 +68,13 @@ import { CheckIcon, CopyIcon } from "lucide-react";
 import { motion, useSpring } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { type ReactNode, useCallback, useEffect, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useWorldDataStandalone } from "@/components/docs/use-world-data";
 import {
   Card,
@@ -128,6 +140,68 @@ const lineMarkers: ChartMarker[] = [
     description: "Started new ad campaign",
   },
 ];
+
+// Live line chart: minimal hook for streaming demo data
+function useLiveData(
+  initialPrice: number,
+  intervalMs: number,
+  paused = false
+): { data: LiveLinePoint[]; value: number } {
+  const [data, setData] = useState<LiveLinePoint[]>([]);
+  const [value, setValue] = useState(initialPrice);
+  const priceRef = useRef(initialPrice);
+  const momentumRef = useRef(0);
+  const pausedRef = useRef(paused);
+
+  useEffect(() => {
+    pausedRef.current = paused;
+  }, [paused]);
+
+  useEffect(() => {
+    const nowSec = Date.now() / 1000;
+    const seed: LiveLinePoint[] = [];
+    let p = initialPrice;
+    let mom = 0;
+    for (let i = 40; i > 0; i--) {
+      mom = mom * 0.92 + (Math.random() - 0.48) * 0.012;
+      p *= 1 + mom;
+      p = Math.max(p, 1);
+      seed.push({
+        time: nowSec - i * (intervalMs / 1000),
+        value: Math.round(p * 100) / 100,
+      });
+    }
+    priceRef.current = p;
+    momentumRef.current = mom;
+    setData(seed);
+    setValue(p);
+  }, [initialPrice, intervalMs]);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (pausedRef.current) {
+        return;
+      }
+      momentumRef.current =
+        momentumRef.current * 0.88 + (Math.random() - 0.48) * 0.008;
+      momentumRef.current *= 0.995;
+      priceRef.current *= 1 + momentumRef.current;
+      priceRef.current = Math.max(priceRef.current, 1);
+      const rounded = Math.round(priceRef.current * 100) / 100;
+      setData((prev) => {
+        const cutoff = Date.now() / 1000 - 120;
+        return [
+          ...prev.filter((p) => p.time >= cutoff),
+          { time: Date.now() / 1000, value: rounded },
+        ];
+      });
+      setValue(rounded);
+    }, intervalMs);
+    return () => clearInterval(id);
+  }, [intervalMs]);
+
+  return { data, value };
+}
 
 const barData = [
   { month: "Jan", desktop: 186 },
@@ -1243,6 +1317,206 @@ function makeLineExamples(): ChartExample[] {
       ),
     },
   ];
+}
+
+// ---------------------------------------------------------------------------
+// Live line chart examples
+// ---------------------------------------------------------------------------
+
+function LiveLineBasicDemo() {
+  const { data, value } = useLiveData(142.5, 600);
+  const formatUsd = useCallback((v: number) => `$${v.toFixed(2)}`, []);
+  return (
+    <LiveLineChart
+      data={data}
+      margin={{ top: 16, right: 16, bottom: 40, left: 56 }}
+      style={{ height: 240 }}
+      value={value}
+      window={30}
+    >
+      <LiveLine
+        dataKey="value"
+        formatValue={formatUsd}
+        stroke="var(--chart-1)"
+      />
+      <ChartTooltip
+        content={({ point }) => (
+          <div className="px-3 py-2.5 text-sm">
+            <span className="text-muted-foreground">
+              {(point.value as number)?.toFixed(2)}
+            </span>
+          </div>
+        )}
+        showDatePill={false}
+      />
+      <LiveXAxis />
+      <LiveYAxis formatValue={formatUsd} position="left" />
+    </LiveLineChart>
+  );
+}
+
+function LiveLineOffsetDemo() {
+  const { data, value } = useLiveData(0.002_34, 500);
+  const formatSats = useCallback((v: number) => `${v.toFixed(5)} BTC`, []);
+  return (
+    <LiveLineChart
+      data={data}
+      exaggerate
+      margin={{ top: 16, right: 16, bottom: 40, left: 72 }}
+      nowOffsetUnits={1}
+      style={{ height: 220 }}
+      value={value}
+      window={20}
+    >
+      <LiveLine
+        dataKey="value"
+        dotSize={4}
+        formatValue={formatSats}
+        stroke="var(--chart-3)"
+      />
+      <ChartTooltip
+        content={({ point }) => (
+          <div className="px-3 py-2.5 text-sm tabular-nums">
+            {formatSats((point.value as number) ?? 0)}
+          </div>
+        )}
+        showDatePill={false}
+      />
+      <LiveXAxis />
+      <LiveYAxis formatValue={formatSats} position="left" />
+    </LiveLineChart>
+  );
+}
+
+const momentumColors: MomentumColors = {
+  up: "var(--color-emerald-500)",
+  down: "var(--color-red-500)",
+  flat: "var(--muted-foreground)",
+};
+
+function LiveLineMomentumDemo() {
+  const { data, value } = useLiveData(85, 500);
+  const formatUsd = useCallback((v: number) => `$${v.toFixed(2)}`, []);
+  return (
+    <LiveLineChart
+      data={data}
+      margin={{ top: 16, right: 16, bottom: 40, left: 56 }}
+      style={{ height: 240 }}
+      value={value}
+      window={25}
+    >
+      <LiveLine
+        dataKey="value"
+        dotSize={5}
+        formatValue={formatUsd}
+        momentumColors={momentumColors}
+      />
+      <ChartTooltip
+        content={({ point }) => (
+          <div className="px-3 py-2.5 text-sm tabular-nums">
+            {formatUsd((point.value as number) ?? 0)}
+          </div>
+        )}
+        showDatePill={false}
+      />
+      <LiveXAxis />
+      <LiveYAxis formatValue={formatUsd} position="left" />
+    </LiveLineChart>
+  );
+}
+
+function LiveLineNoFillDemo() {
+  const { data, value } = useLiveData(72, 550);
+  const formatUsd = useCallback((v: number) => `$${v.toFixed(2)}`, []);
+  return (
+    <LiveLineChart
+      data={data}
+      margin={{ top: 16, right: 16, bottom: 40, left: 56 }}
+      style={{ height: 240 }}
+      value={value}
+      window={28}
+    >
+      <LiveLine
+        dataKey="value"
+        fill={false}
+        formatValue={formatUsd}
+        stroke="var(--chart-1)"
+      />
+      <ChartTooltip
+        content={({ point }) => (
+          <div className="px-3 py-2.5 text-sm tabular-nums">
+            {formatUsd((point.value as number) ?? 0)}
+          </div>
+        )}
+        showDatePill={false}
+      />
+      <LiveXAxis />
+      <LiveYAxis formatValue={formatUsd} position="left" />
+    </LiveLineChart>
+  );
+}
+
+function makeLiveLineExamples(): ChartExample[] {
+  return [
+    {
+      title: "Live Line Chart",
+      description: "Streaming data with smooth scroll, live dot, and crosshair",
+      code: `<LiveLineChart data={data} value={value} window={30}>
+  <LiveLine dataKey="value" stroke="var(--chart-1)" formatValue={(v) => \`$\${v.toFixed(2)}\`} />
+  <ChartTooltip showDatePill={false} content={TooltipContent} />
+  <LiveXAxis />
+  <LiveYAxis position="left" formatValue={(v) => \`$\${v.toFixed(2)}\`} />
+</LiveLineChart>`,
+      render: () => <LiveLineBasicDemo />,
+    },
+    {
+      title: "Live Line - Now Offset",
+      description: "Leading gap so the line fades at the right edge",
+      code: `<LiveLineChart data={data} value={value} window={20} nowOffsetUnits={1}>
+  <LiveLine dataKey="value" stroke="var(--chart-3)" formatValue={formatSats} dotSize={4} />
+  <LiveXAxis />
+  <LiveYAxis position="left" formatValue={formatSats} />
+</LiveLineChart>`,
+      render: () => <LiveLineOffsetDemo />,
+    },
+    {
+      title: "Live Line - Momentum Colors",
+      description: "Green for increase, red for decrease",
+      code: `const momentumColors = { up: "var(--color-emerald-500)", down: "var(--color-red-500)", flat: "var(--muted-foreground)" };
+
+<LiveLineChart data={data} value={value} window={25}>
+  <LiveLine dataKey="value" momentumColors={momentumColors} formatValue={formatUsd} dotSize={5} />
+  <LiveXAxis />
+  <LiveYAxis position="left" formatValue={formatUsd} />
+</LiveLineChart>`,
+      render: () => <LiveLineMomentumDemo />,
+    },
+    {
+      title: "Live Line - Line Only",
+      description: "No area fill — simple line and live dot",
+      code: `<LiveLineChart data={data} value={value} window={28}>
+  <LiveLine dataKey="value" fill={false} stroke="var(--chart-1)" formatValue={formatUsd} />
+  <LiveXAxis />
+  <LiveYAxis position="left" formatValue={formatUsd} />
+</LiveLineChart>`,
+      render: () => <LiveLineNoFillDemo />,
+    },
+  ];
+}
+
+function makeLiveLineHero(): ChartExample {
+  return {
+    title: "Live Line Chart - Interactive",
+    description: "Real-time streaming with crosshair and animated axes",
+    code: `<LiveLineChart data={data} value={value} window={30}>
+  <LiveLine dataKey="value" stroke="var(--chart-line-primary)" formatValue={(v) => \`$\${v.toFixed(2)}\`} />
+  <ChartTooltip showDatePill={false} content={TooltipContent} />
+  <LiveXAxis />
+  <LiveYAxis position="left" formatValue={(v) => \`$\${v.toFixed(2)}\`} />
+</LiveLineChart>`,
+    footer: "Data streams in real time; hover to scrub the crosshair",
+    render: () => <LiveLineBasicDemo />,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -2875,6 +3149,7 @@ const chartTypes = [
   { label: "Choropleth Chart", slug: "choropleth-chart" },
   { label: "Funnel Chart", slug: "funnel-chart" },
   { label: "Line Chart", slug: "line-chart" },
+  { label: "Live Line Chart", slug: "live-line-chart" },
   { label: "Pie Chart", slug: "pie-chart" },
   { label: "Radar Chart", slug: "radar-chart" },
   { label: "Ring Chart", slug: "ring-chart" },
@@ -2934,6 +3209,11 @@ const chartExamplesRegistry: Record<string, RegistryEntry> = {
     hero: makeFunnelHero,
   },
   "line-chart": { factory: makeLineExamples, hero: makeLineHero },
+  "live-line-chart": {
+    columns: 2,
+    factory: makeLiveLineExamples,
+    hero: makeLiveLineHero,
+  },
   "pie-chart": { factory: makePieExamples },
   "radar-chart": { factory: makeRadarExamples },
   "ring-chart": { factory: makeRingExamples },

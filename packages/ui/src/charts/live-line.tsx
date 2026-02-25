@@ -283,11 +283,11 @@ export function LiveLine({
           />
         </g>
 
-        {/* Badge */}
+        {/* Badge — use popover vars so text is never white-on-white */}
         {badge && (
           <g transform={`translate(${liveDotX + 12},${liveDotY})`}>
             <rect
-              fill={resolvedStroke}
+              fill="var(--popover)"
               height={24}
               opacity={0.95}
               rx={6}
@@ -296,7 +296,7 @@ export function LiveLine({
               y={-12}
             />
             <text
-              fill="white"
+              fill="var(--popover-foreground)"
               fontFamily="SF Mono, Menlo, Monaco, monospace"
               fontSize={11}
               fontWeight={500}
