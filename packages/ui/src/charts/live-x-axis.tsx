@@ -1,11 +1,13 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useSpring } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import { useChart } from "./chart-context";
 
 const TICKER_HALF_WIDTH = 50;
 const FADE_BUFFER = 20;
+
+const crosshairSpringConfig = { stiffness: 300, damping: 30 };
 
 function labelFadeOpacity(
   labelX: number,
@@ -78,6 +80,15 @@ export function LiveXAxis({
     return formatTime(timeMs);
   }, [tooltipData, xScale, formatTime]);
 
+  // Spring-animated pill position — matches TooltipIndicator's spring config
+  // so the pill and crosshair line move in lockstep
+  const pillX = tooltipData ? tooltipData.x + margin.left : 0;
+  const animatedPillX = useSpring(pillX, crosshairSpringConfig);
+
+  useEffect(() => {
+    animatedPillX.set(pillX);
+  }, [pillX, animatedPillX]);
+
   const container = containerRef.current;
   if (!(mounted && container)) {
     return null;
@@ -112,13 +123,13 @@ export function LiveXAxis({
         </div>
       ))}
 
-      {/* Time pill at crosshair */}
-      {isHovering && tooltipData && pillLabel && (
+      {/* Time pill at crosshair — spring-animated to match crosshair line */}
+      {isHovering && pillLabel && (
         <motion.div
           className="absolute z-50"
           style={{
-            left: tooltipData.x + margin.left,
-            transform: "translateX(-50%)",
+            left: animatedPillX,
+            x: "-50%",
             bottom: 4,
           }}
         >

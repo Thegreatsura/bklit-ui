@@ -355,9 +355,7 @@ function LiveLineChartInner({
     }
     const timeMs = xScale.invert(cursorX).getTime();
     const timeSec = timeMs / 1000;
-    const visible = data.filter(
-      (p) => p.time >= (frame.now - windowMs) / 1000
-    );
+    const visible = data.filter((p) => p.time >= (frame.now - windowMs) / 1000);
     visible.push({ time: frame.now / 1000, value: frame.displayValue });
     const val = interpolateAtTime(visible, timeSec);
     if (val === null) {
