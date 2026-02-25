@@ -13,52 +13,13 @@ Before installing Bklit UI components, make sure you have shadcn/ui set up in yo
 npx shadcn@latest init
 ```
 
-## Add the Registry
-
-Add the Bklit UI registry to your `components.json` file:
-
-```json title="components.json"
-{
-  "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "new-york",
-  "rsc": true,
-  "tsx": true,
-  "tailwind": {
-    "config": "",
-    "css": "app/globals.css",
-    "baseColor": "neutral",
-    "cssVariables": true,
-    "prefix": ""
-  },
-  "iconLibrary": "lucide",
-  "aliases": {
-    "components": "@/components",
-    "utils": "@/lib/utils",
-    "ui": "@/components/ui",
-    "lib": "@/lib",
-    "hooks": "@/hooks"
-  },
-  "registries": {
-    "@bklit-ui": "https://ui.bklit.com/r/{name}.json"
-  }
-}
-```
-
-The key addition is the `registries` object:
-
-```json
-"registries": {
-  "@bklit-ui": "https://ui.bklit.com/r/{name}.json"
-}
-```
-
 ## Install Components
 
-Once configured, you can install any Bklit UI component using the shadcn CLI:
+Install any Bklit UI component using the CLI:
 
 <PackageManagerTabs name="area-chart" />
 
-This will automatically:
+The registry is configured automatically — no manual setup needed. This will:
 - Download the component source code
 - Install any required dependencies
 - Place files in your configured component directory
