@@ -2,6 +2,7 @@
   "title": "Components",
   "pages": [
     "line-chart",
+    "live-line-chart",
     "area-chart",
     "bar-chart",
     "funnel-chart",

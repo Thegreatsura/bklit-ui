@@ -24,6 +24,7 @@ interface SiteHeaderProps {
 
 const components = [
   { text: "Line Chart", url: "/docs/components/line-chart" },
+  { text: "Live Line Chart", url: "/docs/components/live-line-chart" },
   { text: "Area Chart", url: "/docs/components/area-chart" },
   { text: "Bar Chart", url: "/docs/components/bar-chart" },
   { text: "Funnel Chart", url: "/docs/components/funnel-chart" },
