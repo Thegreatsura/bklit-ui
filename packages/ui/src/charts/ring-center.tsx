@@ -2,7 +2,7 @@
 
 import NumberFlow from "@number-flow/react";
 import type { ReactNode } from "react";
-import { cn } from "../lib/utils";
+import { cn } from "@/lib/utils";
 import { useRing } from "./ring-context";
 
 // NumberFlow format - subset of Intl.NumberFormatOptions

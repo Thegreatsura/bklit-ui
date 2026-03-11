@@ -3,7 +3,7 @@
 import { motion, useSpring } from "motion/react";
 import type { RefObject } from "react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { cn } from "../../lib/utils";
+import { cn } from "@/lib/utils";
 
 // Spring config for smooth tooltip movement
 const springConfig = { stiffness: 100, damping: 20 };

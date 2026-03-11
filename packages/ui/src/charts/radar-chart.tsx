@@ -4,7 +4,7 @@ import { Group } from "@visx/group";
 import { ParentSize } from "@visx/responsive";
 import { scaleLinear } from "@visx/scale";
 import { type ReactNode, useCallback, useState } from "react";
-import { cn } from "../lib/utils";
+import { cn } from "@/lib/utils";
 import {
   defaultRadarColors,
   type RadarContextValue,
