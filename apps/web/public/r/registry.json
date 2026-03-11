@@ -116,6 +116,23 @@
       ]
     },
     {
+      "name": "y-axis",
+      "type": "registry:component",
+      "title": "Y Axis",
+      "description": "Y-axis component for value labels in line and area charts",
+      "registryDependencies": [
+        "https://ui.bklit.com/r/chart-context.json",
+        "https://ui.bklit.com/r/utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/charts/y-axis.tsx",
+          "type": "registry:component",
+          "target": "components/charts/y-axis.tsx"
+        }
+      ]
+    },
+    {
       "name": "chart-tooltip",
       "type": "registry:component",
       "title": "Chart Tooltip",
@@ -355,6 +372,48 @@
           "path": "src/charts/line.tsx",
           "type": "registry:component",
           "target": "components/charts/line.tsx"
+        }
+      ]
+    },
+    {
+      "name": "live-line-chart",
+      "type": "registry:component",
+      "title": "Live Line Chart",
+      "description": "Real-time streaming line chart with smooth scrolling, crosshair, and animated axes",
+      "registryDependencies": [
+        "https://ui.bklit.com/r/chart-context.json",
+        "https://ui.bklit.com/r/chart-tooltip.json",
+        "https://ui.bklit.com/r/utils.json"
+      ],
+      "dependencies": [
+        "@visx/curve@4.0.1-alpha.0",
+        "@visx/scale@4.0.1-alpha.0",
+        "@visx/shape@4.0.1-alpha.0",
+        "@visx/responsive@4.0.1-alpha.0",
+        "@visx/event@4.0.1-alpha.0",
+        "d3-array",
+        "motion"
+      ],
+      "files": [
+        {
+          "path": "src/charts/live-line-chart.tsx",
+          "type": "registry:component",
+          "target": "components/charts/live-line-chart.tsx"
+        },
+        {
+          "path": "src/charts/live-line.tsx",
+          "type": "registry:component",
+          "target": "components/charts/live-line.tsx"
+        },
+        {
+          "path": "src/charts/live-x-axis.tsx",
+          "type": "registry:component",
+          "target": "components/charts/live-x-axis.tsx"
+        },
+        {
+          "path": "src/charts/live-y-axis.tsx",
+          "type": "registry:component",
+          "target": "components/charts/live-y-axis.tsx"
         }
       ]
     },
