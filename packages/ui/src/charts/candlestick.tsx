@@ -48,7 +48,7 @@ interface CandleShape {
   bodyPattern: string | undefined;
   hasPatternOverlay: boolean;
   insideStrokeWidth: number;
-  transition: { duration: number; ease: readonly number[] };
+  transition: { duration: number; ease: "easeInOut" };
   delay: number;
   isFaded: boolean;
   fadedOpacity: number;
@@ -176,7 +176,7 @@ export function Candlestick({
   const transition = useMemo(
     () => ({
       duration: 0.4,
-      ease: [0.85, 0, 0.15, 1] as const,
+      ease: "easeInOut" as const,
     }),
     []
   );

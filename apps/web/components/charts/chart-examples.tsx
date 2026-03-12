@@ -2927,7 +2927,9 @@ function makeCandlestickExamples(): ChartExample[] {
   ];
 }
 
-function candlestickChartPaletteIndicatorColor(point: Record<string, unknown>): string {
+function candlestickChartPaletteIndicatorColor(
+  point: Record<string, unknown>
+): string {
   const close = (point.close as number) ?? 0;
   const open = (point.open as number) ?? 0;
   return close >= open ? "var(--chart-1)" : "var(--chart-5)";

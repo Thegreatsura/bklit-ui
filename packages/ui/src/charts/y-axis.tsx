@@ -8,16 +8,29 @@ export interface YAxisProps {
   numTicks?: number;
   /** Format large numbers (e.g. 1000 as "1k"). Default: true */
   formatLargeNumbers?: boolean;
+  /** Custom formatter for tick labels (e.g. USD). Overrides formatLargeNumbers when set. */
+  formatValue?: (value: number) => string;
 }
 
-function formatLabel(value: number, formatLargeNumbers: boolean): string {
+function formatLabel(
+  value: number,
+  formatLargeNumbers: boolean,
+  formatValue?: (value: number) => string
+): string {
+  if (formatValue) {
+    return formatValue(value);
+  }
   if (formatLargeNumbers && value >= 1000) {
     return `${(value / 1000).toFixed(0)}k`;
   }
   return String(value);
 }
 
-export function YAxis({ numTicks = 5, formatLargeNumbers = true }: YAxisProps) {
+export function YAxis({
+  numTicks = 5,
+  formatLargeNumbers = true,
+  formatValue,
+}: YAxisProps) {
   const { yScale, margin, containerRef } = useChart();
   const [mounted, setMounted] = useState(false);
 
@@ -30,9 +43,9 @@ export function YAxis({ numTicks = 5, formatLargeNumbers = true }: YAxisProps) {
     return tickValues.map((value) => ({
       value,
       y: (yScale(value) ?? 0) + margin.top,
-      label: formatLabel(value, formatLargeNumbers),
+      label: formatLabel(value, formatLargeNumbers, formatValue),
     }));
-  }, [yScale, margin.top, numTicks, formatLargeNumbers]);
+  }, [yScale, margin.top, numTicks, formatLargeNumbers, formatValue]);
 
   const container = containerRef.current;
   if (!(mounted && container)) {

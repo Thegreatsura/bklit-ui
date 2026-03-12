@@ -64,10 +64,10 @@ Documentation lives under `apps/web/`. Do all of the following.
 ### 5. Commit, push, and open a PR
 
 - **Commit** with a short, clear message (e.g. `feat(charts): add MyChart component`).
-- **Push** the branch.
-- **Open a PR** with:
-  - A **summary** of what’s new (component name, purpose, main props/features).
-  - A **checklist** that mirrors this plan so reviewers can confirm:
+- **Push** the branch (e.g. `git push --set-upstream origin <branch>` if first push).
+- **Open a PR** (do not only update a template file—actually create the pull request):
+  - After pushing, run **`gh pr create`** (GitHub CLI) with a title and body, or open the “Compare & pull request” link from the repo’s PR/new view. Use a template body if one exists (e.g. `.github/PULL_REQUEST_TEMPLATE_*.md`).
+  - The PR must include:
     - [ ] Chart/component moved to `packages/ui` and exported
     - [ ] Chart slug and examples added (`chart-slugs.ts`, `chart-examples.tsx`)
     - [ ] New doc page under `content/docs/components/*.mdx`
