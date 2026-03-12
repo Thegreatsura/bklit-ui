@@ -129,6 +129,12 @@ export interface ChartContextValue {
   stacked?: boolean;
   /** Stack offsets: Map of data index -> Map of dataKey -> cumulative offset */
   stackOffsets?: Map<number, Map<string, number>>;
+
+  // Candlestick chart specific (optional)
+  /** Index of currently hovered candle */
+  hoveredCandleIndex?: number | null;
+  /** Setter for hovered candle index */
+  setHoveredCandleIndex?: (index: number | null) => void;
 }
 
 const ChartContext = createContext<ChartContextValue | null>(null);
