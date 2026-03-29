@@ -73,7 +73,7 @@ export function PieCenter({
 }: PieCenterProps) {
   const { data, hoveredIndex, totalValue, innerRadius } = usePie();
 
-  const hoveredData = hoveredIndex !== null ? data[hoveredIndex] : null;
+  const hoveredData = hoveredIndex === null ? null : data[hoveredIndex];
   const displayValue = hoveredData ? hoveredData.value : totalValue;
   const displayLabel = hoveredData ? hoveredData.label : defaultLabel;
   const isHovered = hoveredIndex !== null;

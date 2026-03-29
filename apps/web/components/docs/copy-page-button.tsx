@@ -35,7 +35,7 @@ export function CopyPageButton({ content, url }: CopyPageButtonProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const fullUrl = typeof window !== "undefined" ? window.location.href : url;
+  const fullUrl = typeof window === "undefined" ? url : window.location.href;
 
   return (
     <div className="hidden md:flex">

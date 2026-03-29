@@ -77,7 +77,7 @@ function SegmentBridge({
     onSegmentChange({
       value: endVal,
       change: endVal - startVal,
-      changePct: startVal !== 0 ? ((endVal - startVal) / startVal) * 100 : 0,
+      changePct: startVal === 0 ? 0 : ((endVal - startVal) / startVal) * 100,
       startDate: xAccessor(startPoint),
       endDate: xAccessor(endPoint),
     });
