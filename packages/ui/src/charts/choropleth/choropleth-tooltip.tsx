@@ -86,15 +86,15 @@ export function ChoroplethTooltip({
   // Default tooltip with optional value
   const value = getFeatureValue?.(feature, tooltipData.featureIndex);
   const rows: TooltipRow[] =
-    value !== undefined
-      ? [
+    value === undefined
+      ? []
+      : [
           {
             color: "var(--chart-1)",
             label: valueLabel,
             value: formatValue(value),
           },
-        ]
-      : [];
+        ];
 
   return (
     <TooltipBox

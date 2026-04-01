@@ -73,7 +73,7 @@ export function TooltipContent({ title, rows, children }: TooltipContentProps) {
     <motion.div
       // Only animate if we have a committed height, otherwise use auto
       animate={
-        committedHeight !== null ? { height: committedHeight } : undefined
+        committedHeight === null ? undefined : { height: committedHeight }
       }
       className="overflow-hidden"
       // Skip initial animation

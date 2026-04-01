@@ -8,6 +8,7 @@ import {
   Children,
   isValidElement,
   type ReactNode,
+  startTransition,
   useCallback,
   useEffect,
   useMemo,
@@ -293,6 +294,7 @@ function LiveLineChartInner({
 
       const domainEndMsNext = next.now + leadingMs;
       const cursorX = cursorXRef.current;
+      let nextTooltip: TooltipData | null = null;
       if (cursorX !== null && innerWidth > 0 && innerHeight > 0) {
         const xScaleNext = scaleTime({
           domain: [
@@ -320,20 +322,19 @@ function LiveLineChartInner({
         const val = interpolateAtTime(visible, timeSec);
         const key = dataKeyRef.current;
         if (val !== null) {
-          setTooltipData({
+          nextTooltip = {
             point: { date: new Date(timeMs), [key]: val },
             index: 0,
             x: cursorX,
             yPositions: { [key]: yScaleNext(val) ?? 0 },
-          });
-        } else {
-          setTooltipData(null);
+          };
         }
-      } else {
-        setTooltipData(null);
       }
 
-      setFrame(next);
+      startTransition(() => {
+        setTooltipData(nextTooltip);
+        setFrame(next);
+      });
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
