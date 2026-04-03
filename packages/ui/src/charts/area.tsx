@@ -70,7 +70,6 @@ export function Area({
   } = useChart();
 
   const pathRef = useRef<SVGPathElement>(null);
-  const [pathLength, setPathLength] = useState(0);
   const [clipWidth, setClipWidth] = useState(0);
 
   // Unique IDs for this area
@@ -90,59 +89,78 @@ export function Area({
   // Resolved stroke color (defaults to fill)
   const resolvedStroke = stroke || fill;
 
-  // Measure path length and trigger animation
-  useEffect(() => {
-    if (pathRef.current && animate) {
-      const len = pathRef.current.getTotalLength();
-      if (len > 0) {
-        setPathLength(len);
-        if (!isLoaded) {
-          requestAnimationFrame(() => {
-            setClipWidth(innerWidth);
-          });
-        }
-      }
-    }
-  }, [animate, innerWidth, isLoaded]);
+  const getY = useCallback(
+    (d: Record<string, unknown>) => {
+      const value = d[dataKey];
+      return typeof value === "number" ? (yScale(value) ?? 0) : 0;
+    },
+    [dataKey, yScale]
+  );
 
-  // Binary search to find path length at a given X coordinate
-  const findLengthAtX = useCallback(
-    (targetX: number): number => {
-      const path = pathRef.current;
-      if (!path || pathLength === 0) {
+  /** Polyline chord lengths along data order (no DOM); used for highlight dash math */
+  const chordMetrics = useMemo(() => {
+    const cumulative: number[] = [0];
+    let total = 0;
+    for (let i = 1; i < data.length; i++) {
+      const d0 = data[i - 1];
+      const d1 = data[i];
+      if (!(d0 && d1)) {
+        continue;
+      }
+      const x0 = xScale(xAccessor(d0)) ?? 0;
+      const x1 = xScale(xAccessor(d1)) ?? 0;
+      const y0 = getY(d0);
+      const y1 = getY(d1);
+      total += Math.hypot(x1 - x0, y1 - y0);
+      cumulative.push(total);
+    }
+    return { cumulative, total };
+  }, [data, xScale, xAccessor, getY]);
+
+  const approximateLengthAtX = useCallback(
+    (targetX: number) => {
+      if (data.length < 2) {
         return 0;
       }
-      let low = 0;
-      let high = pathLength;
-      const tolerance = 0.5;
-
-      while (high - low > tolerance) {
-        const mid = (low + high) / 2;
-        const point = path.getPointAtLength(mid);
-        if (point.x < targetX) {
-          low = mid;
-        } else {
-          high = mid;
+      const { cumulative } = chordMetrics;
+      for (let i = 1; i < data.length; i++) {
+        const dPrev = data[i - 1];
+        const dCur = data[i];
+        if (!(dPrev && dCur)) {
+          continue;
+        }
+        const x0 = xScale(xAccessor(dPrev)) ?? 0;
+        const x1 = xScale(xAccessor(dCur)) ?? 0;
+        const atLast = i === data.length - 1;
+        const spanEnd = Math.max(x0, x1);
+        if (targetX <= spanEnd || atLast) {
+          const prev = cumulative[i - 1] ?? 0;
+          const segLen = (cumulative[i] ?? 0) - prev;
+          const denom = x1 - x0;
+          if (Math.abs(denom) < 1e-6) {
+            return prev;
+          }
+          const t = Math.max(0, Math.min(1, (targetX - x0) / denom));
+          return prev + t * segLen;
         }
       }
-      return (low + high) / 2;
+      return chordMetrics.total;
     },
-    [pathLength]
+    [data, xScale, xAccessor, chordMetrics]
   );
 
   // Calculate segment bounds for highlight from either selection or hover
   const segmentBounds = useMemo(() => {
-    if (!pathRef.current || pathLength === 0) {
+    if (data.length < 2 || chordMetrics.total <= 0) {
       return { startLength: 0, segmentLength: 0, isActive: false };
     }
 
-    // Selection takes priority over hover
     if (selection?.active) {
-      const startLength = findLengthAtX(selection.startX);
-      const endLength = findLengthAtX(selection.endX);
+      const startLength = approximateLengthAtX(selection.startX);
+      const endLength = approximateLengthAtX(selection.endX);
       return {
         startLength,
-        segmentLength: endLength - startLength,
+        segmentLength: Math.max(0, endLength - startLength),
         isActive: true,
       };
     }
@@ -164,12 +182,12 @@ export function Area({
     const startX = xScale(xAccessor(startPoint)) ?? 0;
     const endX = xScale(xAccessor(endPoint)) ?? 0;
 
-    const startLength = findLengthAtX(startX);
-    const endLength = findLengthAtX(endX);
+    const startLength = approximateLengthAtX(startX);
+    const endLength = approximateLengthAtX(endX);
 
     return {
       startLength,
-      segmentLength: endLength - startLength,
+      segmentLength: Math.max(0, endLength - startLength),
       isActive: true,
     };
   }, [
@@ -177,9 +195,9 @@ export function Area({
     selection,
     data,
     xScale,
-    pathLength,
     xAccessor,
-    findLengthAtX,
+    chordMetrics.total,
+    approximateLengthAtX,
   ]);
 
   // Springs for smooth highlight animation (both offset AND segment length)
@@ -187,28 +205,22 @@ export function Area({
   const offsetSpring = useSpring(0, springConfig);
   const segmentLengthSpring = useSpring(0, springConfig);
 
+  offsetSpring.set(-segmentBounds.startLength);
+  segmentLengthSpring.set(segmentBounds.segmentLength);
+
   // Create animated strokeDasharray using motion template
-  const animatedDasharray = useMotionTemplate`${segmentLengthSpring} ${pathLength}`;
+  const animatedDasharray = useMotionTemplate`${segmentLengthSpring} ${chordMetrics.total}`;
 
-  // Update springs when segment bounds change
   useEffect(() => {
-    offsetSpring.set(-segmentBounds.startLength);
-    segmentLengthSpring.set(segmentBounds.segmentLength);
-  }, [
-    segmentBounds.startLength,
-    segmentBounds.segmentLength,
-    offsetSpring,
-    segmentLengthSpring,
-  ]);
-
-  // Get y value for a data point
-  const getY = useCallback(
-    (d: Record<string, unknown>) => {
-      const value = d[dataKey];
-      return typeof value === "number" ? (yScale(value) ?? 0) : 0;
-    },
-    [dataKey, yScale]
-  );
+    if (!(animate && data.length > 1)) {
+      return;
+    }
+    if (!isLoaded) {
+      requestAnimationFrame(() => {
+        setClipWidth(innerWidth);
+      });
+    }
+  }, [animate, innerWidth, isLoaded, data.length]);
 
   const isHovering = tooltipData !== null || selection?.active === true;
   const easing = "cubic-bezier(0.85, 0, 0.15, 1)";

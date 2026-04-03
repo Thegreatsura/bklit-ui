@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useChart } from "./chart-context";
@@ -54,14 +53,15 @@ function XAxisLabel({
         justifyContent: "center",
       }}
     >
-      <motion.span
-        animate={{ opacity }}
+      <span
         className={cn("whitespace-nowrap text-chart-label text-xs")}
-        initial={{ opacity: 1 }}
-        transition={{ duration: 0.4, ease: "easeInOut" }}
+        style={{
+          opacity,
+          transition: "opacity 0.4s ease-in-out",
+        }}
       >
         {label}
-      </motion.span>
+      </span>
     </div>
   );
 }

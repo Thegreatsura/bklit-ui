@@ -1,7 +1,6 @@
 "use client";
 
 import { motion, useSpring } from "motion/react";
-import { useEffect } from "react";
 import { chartCssVars } from "../chart-context";
 
 // Faster spring for crosshair - responsive to mouse movement
@@ -80,9 +79,7 @@ export function TooltipIndicator({
 
   const animatedX = useSpring(x - pixelWidth / 2, crosshairSpringConfig);
 
-  useEffect(() => {
-    animatedX.set(x - pixelWidth / 2);
-  }, [x, animatedX, pixelWidth]);
+  animatedX.set(x - pixelWidth / 2);
 
   if (!visible) {
     return null;

@@ -85,9 +85,7 @@ export function ChartTooltip({
   // Animated crosshair position
   const animatedX = useSpring(xWithMargin, crosshairSpringConfig);
 
-  useEffect(() => {
-    animatedX.set(xWithMargin);
-  }, [xWithMargin, animatedX]);
+  animatedX.set(xWithMargin);
 
   // Generate rows from lines
   const tooltipRows = useMemo(() => {
