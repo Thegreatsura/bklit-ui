@@ -50,40 +50,73 @@ export function TooltipBox({
   flipped: flippedOverride,
 }: TooltipBoxProps) {
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const [tooltipWidth, setTooltipWidth] = useState(180);
-  const [tooltipHeight, setTooltipHeight] = useState(80);
+  const tooltipWidthRef = useRef(180);
+  const tooltipHeightRef = useRef(80);
   const [mounted, setMounted] = useState(false);
 
-  // Only render portals on client side after mount
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Measure tooltip dimensions
-  useLayoutEffect(() => {
-    if (tooltipRef.current) {
-      const w = tooltipRef.current.offsetWidth;
-      const h = tooltipRef.current.offsetHeight;
-      if (w > 0 && w !== tooltipWidth) {
-        setTooltipWidth(w);
-      }
-      if (h > 0 && h !== tooltipHeight) {
-        setTooltipHeight(h);
-      }
-    }
-  }, [tooltipWidth, tooltipHeight]);
+  const animatedLeft = useSpring(x + offset, springConfig);
+  const animatedTop = useSpring(y, springConfig);
 
-  // Calculate positions with flip detection
-  const shouldFlipX = x + tooltipWidth + offset > containerWidth;
-  const targetX = shouldFlipX ? x - offset - tooltipWidth : x + offset;
-
-  // Vertical positioning with bounds clamping
+  const tw = tooltipWidthRef.current;
+  const th = tooltipHeightRef.current;
+  const shouldFlipX = x + tw + offset > containerWidth;
+  const targetX = shouldFlipX ? x - offset - tw : x + offset;
   const targetY = Math.max(
     offset,
-    Math.min(y - tooltipHeight / 2, containerHeight - tooltipHeight - offset)
+    Math.min(y - th / 2, containerHeight - th - offset)
   );
 
-  // Track flip state for animation
+  if (leftOverride === undefined) {
+    animatedLeft.set(targetX);
+  }
+  if (topOverride === undefined) {
+    animatedTop.set(targetY);
+  }
+
+  useLayoutEffect(() => {
+    if (!(visible && tooltipRef.current)) {
+      return;
+    }
+    const el = tooltipRef.current;
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+    if (w > 0) {
+      tooltipWidthRef.current = w;
+    }
+    if (h > 0) {
+      tooltipHeightRef.current = h;
+    }
+    const w2 = tooltipWidthRef.current;
+    const h2 = tooltipHeightRef.current;
+    const flip = x + w2 + offset > containerWidth;
+    const tx = flip ? x - offset - w2 : x + offset;
+    const ty = Math.max(
+      offset,
+      Math.min(y - h2 / 2, containerHeight - h2 - offset)
+    );
+    if (leftOverride === undefined) {
+      animatedLeft.set(tx);
+    }
+    if (topOverride === undefined) {
+      animatedTop.set(ty);
+    }
+  }, [
+    visible,
+    x,
+    y,
+    containerWidth,
+    containerHeight,
+    offset,
+    leftOverride,
+    topOverride,
+    animatedLeft,
+    animatedTop,
+  ]);
+
   const prevFlipRef = useRef(shouldFlipX);
   const [flipKey, setFlipKey] = useState(0);
 
@@ -94,31 +127,16 @@ export function TooltipBox({
     }
   }, [shouldFlipX]);
 
-  // Animated positions
-  const animatedLeft = useSpring(targetX, springConfig);
-  const animatedTop = useSpring(targetY, springConfig);
-
-  useEffect(() => {
-    animatedLeft.set(targetX);
-  }, [targetX, animatedLeft]);
-
-  useEffect(() => {
-    animatedTop.set(targetY);
-  }, [targetY, animatedTop]);
-
-  // Use overrides when provided
   const finalLeft = leftOverride ?? animatedLeft;
   const finalTop = topOverride ?? animatedTop;
   const isFlipped = flippedOverride ?? shouldFlipX;
   const transformOrigin = isFlipped ? "right top" : "left top";
 
-  // Use portal to render into the container
   const container = containerRef.current;
   if (!(mounted && container)) {
     return null;
   }
 
-  // Dynamic import to avoid SSR issues
   const { createPortal } = require("react-dom") as typeof import("react-dom");
 
   if (!visible) {

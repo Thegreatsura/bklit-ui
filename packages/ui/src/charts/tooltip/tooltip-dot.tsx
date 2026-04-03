@@ -1,7 +1,6 @@
 "use client";
 
 import { motion, useSpring } from "motion/react";
-import { useEffect } from "react";
 import { chartCssVars } from "../chart-context";
 
 // Faster spring to stay in sync with indicator
@@ -29,10 +28,8 @@ export function TooltipDot({
   const animatedX = useSpring(x, crosshairSpringConfig);
   const animatedY = useSpring(y, crosshairSpringConfig);
 
-  useEffect(() => {
-    animatedX.set(x);
-    animatedY.set(y);
-  }, [x, y, animatedX, animatedY]);
+  animatedX.set(x);
+  animatedY.set(y);
 
   if (!visible) {
     return null;

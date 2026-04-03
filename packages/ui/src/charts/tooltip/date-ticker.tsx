@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useSpring } from "motion/react";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 
 const TICKER_ITEM_HEIGHT = 24;
 
@@ -53,36 +53,23 @@ export function DateTicker({ currentIndex, labels, visible }: DateTickerProps) {
   const dayY = useSpring(0, { stiffness: 400, damping: 35 });
   const monthY = useSpring(0, { stiffness: 400, damping: 35 });
 
-  // Update day scroll position
-  useEffect(() => {
-    dayY.set(-currentIndex * TICKER_ITEM_HEIGHT);
-  }, [currentIndex, dayY]);
+  dayY.set(-currentIndex * TICKER_ITEM_HEIGHT);
 
-  // Update month scroll position only when month changes
-  useEffect(() => {
-    if (currentMonthIndex >= 0) {
-      const isFirstRender = prevMonthIndexRef.current === -1;
-      const monthChanged = prevMonthIndexRef.current !== currentMonthIndex;
-
-      if (isFirstRender || monthChanged) {
-        monthY.set(-currentMonthIndex * TICKER_ITEM_HEIGHT);
-        prevMonthIndexRef.current = currentMonthIndex;
-      }
+  if (currentMonthIndex >= 0) {
+    const isFirstRender = prevMonthIndexRef.current === -1;
+    const monthChanged = prevMonthIndexRef.current !== currentMonthIndex;
+    if (isFirstRender || monthChanged) {
+      monthY.set(-currentMonthIndex * TICKER_ITEM_HEIGHT);
+      prevMonthIndexRef.current = currentMonthIndex;
     }
-  }, [currentMonthIndex, monthY]);
+  }
 
   if (!visible || labels.length === 0) {
     return null;
   }
 
   return (
-    <motion.div
-      className="overflow-hidden rounded-full bg-zinc-900 px-4 py-1 text-white shadow-lg dark:bg-zinc-100 dark:text-zinc-900"
-      layout
-      transition={{
-        layout: { type: "spring", stiffness: 400, damping: 35 },
-      }}
-    >
+    <div className="overflow-hidden rounded-full bg-zinc-900 px-4 py-1 text-white shadow-lg dark:bg-zinc-100 dark:text-zinc-900">
       <div className="relative h-6 overflow-hidden">
         <div className="flex items-center justify-center gap-1">
           {/* Month stack */}
@@ -118,7 +105,7 @@ export function DateTicker({ currentIndex, labels, visible }: DateTickerProps) {
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
