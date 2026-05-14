@@ -3,49 +3,12 @@ title: Composed Chart
 description: Mix SeriesBar, Line, and Area on one shared time axis (Recharts ComposedChart–style)
 ---
 
-import {
-  Area,
-  ComposedChart,
-  Grid,
-  Line,
-  SeriesBar,
-  XAxis,
-  ChartTooltip,
-} from "@bklitui/ui/charts";
-import { curveCatmullRom } from "@visx/curve";
-import { composedDemoData } from "@/lib/composed-demo-data";
-
-const composedSmoothCurve = curveCatmullRom.alpha(0.42);
+import { ComposedChartDocsPreview } from "@/components/docs/composed-chart-docs-preview";
 
 ## Preview
 
 <ComponentPreview>
-  <div className="w-full">
-    <ComposedChart
-      aspectRatio="2 / 1"
-      barGap={0}
-      data={composedDemoData}
-      maxBarSize={32}
-      xDataKey="date"
-    >
-      <Grid horizontal />
-      <Area
-        curve={composedSmoothCurve}
-        dataKey="runRate"
-        fill="var(--chart-4)"
-        fillOpacity={0.32}
-      />
-      <SeriesBar dataKey="units" fill="var(--chart-3)" radius={4} />
-      <Line
-        curve={composedSmoothCurve}
-        dataKey="revenue"
-        stroke="var(--chart-1)"
-        strokeWidth={2.5}
-      />
-      <ChartTooltip showCrosshair={false} />
-      <XAxis numTicks={8} />
-    </ComposedChart>
-  </div>
+  <ComposedChartDocsPreview />
 </ComponentPreview>
 
 ## Installation
