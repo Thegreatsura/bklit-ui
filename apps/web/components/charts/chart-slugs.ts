@@ -5,6 +5,7 @@ export const validChartSlugs = [
   "choropleth-chart",
   "composed-chart",
   "funnel-chart",
+  "gauge-chart",
   "line-chart",
   "live-line-chart",
   "pie-chart",

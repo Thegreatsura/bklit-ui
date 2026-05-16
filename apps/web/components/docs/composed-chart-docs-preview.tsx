@@ -2,12 +2,12 @@
 
 import {
   Area,
+  ChartTooltip,
   ComposedChart,
   Grid,
   Line,
   SeriesBar,
   XAxis,
-  ChartTooltip,
 } from "@bklitui/ui/charts";
 import { curveCatmullRom } from "@visx/curve";
 import { composedDemoData } from "@/lib/composed-demo-data";

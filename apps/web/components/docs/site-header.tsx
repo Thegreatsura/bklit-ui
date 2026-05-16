@@ -29,6 +29,7 @@ const components = [
   { text: "Choropleth Chart", url: "/docs/components/choropleth-chart" },
   { text: "Composed Chart", url: "/docs/components/composed-chart" },
   { text: "Funnel Chart", url: "/docs/components/funnel-chart" },
+  { text: "Gauge", url: "/docs/components/gauge-chart" },
   { text: "Line Chart", url: "/docs/components/line-chart" },
   { text: "Live Line Chart", url: "/docs/components/live-line-chart" },
   { text: "Pie Chart", url: "/docs/components/pie-chart" },

@@ -11,6 +11,7 @@ import {
   CandlestickChart,
   type ChartMarker,
   ChartMarkers,
+  type ChartStatFlowFormat,
   ChartTooltip,
   ChoroplethChart,
   type ChoroplethFeature,
@@ -20,6 +21,7 @@ import {
   ComposedChart,
   FunnelChart,
   type FunnelStage,
+  Gauge,
   Grid,
   Legend,
   LegendItemComponent,
@@ -2799,6 +2801,352 @@ function makeRingExamples(): ChartExample[] {
   ];
 }
 
+const gaugeGalleryUsdFormat: ChartStatFlowFormat = {
+  style: "currency",
+  currency: "USD",
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+};
+
+function makeGaugeHero(): ChartExample {
+  return {
+    title: "Gauge",
+    description:
+      "Notch arc with PieCenter-style NumberFlow, theme fills, optional patterns in defs, and separate active / inactive arc gradients when enabled.",
+    code: `<Gauge
+  value={66}
+  centerValue={428_000}
+  spacing={25}
+  inactiveFillOpacity={0.4}
+  defaultLabel="ARR run rate"
+  formatOptions={{ style: "currency", currency: "USD", maximumFractionDigits: 0 }}
+/>`,
+    data: "// Omit width and height for a responsive layout (min-width 300px by default).",
+    render: () => (
+      <div className="mx-auto w-full min-w-[300px] max-w-lg py-2">
+        <Gauge
+          centerValue={428_000}
+          defaultLabel="ARR run rate"
+          formatOptions={gaugeGalleryUsdFormat}
+          inactiveFillOpacity={0.4}
+          spacing={25}
+          value={66}
+        />
+      </div>
+    ),
+  };
+}
+
+function makeGaugeExamples(): ChartExample[] {
+  return [
+    {
+      title: "Gauge — tight arc, filleted corners",
+      description:
+        "No spacing between notches, 7px corner radius, custom sweep from 140° to 400°.",
+      code: `<Gauge
+  value={66}
+  centerValue={428_000}
+  spacing={0}
+  notchCornerRadius={7}
+  startAngle={140}
+  endAngle={400}
+  inactiveFillOpacity={0.4}
+  defaultLabel="ARR run rate"
+  formatOptions={{ style: "currency", currency: "USD", maximumFractionDigits: 0 }}
+/>`,
+      render: () => (
+        <div className="mx-auto w-full min-w-[300px] max-w-md py-2">
+          <Gauge
+            centerValue={428_000}
+            defaultLabel="ARR run rate"
+            endAngle={400}
+            formatOptions={gaugeGalleryUsdFormat}
+            inactiveFillOpacity={0.4}
+            notchCornerRadius={7}
+            spacing={0}
+            startAngle={140}
+            value={66}
+          />
+        </div>
+      ),
+    },
+    {
+      title: "Gauge — dual arc gradients",
+      description:
+        "Foreground and background notches each get their own hex ramp along the arc (requires useGradient).",
+      code: `<Gauge
+  value={66}
+  centerValue={428_000}
+  useGradient
+  activeGradient={["#a855f7", "#06b6d4"]}
+  inactiveGradient={["#334155", "#38bdf8"]}
+  spacing={0}
+  notchCornerRadius={7}
+  startAngle={140}
+  endAngle={400}
+  inactiveFillOpacity={0.4}
+  defaultLabel="ARR run rate"
+  formatOptions={{ style: "currency", currency: "USD", maximumFractionDigits: 0 }}
+/>`,
+      render: () => (
+        <div className="mx-auto w-full min-w-[300px] max-w-md py-2">
+          <Gauge
+            activeGradient={["#a855f7", "#06b6d4"]}
+            centerValue={428_000}
+            defaultLabel="ARR run rate"
+            endAngle={400}
+            formatOptions={gaugeGalleryUsdFormat}
+            inactiveFillOpacity={0.4}
+            inactiveGradient={["#334155", "#38bdf8"]}
+            notchCornerRadius={7}
+            spacing={0}
+            startAngle={140}
+            useGradient
+            value={66}
+          />
+        </div>
+      ),
+    },
+    {
+      title: "Gauge — pattern foreground, dim solid track",
+      description:
+        "Diagonal PatternLines on active notches; inactive track uses `chart-1` at 0.4 fill opacity.",
+      code: `<Gauge
+  value={66}
+  centerValue={1840}
+  spacing={0}
+  notchCornerRadius={7}
+  startAngle={140}
+  endAngle={400}
+  activeFill="url(#gauge-gallery-ex3-fg)"
+  inactiveFill="var(--chart-1)"
+  inactiveFillOpacity={0.4}
+  defaultLabel="Trials converted (30d)"
+  formatOptions={{ maximumFractionDigits: 0 }}
+>
+  <PatternLines
+    id="gauge-gallery-ex3-fg"
+    width={6}
+    height={6}
+    orientation={["diagonal"]}
+    stroke="var(--chart-1)"
+    strokeWidth={1}
+  />
+</Gauge>`,
+      render: () => (
+        <div className="mx-auto w-full min-w-[300px] max-w-md py-2">
+          <Gauge
+            activeFill="url(#gauge-gallery-ex3-fg)"
+            centerValue={1840}
+            defaultLabel="Trials converted (30d)"
+            endAngle={400}
+            formatOptions={{ maximumFractionDigits: 0 }}
+            inactiveFill="var(--chart-1)"
+            inactiveFillOpacity={0.4}
+            notchCornerRadius={7}
+            spacing={0}
+            startAngle={140}
+            value={66}
+          >
+            <PatternLines
+              height={6}
+              id="gauge-gallery-ex3-fg"
+              orientation={["diagonal"]}
+              stroke="var(--chart-1)"
+              strokeWidth={1}
+              width={6}
+            />
+          </Gauge>
+        </div>
+      ),
+    },
+    {
+      title: "Gauge — sparse ring, quarter sweep",
+      description:
+        "Fewer notches, wide spacing, sharp corners, 90° → 270° sweep — reads like a progress ring segment.",
+      code: `<Gauge
+  value={66}
+  centerValue={12}
+  totalNotches={33}
+  spacing={60}
+  startAngle={90}
+  endAngle={270}
+  inactiveFillOpacity={0.4}
+  defaultLabel="Active squads"
+  formatOptions={{ maximumFractionDigits: 0 }}
+/>`,
+      render: () => (
+        <div className="mx-auto w-full min-w-[300px] max-w-md py-2">
+          <Gauge
+            centerValue={12}
+            defaultLabel="Active squads"
+            endAngle={270}
+            formatOptions={{ maximumFractionDigits: 0 }}
+            inactiveFillOpacity={0.4}
+            spacing={60}
+            startAngle={90}
+            totalNotches={33}
+            value={66}
+          />
+        </div>
+      ),
+    },
+    {
+      title: "Gauge — same density, bottom half sweep",
+      description:
+        "Same notch layout as the sparse ring example, but the arc runs 180° → 360° (lower semicircle emphasis).",
+      code: `<Gauge
+  value={66}
+  centerValue={12}
+  totalNotches={33}
+  spacing={60}
+  startAngle={180}
+  endAngle={360}
+  inactiveFillOpacity={0.4}
+  defaultLabel="Active squads"
+  formatOptions={{ maximumFractionDigits: 0 }}
+/>`,
+      render: () => (
+        <div className="mx-auto w-full min-w-[300px] max-w-md py-2">
+          <Gauge
+            centerValue={12}
+            defaultLabel="Active squads"
+            endAngle={360}
+            formatOptions={{ maximumFractionDigits: 0 }}
+            inactiveFillOpacity={0.4}
+            spacing={60}
+            startAngle={180}
+            totalNotches={33}
+            value={66}
+          />
+        </div>
+      ),
+    },
+    {
+      title: "Gauge — flipped sweep (270° → 450°)",
+      description:
+        "Same spacing and notch count as the quarter sweep, rotated so the gap sits on the opposite side of the ring.",
+      code: `<Gauge
+  value={66}
+  centerValue={12}
+  totalNotches={33}
+  spacing={60}
+  startAngle={270}
+  endAngle={450}
+  inactiveFillOpacity={0.4}
+  defaultLabel="Active squads"
+  formatOptions={{ maximumFractionDigits: 0 }}
+/>`,
+      render: () => (
+        <div className="mx-auto w-full min-w-[300px] max-w-md py-2">
+          <Gauge
+            centerValue={12}
+            defaultLabel="Active squads"
+            endAngle={450}
+            formatOptions={{ maximumFractionDigits: 0 }}
+            inactiveFillOpacity={0.4}
+            spacing={60}
+            startAngle={270}
+            totalNotches={33}
+            value={66}
+          />
+        </div>
+      ),
+    },
+    {
+      title: "Gauge — soft fillets, full depth",
+      description:
+        "Default notch length with an 8px corner radius — smooth joints without going fully pill-shaped.",
+      code: `<Gauge
+  value={66}
+  centerValue={428_000}
+  spacing={25}
+  notchCornerRadius={8}
+  notchLengthPercent={100}
+  inactiveFillOpacity={0.4}
+  defaultLabel="ARR run rate"
+  formatOptions={{ style: "currency", currency: "USD", maximumFractionDigits: 0 }}
+/>`,
+      render: () => (
+        <div className="mx-auto w-full min-w-[300px] max-w-md py-2">
+          <Gauge
+            centerValue={428_000}
+            defaultLabel="ARR run rate"
+            formatOptions={gaugeGalleryUsdFormat}
+            inactiveFillOpacity={0.4}
+            notchCornerRadius={8}
+            notchLengthPercent={100}
+            spacing={25}
+            value={66}
+          />
+        </div>
+      ),
+    },
+    {
+      title: "Gauge — short notches, bold corners",
+      description:
+        "Radial depth at 38% with a 12px fillet — stubbier ticks that still read soft at the tips.",
+      code: `<Gauge
+  value={66}
+  centerValue={428_000}
+  spacing={25}
+  notchCornerRadius={12}
+  notchLengthPercent={38}
+  inactiveFillOpacity={0.4}
+  defaultLabel="ARR run rate"
+  formatOptions={{ style: "currency", currency: "USD", maximumFractionDigits: 0 }}
+/>`,
+      render: () => (
+        <div className="mx-auto w-full min-w-[300px] max-w-md py-2">
+          <Gauge
+            centerValue={428_000}
+            defaultLabel="ARR run rate"
+            formatOptions={gaugeGalleryUsdFormat}
+            inactiveFillOpacity={0.4}
+            notchCornerRadius={12}
+            notchLengthPercent={38}
+            spacing={25}
+            value={66}
+          />
+        </div>
+      ),
+    },
+    {
+      title: "Gauge — near-circular notches",
+      description:
+        "Full default depth with a 22px corner radius (geometry-clamped) for a capsule / almost-round look.",
+      code: `<Gauge
+  value={66}
+  centerValue={428_000}
+  spacing={0}
+  notchCornerRadius={22}
+  notchLengthPercent={100}
+  startAngle={140}
+  endAngle={400}
+  inactiveFillOpacity={0.4}
+  defaultLabel="ARR run rate"
+  formatOptions={{ style: "currency", currency: "USD", maximumFractionDigits: 0 }}
+/>`,
+      render: () => (
+        <div className="mx-auto w-full min-w-[300px] max-w-md py-2">
+          <Gauge
+            centerValue={428_000}
+            defaultLabel="ARR run rate"
+            endAngle={400}
+            formatOptions={gaugeGalleryUsdFormat}
+            inactiveFillOpacity={0.4}
+            notchCornerRadius={22}
+            notchLengthPercent={100}
+            spacing={0}
+            startAngle={140}
+            value={66}
+          />
+        </div>
+      ),
+    },
+  ];
+}
+
 function makeSankeyExamples(): ChartExample[] {
   return [
     {
@@ -3869,6 +4217,7 @@ const chartTypes = [
   { label: "Choropleth Chart", slug: "choropleth-chart" },
   { label: "Composed Chart", slug: "composed-chart" },
   { label: "Funnel Chart", slug: "funnel-chart" },
+  { label: "Gauge", slug: "gauge-chart" },
   { label: "Line Chart", slug: "line-chart" },
   { label: "Live Line Chart", slug: "live-line-chart" },
   { label: "Pie Chart", slug: "pie-chart" },
@@ -3938,6 +4287,7 @@ const chartExamplesRegistry: Record<string, RegistryEntry> = {
     columns: 2,
     hero: makeFunnelHero,
   },
+  "gauge-chart": { factory: makeGaugeExamples, hero: makeGaugeHero },
   "line-chart": { factory: makeLineExamples, hero: makeLineHero },
   "live-line-chart": {
     columns: 2,

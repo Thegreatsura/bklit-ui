@@ -46,13 +46,13 @@ export function ComponentShowcase({
   return (
     <div
       className={cn(
-        "not-prose my-6 overflow-hidden rounded-xl border border-fd-border",
+        "not-prose my-6 overflow-hidden rounded-xl border border-border bg-card shadow-sm",
         className
       )}
     >
       {/* Preview Section */}
       <div
-        className="flex items-center justify-center bg-fd-muted/30 p-8"
+        className="flex items-center justify-center bg-card p-8"
         style={{ minHeight: previewMinHeight }}
       >
         {children}
@@ -132,7 +132,7 @@ export function ComponentPreview({
   return (
     <div
       className={cn(
-        "not-prose my-6 flex min-h-[200px] items-center justify-center rounded-xl border border-fd-border bg-fd-muted/30 p-8",
+        "not-prose my-6 flex min-h-[200px] items-center justify-center rounded-xl border border-border bg-card p-8 shadow-sm",
         className
       )}
     >

@@ -1,31 +1,19 @@
 "use client";
 
-import NumberFlow from "@number-flow/react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import {
+  ChartStatFlow,
+  type ChartStatFlowFormat,
+  defaultChartStatFlowFormat,
+} from "./chart-stat-flow";
 import { usePie } from "./pie-context";
-
-// NumberFlow format - subset of Intl.NumberFormatOptions
-interface NumberFlowFormat {
-  notation?: "standard" | "compact";
-  compactDisplay?: "short" | "long";
-  minimumFractionDigits?: number;
-  maximumFractionDigits?: number;
-  minimumIntegerDigits?: number;
-  minimumSignificantDigits?: number;
-  maximumSignificantDigits?: number;
-  style?: "decimal" | "percent" | "currency";
-  currency?: string;
-  currencyDisplay?: "symbol" | "narrowSymbol" | "code" | "name";
-  unit?: string;
-  unitDisplay?: "short" | "long" | "narrow";
-}
 
 export interface PieCenterProps {
   /** Label shown below the value. Default: "Total" when not hovering */
   defaultLabel?: string;
   /** Format options for NumberFlow. Default: standard notation */
-  formatOptions?: NumberFlowFormat;
+  formatOptions?: ChartStatFlowFormat;
   /** Custom render function for complete control over center content */
   children?: (props: {
     value: number;
@@ -45,12 +33,6 @@ export interface PieCenterProps {
   suffix?: string;
 }
 
-// Default format options
-const defaultFormatOptions: NumberFlowFormat = {
-  notation: "standard",
-  maximumFractionDigits: 0,
-};
-
 /**
  * PieCenter displays content in the center of a donut/pie chart.
  *
@@ -63,7 +45,7 @@ const defaultFormatOptions: NumberFlowFormat = {
  */
 export function PieCenter({
   defaultLabel = "Total",
-  formatOptions = defaultFormatOptions,
+  formatOptions = defaultChartStatFlowFormat,
   children,
   className = "",
   valueClassName = "text-2xl font-bold",
@@ -76,7 +58,6 @@ export function PieCenter({
   const hoveredData = hoveredIndex === null ? null : data[hoveredIndex];
   const displayValue = hoveredData ? hoveredData.value : totalValue;
   const displayLabel = hoveredData ? hoveredData.label : defaultLabel;
-  const isHovered = hoveredIndex !== null;
 
   // Calculate center area size based on inner radius
   // Leave some padding so text doesn't touch the inner edge
@@ -97,7 +78,7 @@ export function PieCenter({
         {children({
           value: displayValue,
           label: displayLabel,
-          isHovered,
+          isHovered: hoveredIndex !== null,
           data: hoveredData,
         })}
       </div>
@@ -114,18 +95,15 @@ export function PieCenter({
       )}
       style={{ width: centerSize, height: centerSize }}
     >
-      <span className={cn("text-foreground tabular-nums", valueClassName)}>
-        <NumberFlow
-          format={formatOptions}
-          prefix={prefix}
-          suffix={suffix}
-          value={displayValue}
-          willChange
-        />
-      </span>
-      <span className={cn("mt-0.5 text-chart-label", labelClassName)}>
-        {displayLabel}
-      </span>
+      <ChartStatFlow
+        formatOptions={formatOptions}
+        label={displayLabel}
+        labelClassName={labelClassName}
+        prefix={prefix}
+        suffix={suffix}
+        value={displayValue}
+        valueClassName={valueClassName}
+      />
     </div>
   );
 }

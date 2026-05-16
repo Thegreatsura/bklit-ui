@@ -1,0 +1,88 @@
+---
+title: Gauge
+description: Notch-based radial gauge with PieCenter-style NumberFlow, theme fills, optional patterns and arc gradients, and responsive sizing
+---
+
+import { GaugeChartDemo } from "@/components/docs/gauge-chart-demo";
+
+## Preview
+
+<ComponentPreview>
+  <GaugeChartDemo />
+</ComponentPreview>
+
+## Installation
+
+<InstallationTabs
+  name="gauge-chart"
+  dependencies={[
+    "@visx/responsive",
+    "@visx/pattern",
+    "@number-flow/react",
+    "motion",
+    "d3-shape",
+  ]}
+/>
+
+## Usage
+
+`Gauge` draws **notches** around an arc and uses **`PieCenterShell`** so the center matches donut **`PieChart`** / **`PieCenter`** (NumberFlow + label) without mounting slices.
+
+- **Fill vs center:** `value` is the arc fill **0–100**. `centerValue` is the statistic passed to the center (often the same story or a related KPI).
+- **Responsive:** omit `width` and `height` to fill the parent; the root uses **`minWidth`** (default **300**) and an **aspect ratio** so layout stays stable. Pass explicit `width` / `height` for fixed layouts.
+- **Patterns / gradients in `<defs>`:** pass **`PatternLines`**, **`LinearGradient`**, etc. as **`children`** (same idea as **`PieChart`**), then set **`activeFill`** / **`inactiveFill`** to `url(#id)`.
+- **Arc gradients:** set **`useGradient`**. Optional **`activeGradient`** and **`inactiveGradient`** are **`[hexFrom, hexTo]`** tuples (interpolated along the notch index).
+- **Fill opacity:** `activeFillOpacity` and `inactiveFillOpacity` map to SVG `fill-opacity` (0–1). Defaults are **1** for active notches and **0.8** for the track; docs and gallery examples use **`inactiveFillOpacity={0.4}`** for a lighter track.
+- **Corner radius:** `notchCornerRadius` is the fillet in **pixels** at each notch corner (**0** = sharp). Large values are clamped by edge length and radial depth so shapes can approach a **capsule** / near-circular look.
+
+```tsx
+import { Gauge, PatternLines } from "@bklitui/ui/charts";
+
+export default function RevenueGauge() {
+  return (
+    <Gauge
+      value={66}
+      centerValue={428_000}
+      spacing={25}
+      inactiveFillOpacity={0.4}
+      defaultLabel="ARR run rate"
+      formatOptions={{
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0,
+      }}
+    />
+  );
+}
+```
+
+## Props
+
+### Gauge
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `value` | `number` | required | Arc fill **0–100** |
+| `centerValue` | `number` | required | Center statistic (NumberFlow) |
+| `totalNotches` | `number` | `40` | Notch count |
+| `spacing` | `number` | `25` | **%** of the arc used as gaps between notches |
+| `notchLengthPercent` | `number` | `100` | Radial notch depth as **%** of default (5–100); lower = shorter notches |
+| `notchCornerRadius` | `number` | `0` | Corner fillet in **px** (0 = sharp); large values clamp toward a capsule shape |
+| `uniformWidth` | `boolean` | `false` | Rectangular notches vs tapered |
+| `startAngle` / `endAngle` | `number` | `135` / `405` | Arc sweep in degrees |
+| `useGradient` | `boolean` | `false` | Per-notch color ramp along the arc |
+| `activeGradient` | `[string, string]` | lime → emerald | Hex stops for active notches when `useGradient` |
+| `inactiveGradient` | `[string, string]` | same as active | Hex stops for inactive notches when `useGradient` |
+| `activeFill` / `inactiveFill` | `string` | `chart-1` / `chart-background` | Solid, CSS color, or `url(#patternId)` |
+| `activeFillOpacity` / `inactiveFillOpacity` | `number` | `1` / `0.8` | SVG `fill-opacity` (0–1) for active / track notches |
+| `defaultLabel` | `string` | `"Total"` | Center label |
+| `formatOptions` | `ChartStatFlowFormat` | standard | NumberFlow format |
+| `prefix` / `suffix` | `string` | - | Center prefix / suffix |
+| `width` / `height` | `number` | - | Fixed size; omit for responsive |
+| `minWidth` | `number` | `300` | Min width (px) when responsive |
+| `className` | `string` | - | Root wrapper |
+| `children` | `ReactNode` | - | Defs (`Pattern*`, `*Gradient`, …) |
+
+## Live examples
+
+See the [Gauge gallery](/charts/gauge-chart). The [`/playground`](/playground) route still exposes interactive sliders for rapid iteration.

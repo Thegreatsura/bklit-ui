@@ -59,6 +59,12 @@ export {
   type ChartLegendProps,
   type LegendItem,
 } from "./chart-legend";
+export {
+  ChartStatFlow,
+  type ChartStatFlowFormat,
+  type ChartStatFlowProps,
+  defaultChartStatFlowFormat,
+} from "./chart-stat-flow";
 // Choropleth chart components
 export {
   ChoroplethChart,
@@ -92,6 +98,8 @@ export {
   type FunnelGradientStop,
   type FunnelStage,
 } from "./funnel-chart";
+// Gauge chart
+export { Gauge, type GaugeProps } from "./gauge";
 // Shared chart elements
 export { Grid, type GridProps } from "./grid";
 // Composable legend components
@@ -146,6 +154,10 @@ export {
 } from "./markers";
 // Pie chart components
 export { PieCenter, type PieCenterProps } from "./pie-center";
+export {
+  PieCenterShell,
+  type PieCenterShellProps,
+} from "./pie-center-shell";
 export {
   DEFAULT_HOVER_OFFSET,
   PieChart,
