@@ -71,13 +71,12 @@ export function PatternPicker({
   onChange: (v: PatternPresetId) => void;
 }) {
   return (
-    <div className="grid grid-cols-4 gap-2">
+    <div className="studio-control-card -mx-0.5 flex flex-wrap gap-1.5 rounded-lg border border-border p-2">
       {PATTERN_PRESETS.map((preset) => (
         <button
           className={cn(
-            "size-10 rounded-md ring-1 ring-foreground/10 transition-[box-shadow,ring-color]",
-            value === preset.id &&
-              "ring-2 ring-foreground ring-offset-2 ring-offset-background"
+            "size-8 shrink-0 overflow-hidden rounded-md ring-1 ring-foreground/10 ring-inset transition-[box-shadow,ring-color]",
+            value === preset.id && "ring-2 ring-foreground ring-inset"
           )}
           key={preset.id}
           onClick={() => onChange(preset.id)}

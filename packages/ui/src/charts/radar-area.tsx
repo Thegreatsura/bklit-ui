@@ -38,9 +38,13 @@ export function RadarArea({
     hoveredIndex,
     setHoveredIndex,
     animate,
+    enterDurationMs,
+    staggerScale,
     getColor,
     getPointPosition,
   } = useRadar();
+
+  const durationFactor = enterDurationMs / 1100;
 
   const areaData = data[index];
 
@@ -62,9 +66,9 @@ export function RadarArea({
   }, [metrics, areaData, getPointPosition]);
 
   // Animation delays
-  const gridStagger = 0.08;
-  const campaignBaseDelay = levels * gridStagger + 0.2;
-  const campaignStagger = 0.15;
+  const gridStagger = 0.08 * staggerScale * durationFactor;
+  const campaignBaseDelay = (levels * gridStagger + 0.2) * durationFactor;
+  const campaignStagger = 0.15 * staggerScale * durationFactor;
   const animationDelay = campaignBaseDelay + index * campaignStagger;
 
   // Initial expand animation (runs once on mount)
@@ -74,7 +78,7 @@ export function RadarArea({
       return;
     }
 
-    const metricStagger = 0.06;
+    const metricStagger = 0.06 * staggerScale * durationFactor;
     const timeouts: NodeJS.Timeout[] = [];
 
     // Animate each metric from center to its position with stagger
@@ -106,7 +110,14 @@ export function RadarArea({
     timeouts.push(completeTimeout);
 
     return () => timeouts.forEach(clearTimeout);
-  }, [animate, animationDelay, metrics.length, targetPositions]);
+  }, [
+    animate,
+    animationDelay,
+    durationFactor,
+    metrics.length,
+    staggerScale,
+    targetPositions,
+  ]);
 
   // After initialization, update positions immediately when data changes
   useEffect(() => {

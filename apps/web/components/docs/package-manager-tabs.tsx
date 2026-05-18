@@ -1,8 +1,10 @@
 "use client";
 
-import { Check, Copy, Terminal } from "lucide-react";
+import { Terminal } from "lucide-react";
 import { useEffect, useState } from "react";
+import { CopyButton } from "@/components/copy-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { registryJsonUrlForName } from "@/lib/studio/chart-links";
 import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "bklit-package-manager";
@@ -29,7 +31,6 @@ interface PackageManagerTabsProps {
 
 export function PackageManagerTabs({ name }: PackageManagerTabsProps) {
   const [pm, setPm] = useState<PackageManager>("pnpm");
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY) as PackageManager | null;
@@ -51,17 +52,10 @@ export function PackageManagerTabs({ name }: PackageManagerTabsProps) {
     if (isDepsOnly) {
       return `${PM_ADD_COMMANDS[manager]} ${depsString}`;
     }
-    const registryUrl = `https://ui.bklit.com/r/${name}.json`;
-    return `${PM_SHADCN_COMMANDS[manager]} ${registryUrl}`;
+    return `${PM_SHADCN_COMMANDS[manager]} ${registryJsonUrlForName(name)}`;
   };
 
   const command = getCommand(pm);
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(command);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
     <figure className="not-prose relative my-4 overflow-hidden rounded-lg border border-fd-border bg-fd-secondary">
@@ -108,20 +102,7 @@ export function PackageManagerTabs({ name }: PackageManagerTabsProps) {
         </div>
       </Tabs>
 
-      {/* Copy button */}
-      <button
-        className={cn(
-          "absolute top-2 right-2 z-10 flex size-7 items-center justify-center rounded-md",
-          "opacity-70 transition-opacity hover:opacity-100 focus-visible:opacity-100",
-          "hover:bg-fd-accent hover:text-fd-accent-foreground",
-          copied && "text-green-400"
-        )}
-        onClick={handleCopy}
-        type="button"
-      >
-        <span className="sr-only">Copy</span>
-        {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-      </button>
+      <CopyButton className="absolute top-2 right-2 z-10" text={command} />
     </figure>
   );
 }

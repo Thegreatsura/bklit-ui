@@ -99,6 +99,8 @@ export interface ChartContextValue {
   // Animation state
   isLoaded: boolean;
   animationDuration: number;
+  /** CSS easing for clip-reveal / line draw (cartesian charts). */
+  animationEasing?: string;
 
   // X accessor - how to get the x value from data points
   xAccessor: (d: Record<string, unknown>) => Date;

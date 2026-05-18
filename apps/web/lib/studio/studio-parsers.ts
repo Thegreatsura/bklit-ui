@@ -37,7 +37,19 @@ export const studioSearchParams = {
   strokeWidth: parseAsFloat.withDefault(2),
   pattern: parseAsStringLiteral(PATTERN_PRESET_IDS).withDefault("none"),
   aspectRatio: parseAsString.withDefault("2 / 1"),
-  animationDuration: parseAsInteger.withDefault(1100),
+  animationDuration: parseAsInteger.withDefault(800),
+  motionType: parseAsStringLiteral(["spring", "ease"]).withDefault("spring"),
+  motionDuration: parseAsFloat.withDefault(0.8),
+  motionBounce: parseAsFloat.withDefault(0.6),
+  motionEase: parseAsStringLiteral([
+    "easeOut",
+    "easeInOut",
+    "snappy",
+    "smooth",
+    "custom",
+  ]).withDefault("snappy"),
+  motionBezier: parseAsString.withDefault("0.85, 0, 0.15, 1"),
+  motionStaggerScale: parseAsFloat.withDefault(1),
   showLine: parseAsBoolean.withDefault(true),
   showHighlight: parseAsBoolean.withDefault(true),
   fadeEdges: parseAsBoolean.withDefault(true),
@@ -138,6 +150,12 @@ export interface StudioUrlState {
   pattern: PatternPresetId;
   aspectRatio: string;
   animationDuration: number;
+  motionType: "spring" | "ease";
+  motionDuration: number;
+  motionBounce: number;
+  motionEase: "easeOut" | "easeInOut" | "snappy" | "smooth" | "custom";
+  motionBezier: string;
+  motionStaggerScale: number;
   showLine: boolean;
   showHighlight: boolean;
   fadeEdges: boolean;
@@ -203,4 +221,99 @@ export function defaultsForChart(): Partial<
   return Object.fromEntries(
     Object.keys(studioSearchParams).map((key) => [key, null])
   ) as Partial<Record<keyof typeof studioSearchParams, null>>;
+}
+
+/** Default studio state (matches `studioSearchParams` defaults) for tests and codegen. */
+export function defaultStudioState(
+  overrides: Partial<StudioUrlState> = {}
+): StudioUrlState {
+  return {
+    chart: "gauge-chart",
+    preset: "default",
+    frameW: 720,
+    frameH: 400,
+    value: 66,
+    centerValue: 284_920,
+    spacing: 25,
+    totalNotches: 40,
+    notchCornerRadius: 0,
+    notchLengthPercent: 100,
+    startAngle: 135,
+    endAngle: 405,
+    useGradient: false,
+    uniformWidth: false,
+    inactiveFillOpacity: 0.4,
+    activeFillOpacity: 1,
+    gaugeLabel: "Total Revenue",
+    curve: "natural",
+    fillOpacity: 0.3,
+    strokeWidth: 2,
+    pattern: "none",
+    aspectRatio: "2 / 1",
+    animationDuration: 800,
+    motionType: "spring",
+    motionDuration: 0.8,
+    motionBounce: 0.6,
+    motionEase: "snappy",
+    motionBezier: "0.85, 0, 0.15, 1",
+    motionStaggerScale: 1,
+    showLine: true,
+    showHighlight: true,
+    fadeEdges: true,
+    gradientToOpacity: 0,
+    innerRadius: 0,
+    padAngle: 0,
+    pieSize: 100,
+    pieShowGlow: true,
+    pieHoverEffect: "translate",
+    pieStartAngleDeg: -90,
+    pieEndAngleDeg: 270,
+    pieCornerRadius: 0,
+    pieHoverOffset: 10,
+    pieFillMode: "solid",
+    choroplethBgPattern: "none",
+    choroplethFgPattern: "none",
+    barGap: 0.2,
+    barWidth: 0,
+    groupGap: 4,
+    barFadedOpacity: 0.3,
+    barSeriesMode: "single",
+    barLineCap: "round",
+    barOrientation: "vertical",
+    ringGap: 6,
+    ringBaseInnerRadius: 60,
+    radarSize: 100,
+    radarMargin: 60,
+    radarLevels: 5,
+    showRadarGrid: true,
+    radarShowPoints: true,
+    radarShowStroke: true,
+    radarShowGlow: true,
+    funnelLayers: 3,
+    funnelGap: 4,
+    funnelOrientation: "vertical",
+    funnelEdges: "curved",
+    funnelShowValues: true,
+    funnelShowLabels: true,
+    funnelShowPercentage: true,
+    candleFadedOpacity: 0.25,
+    candleGap: 0.2,
+    composedBarRadius: 0,
+    liveInterval: 500,
+    livePaused: false,
+    liveWindow: 30,
+    liveFill: true,
+    livePulse: true,
+    liveBadge: true,
+    liveLerpSpeed: 0.08,
+    liveExaggerate: false,
+    showGraticule: true,
+    choroplethAnalytics: true,
+    candleUseGradient: false,
+    candleShowDots: false,
+    sankeyNodePadding: 12,
+    sankeyNodeWidth: 16,
+    linkOpacity: 0.4,
+    ...overrides,
+  };
 }

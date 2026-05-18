@@ -2,21 +2,33 @@
 
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useCallback, useState } from "react";
+import { Button } from "@/components/ui/button";
 
-export function CopyButton({ text }: { text: string }) {
+export function CopyButton({
+  text,
+  className,
+  "aria-label": ariaLabel,
+}: {
+  text: string;
+  className?: string;
+  "aria-label"?: string;
+}) {
   const [copied, setCopied] = useState(false);
 
-  const copy = useCallback(() => {
-    navigator.clipboard.writeText(text);
+  const copy = useCallback(async () => {
+    await navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }, [text]);
 
   return (
-    <button
-      className="shrink-0 rounded-md border p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+    <Button
+      aria-label={ariaLabel ?? (copied ? "Copied" : "Copy")}
+      className={className}
       onClick={copy}
+      size="icon-sm"
       type="button"
+      variant="ghost"
     >
       <span className="relative block size-3">
         <CopyIcon
@@ -36,6 +48,6 @@ export function CopyButton({ text }: { text: string }) {
           }}
         />
       </span>
-    </button>
+    </Button>
   );
 }

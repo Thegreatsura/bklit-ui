@@ -47,6 +47,7 @@ export function Line({
     selection,
     isLoaded,
     animationDuration,
+    animationEasing,
     xAccessor,
   } = useChart();
 
@@ -181,7 +182,7 @@ export function Line({
   );
 
   const isHovering = tooltipData !== null || selection?.active === true;
-  const easing = "cubic-bezier(0.85, 0, 0.15, 1)";
+  const easing = animationEasing ?? "cubic-bezier(0.85, 0, 0.15, 1)";
 
   return (
     <>

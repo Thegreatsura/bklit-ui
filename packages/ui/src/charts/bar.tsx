@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { useEffect, useId, useMemo, useState } from "react";
+import { DEFAULT_ANIMATION_EASING } from "./animation";
 import { chartCssVars, useChart } from "./chart-context";
 
 export type BarLineCap = "round" | "butt" | number;
@@ -30,9 +31,6 @@ export interface BarProps {
   groupGap?: number;
 }
 
-// Same easing as Line chart for consistent animation feel
-const BAR_EASING = "cubic-bezier(0.85, 0, 0.15, 1)";
-
 interface AnimatedBarProps {
   x: number;
   y: number;
@@ -48,6 +46,7 @@ interface AnimatedBarProps {
   fadedOpacity: number;
   staggerDelay: number;
   animationDuration: number;
+  animationEasing: string;
   isHorizontal: boolean;
 }
 
@@ -66,6 +65,7 @@ function AnimatedBar({
   fadedOpacity,
   staggerDelay,
   animationDuration,
+  animationEasing,
   isHorizontal,
 }: AnimatedBarProps) {
   const [isAnimated, setIsAnimated] = useState(false);
@@ -106,7 +106,7 @@ function AnimatedBar({
         rx={rx}
         ry={ry}
         style={{
-          transition: `opacity ${barDuration}ms ${BAR_EASING}, filter ${barDuration}ms ${BAR_EASING}`,
+          transition: `opacity ${barDuration}ms ${animationEasing}, filter ${barDuration}ms ${animationEasing}`,
         }}
         transition={{
           opacity: { duration: 0.15 },
@@ -143,7 +143,7 @@ function AnimatedBar({
       rx={rx}
       ry={ry}
       style={{
-        transition: `width ${barDuration}ms ${BAR_EASING}, height ${barDuration}ms ${BAR_EASING}, x ${barDuration}ms ${BAR_EASING}, y ${barDuration}ms ${BAR_EASING}`,
+        transition: `width ${barDuration}ms ${animationEasing}, height ${barDuration}ms ${animationEasing}, x ${barDuration}ms ${animationEasing}, y ${barDuration}ms ${animationEasing}`,
       }}
       transition={{
         opacity: { duration: 0.15 },
@@ -181,7 +181,10 @@ export function Bar({
     stacked,
     stackOffsets,
     animationDuration,
+    animationEasing: animationEasingProp,
   } = useChart();
+
+  const animationEasing = animationEasingProp ?? DEFAULT_ANIMATION_EASING;
 
   // Calculate stagger delay automatically if not provided
   // Total animation duration is ~1200ms, with 40% for stagger spread and 60% for bar animation
@@ -320,6 +323,7 @@ export function Bar({
           return (
             <AnimatedBar
               animationDuration={totalAnimDuration}
+              animationEasing={animationEasing}
               animationType={animationType}
               fadedOpacity={fadedOpacity}
               fill={fill}

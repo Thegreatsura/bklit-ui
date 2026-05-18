@@ -38,19 +38,23 @@ const CHART_TYPE_ICONS: Record<ChartSlug, IconSvgElement> = {
 export function ChartTypeIcon({
   slug,
   className,
+  variant = "default",
 }: {
   slug: ChartSlug;
   className?: string;
+  variant?: "default" | "plain";
 }) {
   return (
     <span
       className={cn(
-        "inline-flex size-8 shrink-0 items-center justify-center rounded-md bg-muted/50 text-foreground",
+        variant === "plain"
+          ? "inline-flex size-5 shrink-0 items-center justify-center text-foreground"
+          : "inline-flex size-8 shrink-0 items-center justify-center rounded-md bg-muted/50 text-foreground",
         className
       )}
     >
       <HugeiconsIcon
-        className="size-[18px]"
+        className={variant === "plain" ? "size-4" : "size-[18px]"}
         icon={CHART_TYPE_ICONS[slug]}
         strokeWidth={1.75}
       />

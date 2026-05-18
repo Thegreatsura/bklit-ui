@@ -15,6 +15,7 @@ import {
   useState,
 } from "react";
 import { cn } from "@/lib/utils";
+import { DEFAULT_ANIMATION_EASING } from "./animation";
 import type { BarProps } from "./bar";
 import {
   ChartProvider,
@@ -34,6 +35,8 @@ export interface BarChartProps {
   margin?: Partial<Margin>;
   /** Animation duration in milliseconds. Default: 1100 */
   animationDuration?: number;
+  /** CSS easing for bar grow transitions. */
+  animationEasing?: string;
   /** Aspect ratio as "width / height". Default: "2 / 1" */
   aspectRatio?: string;
   /** Additional class name for the container */
@@ -120,6 +123,7 @@ interface ChartInnerProps {
   xDataKey: string;
   margin: Margin;
   animationDuration: number;
+  animationEasing: string;
   barGap: number;
   barWidthProp?: number;
   orientation: BarOrientation;
@@ -136,6 +140,7 @@ function ChartInner({
   xDataKey,
   margin,
   animationDuration,
+  animationEasing,
   barGap,
   barWidthProp,
   orientation,
@@ -492,6 +497,7 @@ function ChartInner({
     lines,
     isLoaded,
     animationDuration,
+    animationEasing,
     xAccessor: xAccessorDate,
     dateLabels,
     // Bar-specific properties
@@ -545,6 +551,7 @@ export function BarChart({
   xDataKey = "name",
   margin: marginProp,
   animationDuration = 1100,
+  animationEasing = DEFAULT_ANIMATION_EASING,
   aspectRatio = "2 / 1",
   className = "",
   barGap = 0.2,
@@ -567,6 +574,7 @@ export function BarChart({
         {({ width, height }) => (
           <ChartInner
             animationDuration={animationDuration}
+            animationEasing={animationEasing}
             barGap={barGap}
             barWidthProp={barWidth}
             containerRef={containerRef}

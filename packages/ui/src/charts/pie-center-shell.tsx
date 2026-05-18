@@ -144,6 +144,7 @@ export function PieCenterShell({
       setHoveredIndex: () => undefined,
       animationKey: 0,
       isLoaded: true,
+      enterStaggerScale: 1,
       containerRef,
       totalValue,
       getColor,

@@ -1,5 +1,6 @@
 "use client";
 
+import type { Transition } from "motion/react";
 import { createContext, type RefObject, useContext } from "react";
 
 // CSS variable references for pie chart theming
@@ -69,6 +70,8 @@ export interface PieContextValue {
   // Animation state
   animationKey: number;
   isLoaded: boolean;
+  enterTransition?: Transition;
+  enterStaggerScale: number;
 
   // Container ref for portals
   containerRef: RefObject<HTMLDivElement | null>;

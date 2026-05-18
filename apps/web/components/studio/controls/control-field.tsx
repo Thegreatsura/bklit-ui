@@ -5,7 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { StudioUrlState } from "@/lib/studio/studio-parsers";
 import type { StudioControl } from "@/lib/studio/types";
-import { ControlFieldLabel } from "./control-field-helpers";
+import {
+  ControlFieldLabel,
+  isGroupLabeledControlType,
+  StudioControlRow,
+  studioControlLabelClass,
+  studioControlRowClass,
+} from "./control-field-helpers";
 import { ControlFieldInputs } from "./control-field-inputs";
 import { GaugeAngleControl } from "./gauge-angle-control";
 import { InnerRadiusControl } from "./inner-radius-control";
@@ -36,20 +42,13 @@ function NumberInputOnly({
     setLocalValue(Number.isFinite(value) ? value : control.min);
   }, [control.min, value]);
 
-  const display = control.format?.(localValue) ?? String(localValue);
-
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between gap-2">
-        <Label className="text-xs" htmlFor={String(control.key)}>
-          {control.label}
-        </Label>
-        <span className="text-muted-foreground text-xs tabular-nums">
-          {display}
-        </span>
-      </div>
+    <div className={studioControlRowClass}>
+      <Label className={studioControlLabelClass} htmlFor={String(control.key)}>
+        {control.label}
+      </Label>
       <Input
-        className="h-8 tabular-nums"
+        className="h-8 min-w-0 flex-1 tabular-nums"
         id={String(control.key)}
         max={control.max}
         min={control.min}
@@ -76,9 +75,11 @@ export function ControlField({
   onChange,
   onPreview,
   onCommit,
+  hideGroupLabel = false,
 }: {
   control: StudioControl;
   state: StudioUrlState;
+  hideGroupLabel?: boolean;
   onChange: <K extends keyof StudioUrlState>(
     key: K,
     value: StudioUrlState[K]
@@ -216,6 +217,47 @@ export function ControlField({
         }
         value={value as number}
       />
+    );
+  }
+
+  if (control.type === "text") {
+    return (
+      <StudioControlRow htmlFor={String(control.key)} label={control.label}>
+        <ControlFieldInputs
+          control={control}
+          onChange={onChange}
+          value={value}
+        />
+      </StudioControlRow>
+    );
+  }
+
+  if (control.type === "boolean") {
+    return (
+      <StudioControlRow
+        alignControl="end"
+        htmlFor={String(control.key)}
+        label={control.label}
+      >
+        <ControlFieldInputs
+          control={control}
+          onChange={onChange}
+          value={value}
+        />
+      </StudioControlRow>
+    );
+  }
+
+  if (isGroupLabeledControlType(control.type)) {
+    return (
+      <div className="space-y-2">
+        {hideGroupLabel ? null : <ControlFieldLabel control={control} />}
+        <ControlFieldInputs
+          control={control}
+          onChange={onChange}
+          value={value}
+        />
+      </div>
     );
   }
 

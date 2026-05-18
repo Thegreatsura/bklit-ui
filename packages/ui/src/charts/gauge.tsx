@@ -1,7 +1,7 @@
 "use client";
 
 import { ParentSize } from "@visx/responsive";
-import { motion } from "motion/react";
+import { motion, type Transition, useReducedMotion } from "motion/react";
 import {
   Children,
   Fragment,
@@ -84,6 +84,12 @@ const DEFAULT_ACTIVE_GRADIENT: readonly [string, string] = [
 const DEFAULT_ACTIVE_FILL_OPACITY = 1;
 const DEFAULT_INACTIVE_FILL_OPACITY = 0.8;
 
+const DEFAULT_NOTCH_ENTER_TRANSITION: Transition = {
+  type: "spring",
+  stiffness: 300,
+  damping: 20,
+};
+
 export interface GaugeProps {
   /** Fill level 0–100 */
   value: number;
@@ -157,6 +163,10 @@ export interface GaugeProps {
    * edge toward the outer arc. Clamped **5–100**.
    */
   notchLengthPercent?: number;
+  /** Framer Motion transition for notch enter animation (opacity / scale). */
+  enterTransition?: Transition;
+  /** Scales notch stagger delays relative to default timing (1 = reference). */
+  enterStaggerScale?: number;
 }
 
 interface GaugeInnerProps extends Omit<GaugeProps, "className" | "minWidth"> {
@@ -188,8 +198,17 @@ function GaugeInner({
   activeFillOpacity,
   children,
   notchLengthPercent = 100,
+  enterTransition,
+  enterStaggerScale = 1,
 }: GaugeInnerProps) {
+  const prefersReducedMotion = useReducedMotion();
   const defsChildren = useMemo(() => collectDefsElements(children), [children]);
+
+  const notchTransition: Transition = prefersReducedMotion
+    ? { duration: 0 }
+    : (enterTransition ?? DEFAULT_NOTCH_ENTER_TRANSITION);
+
+  const stagger = Math.max(0.25, Math.min(2.5, enterStaggerScale));
 
   const hasCustomInactive =
     inactiveFill !== undefined && inactiveFill.length > 0;
@@ -346,12 +365,6 @@ function GaugeInner({
   const bgFillSolid = "var(--chart-background)";
   const activeFillSolid = "var(--chart-1)";
 
-  const notchSpring = {
-    type: "spring" as const,
-    stiffness: 300,
-    damping: 20,
-  };
-
   const denom = totalNotches > 1 ? totalNotches - 1 : 1;
 
   const resolveBgFill = (notchIndex: number) => {
@@ -396,8 +409,8 @@ function GaugeInner({
               transformOrigin: `${centerX}px ${centerY}px`,
             }}
             transition={{
-              ...notchSpring,
-              delay: notch.index * 0.015,
+              ...notchTransition,
+              delay: notch.index * 0.015 * stagger,
             }}
           />
         ))}
@@ -416,8 +429,8 @@ function GaugeInner({
                 transformOrigin: `${centerX}px ${centerY}px`,
               }}
               transition={{
-                ...notchSpring,
-                delay: 0.3 + notch.index * 0.02,
+                ...notchTransition,
+                delay: (0.3 + notch.index * 0.02) * stagger,
               }}
             />
           ))}

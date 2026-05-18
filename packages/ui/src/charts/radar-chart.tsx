@@ -26,6 +26,10 @@ export interface RadarChartProps {
   margin?: number;
   /** Enable animations. Default: true */
   animate?: boolean;
+  /** Enter animation budget in ms. Default: 1100 */
+  enterDurationMs?: number;
+  /** Scales stagger timing (1 = default). */
+  staggerScale?: number;
   /** Controlled hover state - index of hovered area */
   hoveredIndex?: number | null;
   /** Callback when hover state changes */
@@ -44,6 +48,8 @@ interface RadarChartInnerProps {
   levels: number;
   margin: number;
   animate: boolean;
+  enterDurationMs: number;
+  staggerScale: number;
   children: ReactNode;
   hoveredIndexProp?: number | null;
   onHoverChange?: (index: number | null) => void;
@@ -57,6 +63,8 @@ function RadarChartInner({
   levels,
   margin,
   animate,
+  enterDurationMs,
+  staggerScale,
   children,
   hoveredIndexProp,
   onHoverChange,
@@ -144,6 +152,8 @@ function RadarChartInner({
     hoveredIndex,
     setHoveredIndex,
     animate,
+    enterDurationMs,
+    staggerScale,
     getColor,
     getAngle,
     getPointPosition,
@@ -173,6 +183,8 @@ export function RadarChart({
   levels = 5,
   margin = 60,
   animate = true,
+  enterDurationMs = 1100,
+  staggerScale = 1,
   className = "",
   hoveredIndex,
   onHoverChange,
@@ -188,12 +200,14 @@ export function RadarChart({
         <RadarChartInner
           animate={animate}
           data={data}
+          enterDurationMs={enterDurationMs}
           height={fixedSize}
           hoveredIndexProp={hoveredIndex}
           levels={levels}
           margin={margin}
           metrics={metrics}
           onHoverChange={onHoverChange}
+          staggerScale={staggerScale}
           width={fixedSize}
         >
           {children}
@@ -210,12 +224,14 @@ export function RadarChart({
           <RadarChartInner
             animate={animate}
             data={data}
+            enterDurationMs={enterDurationMs}
             height={height}
             hoveredIndexProp={hoveredIndex}
             levels={levels}
             margin={margin}
             metrics={metrics}
             onHoverChange={onHoverChange}
+            staggerScale={staggerScale}
             width={width}
           >
             {children}

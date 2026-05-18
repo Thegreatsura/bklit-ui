@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test": "node --import tsx --test lib/studio/__tests__/**/*.test.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.1.0",
@@ -15,6 +16,7 @@
     "@bklitui/ui": "workspace:*",
     "@hugeicons/core-free-icons": "^4.1.4",
     "@hugeicons/react": "^1.1.6",
+    "@number-flow/react": "^0.5.4",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-popover": "^1.1.15",
@@ -61,6 +63,7 @@
     "@types/topojson-specification": "^1.0.5",
     "eslint": "^9.39.1",
     "tailwindcss": "^4.1.8",
+    "tsx": "^4.19.4",
     "typescript": "5.9.2"
   }
 }

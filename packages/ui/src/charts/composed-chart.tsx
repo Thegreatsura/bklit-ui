@@ -23,6 +23,7 @@ export interface ComposedChartProps {
   xDataKey?: string;
   margin?: Partial<Margin>;
   animationDuration?: number;
+  animationEasing?: string;
   aspectRatio?: string;
   className?: string;
   children: ReactNode;
@@ -161,6 +162,7 @@ interface ChartInnerProps {
   xDataKey: string;
   margin: Margin;
   animationDuration: number;
+  animationEasing?: string;
   children: ReactNode;
   containerRef: React.RefObject<HTMLDivElement | null>;
   barSize?: number;
@@ -177,6 +179,7 @@ function ChartInner({
   xDataKey,
   margin,
   animationDuration,
+  animationEasing,
   children,
   containerRef,
   barSize,
@@ -225,6 +228,7 @@ function ChartInner({
   return (
     <TimeSeriesChartInner
       animationDuration={animationDuration}
+      animationEasing={animationEasing}
       clipPathId="composed-chart-grow-clip"
       composedBarDataKeys={barDataKeys.length > 0 ? barDataKeys : undefined}
       composedBarGap={barGap}
@@ -252,6 +256,7 @@ export function ComposedChart({
   xDataKey = "date",
   margin: marginProp,
   animationDuration = 1100,
+  animationEasing,
   aspectRatio = "2 / 1",
   className = "",
   children,
@@ -274,6 +279,7 @@ export function ComposedChart({
         {({ width, height }) => (
           <ChartInner
             animationDuration={animationDuration}
+            animationEasing={animationEasing}
             barGap={barGap}
             barSize={barSize}
             containerRef={containerRef}

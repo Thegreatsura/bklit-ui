@@ -22,6 +22,8 @@ export interface LineChartProps {
   margin?: Partial<Margin>;
   /** Animation duration in milliseconds. Default: 1100 */
   animationDuration?: number;
+  /** CSS easing for clip-reveal. Default: cubic-bezier(0.85, 0, 0.15, 1) */
+  animationEasing?: string;
   /** Aspect ratio as "width / height". Default: "2 / 1" */
   aspectRatio?: string;
   /** Additional class name for the container */
@@ -74,6 +76,7 @@ interface ChartInnerProps {
   xDataKey: string;
   margin: Margin;
   animationDuration: number;
+  animationEasing?: string;
   children: ReactNode;
   containerRef: React.RefObject<HTMLDivElement | null>;
 }
@@ -85,6 +88,7 @@ function ChartInner({
   xDataKey,
   margin,
   animationDuration,
+  animationEasing,
   children,
   containerRef,
 }: ChartInnerProps) {
@@ -93,6 +97,7 @@ function ChartInner({
   return (
     <TimeSeriesChartInner
       animationDuration={animationDuration}
+      animationEasing={animationEasing}
       clipPathId="chart-grow-clip"
       containerRef={containerRef}
       data={data}
@@ -112,6 +117,7 @@ export function LineChart({
   xDataKey = "date",
   margin: marginProp,
   animationDuration = 1100,
+  animationEasing,
   aspectRatio = "2 / 1",
   className = "",
   children,
@@ -129,6 +135,7 @@ export function LineChart({
         {({ width, height }) => (
           <ChartInner
             animationDuration={animationDuration}
+            animationEasing={animationEasing}
             containerRef={containerRef}
             data={data}
             height={height}

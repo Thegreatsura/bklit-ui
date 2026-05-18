@@ -3,6 +3,10 @@
 import { motion, useReducedMotion } from "motion/react";
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  StudioFrameRulerX,
+  StudioFrameRulerY,
+} from "@/components/studio/studio-frame-rulers";
 import { cn } from "@/lib/utils";
 
 export const STUDIO_CHART_FRAME_HEIGHT = 400;
@@ -75,11 +79,10 @@ function ResizeHandle({
   onPointerDown: (event: React.PointerEvent<HTMLButtonElement>) => void;
 }) {
   return (
-    <motion.button
+    <button
       aria-label={resizeAriaLabel(edge)}
       className={cn(
-        "absolute z-20 flex touch-none select-none items-center justify-center border-0 bg-transparent p-0 transition-transform",
-        "group-hover/studio-frame:scale-110",
+        "absolute z-20 touch-none select-none border-0 bg-transparent p-0 opacity-0",
         edge === "right" &&
           "top-0 right-0 h-full w-4 translate-x-1/2 cursor-ew-resize",
         edge === "bottom" &&
@@ -89,18 +92,7 @@ function ResizeHandle({
       )}
       onPointerDown={onPointerDown}
       type="button"
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-    >
-      <span
-        className={cn(
-          "pointer-events-none rounded-full bg-border shadow-sm ring-1 ring-background transition-colors group-hover/studio-frame:bg-foreground/70 group-hover/studio-frame:ring-foreground/25",
-          edge === "right" && "h-8 w-1.5",
-          edge === "bottom" && "h-1.5 w-8",
-          edge === "corner" && "size-3 rounded-sm"
-        )}
-      />
-    </motion.button>
+    />
   );
 }
 
@@ -108,6 +100,7 @@ export function StudioChartFrame({
   width,
   height,
   onResize,
+  onDraggingChange,
   className,
   style,
   children,
@@ -115,6 +108,7 @@ export function StudioChartFrame({
   width: number;
   height: number;
   onResize: (width: number, height: number) => void;
+  onDraggingChange?: (dragging: boolean) => void;
   className?: string;
   style?: CSSProperties;
   children: React.ReactNode;
@@ -167,6 +161,7 @@ export function StudioChartFrame({
       handle.setPointerCapture(event.pointerId);
       draggingRef.current = true;
       setIsDragging(true);
+      onDraggingChange?.(true);
 
       const startX = event.clientX;
       const startY = event.clientY;
@@ -211,18 +206,29 @@ export function StudioChartFrame({
         document.body.style.userSelect = "";
         draggingRef.current = false;
         setIsDragging(false);
+        onDraggingChange?.(false);
         onResize(latest.width, latest.height);
       };
 
       handle.addEventListener("pointermove", onPointerMove);
       handle.addEventListener("pointerup", onPointerUp);
     },
-    [maxSize.height, maxSize.width, onResize, size.height, size.width]
+    [
+      maxSize.height,
+      maxSize.width,
+      onDraggingChange,
+      onResize,
+      size.height,
+      size.width,
+    ]
   );
 
   return (
     <div
-      className={cn("group/studio-frame max-w-full", className)}
+      className={cn(
+        "group/studio-frame relative inline-block max-w-full overflow-visible",
+        className
+      )}
       ref={wrapRef}
     >
       <motion.div
@@ -251,6 +257,12 @@ export function StudioChartFrame({
         <ResizeHandle edge="bottom" onPointerDown={startDrag("bottom")} />
         <ResizeHandle edge="corner" onPointerDown={startDrag("corner")} />
       </motion.div>
+      {isDragging ? (
+        <>
+          <StudioFrameRulerX width={size.width} />
+          <StudioFrameRulerY height={size.height} />
+        </>
+      ) : null}
     </div>
   );
 }

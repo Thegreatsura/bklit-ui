@@ -2,7 +2,8 @@
 
 import { arc as arcGenerator } from "@visx/shape";
 import { motion, useSpring, useTransform } from "motion/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { springOptionsFromTransition } from "./motion-utils";
 import { usePie } from "./pie-context";
 
 // Helper to generate arc path using d3 arc generator
@@ -190,11 +191,19 @@ function AnimatedSliceGrow({
   showGlow,
   hoverOffset,
 }: AnimatedSliceGrowProps) {
-  const animationDelay = 0.1 + index * 0.08;
+  const { enterTransition, enterStaggerScale } = usePie();
+  const mountSpringOpts = useMemo(
+    () =>
+      springOptionsFromTransition(enterTransition, {
+        stiffness: 60,
+        damping: 20,
+      }),
+    [enterTransition]
+  );
+  const animationDelay = (0.1 + index * 0.08) * enterStaggerScale;
 
   const mountSpring = useSpring(0, {
-    stiffness: 60,
-    damping: 20,
+    ...mountSpringOpts,
     restDelta: 0.001,
   });
 

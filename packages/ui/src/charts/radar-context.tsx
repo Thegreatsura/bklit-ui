@@ -59,6 +59,10 @@ export interface RadarContextValue {
 
   // Animation
   animate: boolean;
+  /** Total enter animation budget in ms */
+  enterDurationMs: number;
+  /** Scales stagger delays between grid / campaigns / metrics */
+  staggerScale: number;
 
   // Computed helpers
   getColor: (index: number) => string;

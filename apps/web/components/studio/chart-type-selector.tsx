@@ -33,7 +33,7 @@ export function ChartTypeSelector({
         id="studio-chart"
         type="button"
       >
-        <ChartTypeIcon slug={value} />
+        <ChartTypeIcon slug={value} variant="plain" />
         <span className="min-w-0 flex-1 truncate font-medium">
           {active?.label ?? "Chart"}
         </span>

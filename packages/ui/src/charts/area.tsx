@@ -66,6 +66,7 @@ export function Area({
     selection,
     isLoaded,
     animationDuration,
+    animationEasing,
     xAccessor,
   } = useChart();
 
@@ -223,7 +224,7 @@ export function Area({
   }, [animate, innerWidth, isLoaded, data.length]);
 
   const isHovering = tooltipData !== null || selection?.active === true;
-  const easing = "cubic-bezier(0.85, 0, 0.15, 1)";
+  const easing = animationEasing ?? "cubic-bezier(0.85, 0, 0.15, 1)";
 
   return (
     <>

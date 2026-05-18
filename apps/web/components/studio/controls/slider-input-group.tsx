@@ -1,6 +1,10 @@
 "use client";
 
 import { type ReactNode, useEffect, useState } from "react";
+import {
+  studioControlLabelClass,
+  studioControlRowClass,
+} from "@/components/studio/controls/control-field-helpers";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -15,7 +19,6 @@ export function SliderInputGroup({
   min,
   max,
   step = 1,
-  format,
   icon,
   renderIcon,
   onPreview,
@@ -40,60 +43,50 @@ export function SliderInputGroup({
     setLocal(Number.isFinite(value) ? value : min);
   }, [min, value]);
 
-  const display = format?.(local) ?? String(local);
   const iconNode = renderIcon?.(local) ?? icon;
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between gap-2">
-        <Label className="text-xs">{label}</Label>
-        <span className="text-muted-foreground text-xs tabular-nums">
-          {display}
-        </span>
-      </div>
-      <div className="flex overflow-hidden rounded-lg border border-input bg-background shadow-xs">
-        {iconNode ? (
-          <div className="flex w-11 shrink-0 items-center justify-center border-input border-r bg-muted/40">
-            {iconNode}
-          </div>
-        ) : null}
-        <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 px-3 py-2">
-          <Slider
-            className="w-full **:data-[slot=slider-thumb]:size-4 **:data-[slot=slider-track]:h-2"
-            max={max}
-            min={min}
-            onValueChange={([v]) => {
-              const next = clamp(v ?? min, min, max);
-              setLocal(next);
-              onPreview(next);
-            }}
-            onValueCommit={([v]) => {
-              const next = clamp(v ?? min, min, max);
-              setLocal(next);
-              onCommit(next);
-            }}
-            step={step}
-            value={[local]}
-          />
+    <div className={studioControlRowClass}>
+      <Label className={studioControlLabelClass}>{label}</Label>
+      {iconNode ? (
+        <div className="flex size-7 shrink-0 items-center justify-center">
+          {iconNode}
         </div>
-        <Input
-          className="h-auto w-[4.25rem] shrink-0 rounded-none border-0 border-input border-l bg-transparent px-2 py-2 text-center text-xs tabular-nums shadow-none focus-visible:ring-0"
-          max={max}
-          min={min}
-          onChange={(e) => {
-            const parsed = Number(e.target.value);
-            if (!Number.isNaN(parsed)) {
-              const next = clamp(parsed, min, max);
-              setLocal(next);
-              onPreview(next);
-              onCommit(next);
-            }
-          }}
-          step={step}
-          type="number"
-          value={local}
-        />
-      </div>
+      ) : null}
+      <Slider
+        className="min-w-0 flex-1 **:data-[slot=slider-thumb]:size-3.5 **:data-[slot=slider-track]:h-1.5"
+        max={max}
+        min={min}
+        onValueChange={([v]) => {
+          const next = clamp(v ?? min, min, max);
+          setLocal(next);
+          onPreview(next);
+        }}
+        onValueCommit={([v]) => {
+          const next = clamp(v ?? min, min, max);
+          setLocal(next);
+          onCommit(next);
+        }}
+        step={step}
+        value={[local]}
+      />
+      <Input
+        className="h-8 w-17 shrink-0 px-2 text-center text-xs tabular-nums"
+        max={max}
+        min={min}
+        onChange={(e) => {
+          const parsed = Number(e.target.value);
+          if (!Number.isNaN(parsed)) {
+            const next = clamp(parsed, min, max);
+            setLocal(next);
+            onPreview(next);
+            onCommit(next);
+          }
+        }}
+        step={step}
+        type="number"
+        value={local}
+      />
     </div>
   );
 }

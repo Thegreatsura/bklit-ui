@@ -48,6 +48,7 @@ export function ControlFieldInputs({
     case "text":
       return (
         <Input
+          className="h-8 w-full text-xs"
           id={String(control.key)}
           onChange={(e) =>
             onChange(

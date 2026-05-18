@@ -3,6 +3,7 @@
 import { Group } from "@visx/group";
 import { ParentSize } from "@visx/responsive";
 import { pie as d3Pie } from "d3-shape";
+import type { Transition } from "motion/react";
 import {
   Children,
   isValidElement,
@@ -54,6 +55,10 @@ export interface PieChartProps {
   hoverOffset?: number;
   /** Child components (PieSlice, PieCenter, patterns, gradients, etc.) */
   children: ReactNode;
+  /** Framer Motion transition for slice enter animation */
+  enterTransition?: Transition;
+  /** Scales slice stagger delays (1 = default). */
+  enterStaggerScale?: number;
 }
 
 interface PieChartInnerProps {
@@ -70,6 +75,8 @@ interface PieChartInnerProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
   hoveredIndexProp?: number | null;
   onHoverChange?: (index: number | null) => void;
+  enterTransition?: Transition;
+  enterStaggerScale: number;
 }
 
 // Helper to check if a child is a PieCenter component
@@ -110,6 +117,8 @@ function PieChartInner({
   containerRef,
   hoveredIndexProp,
   onHoverChange,
+  enterTransition,
+  enterStaggerScale,
 }: PieChartInnerProps) {
   const [internalHoveredIndex, setInternalHoveredIndex] = useState<
     number | null
@@ -248,6 +257,8 @@ function PieChartInner({
     setHoveredIndex,
     animationKey,
     isLoaded,
+    enterTransition,
+    enterStaggerScale,
     containerRef,
     totalValue,
     getColor,
@@ -308,6 +319,8 @@ export function PieChart({
   hoveredIndex,
   onHoverChange,
   hoverOffset = DEFAULT_HOVER_OFFSET,
+  enterTransition,
+  enterStaggerScale = 1,
   children,
 }: PieChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -325,6 +338,8 @@ export function PieChart({
           cornerRadius={cornerRadius}
           data={data}
           endAngle={endAngle}
+          enterStaggerScale={enterStaggerScale}
+          enterTransition={enterTransition}
           height={fixedSize}
           hoveredIndexProp={hoveredIndex}
           hoverOffset={hoverOffset}
@@ -353,6 +368,8 @@ export function PieChart({
             cornerRadius={cornerRadius}
             data={data}
             endAngle={endAngle}
+            enterStaggerScale={enterStaggerScale}
+            enterTransition={enterTransition}
             height={height}
             hoveredIndexProp={hoveredIndex}
             hoverOffset={hoverOffset}

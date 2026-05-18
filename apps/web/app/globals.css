@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/shadcn.css";
 @import "fumadocs-ui/css/preset.css";
 @import "shadcn/tailwind.css";
 
@@ -64,6 +64,7 @@
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
   --font-heading: var(--font-heading);
+  --color-fd-input: var(--input);
 }
 
 :root {
@@ -98,18 +99,6 @@
   --sidebar-accent-foreground: oklch(0.218 0.008 223.9);
   --sidebar-border: oklch(0.925 0.005 214.3);
   --sidebar-ring: oklch(0.723 0.014 214.4);
-
-  /* Fumadocs variables */
-  --fd-background: 0 0% 100%;
-  --fd-foreground: 240 10% 4%;
-  --fd-primary: 250 100% 55%;
-  --fd-primary-foreground: 0 0% 100%;
-  --fd-muted: 240 5% 96%;
-  --fd-muted-foreground: 240 4% 46%;
-  --fd-accent: 240 5% 96%;
-  --fd-accent-foreground: 240 6% 10%;
-  --fd-border: 240 6% 90%;
-  --fd-ring: 250 100% 55%;
 
   /* Chart component semantic colors */
   --chart-background: oklch(1 0 0);
@@ -183,18 +172,6 @@
   --sidebar-accent-foreground: oklch(0.987 0.002 197.1);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.56 0.021 213.5);
-
-  /* Fumadocs dark variables */
-  --fd-background: 0 0% 4%;
-  --fd-foreground: 0 0% 98%;
-  --fd-primary: 250 100% 70%;
-  --fd-primary-foreground: 0 0% 100%;
-  --fd-muted: 240 4% 16%;
-  --fd-muted-foreground: 240 5% 65%;
-  --fd-accent: 240 4% 16%;
-  --fd-accent-foreground: 0 0% 98%;
-  --fd-border: 240 4% 16%;
-  --fd-ring: 250 100% 70%;
 
   /* Chart component dark variables */
   --chart-background: oklch(0.145 0 0);
@@ -276,6 +253,51 @@
       transparent 1px
     );
     background-size: 20px 20px;
+  }
+
+  /* Studio sidebar: dotted card for curve / motion editors and similar pickers */
+  .studio-motion-section {
+    overflow: visible;
+  }
+
+  .studio-control-card {
+    background-color: color-mix(in oklch, var(--muted) 40%, transparent);
+    background-image: radial-gradient(
+      circle,
+      color-mix(in oklch, var(--muted-foreground) 30%, transparent) 0.65px,
+      transparent 0
+    );
+    background-size: 10px 10px;
+  }
+
+  /* Studio sidebar: slim scrollbar */
+  .studio-sidebar-viewport {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklch, var(--foreground) 22%, transparent)
+      transparent;
+  }
+
+  .studio-sidebar-viewport > div {
+    display: block !important;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .studio-sidebar-viewport::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .studio-sidebar-viewport::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .studio-sidebar-viewport::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: color-mix(in oklch, var(--foreground) 22%, transparent);
+  }
+
+  .studio-sidebar-viewport::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklch, var(--foreground) 34%, transparent);
   }
 }
 

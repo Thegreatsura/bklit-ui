@@ -2,9 +2,8 @@
 
 import { motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
+import { DEFAULT_ANIMATION_EASING } from "./animation";
 import { chartCssVars, useChart } from "./chart-context";
-
-const BAR_EASING = "cubic-bezier(0.85, 0, 0.15, 1)";
 
 function computeSeriesBarLayout(input: {
   stacked: boolean;
@@ -109,6 +108,7 @@ export function SeriesBar({
     columnWidth,
     isLoaded,
     animationDuration,
+    animationEasing: animationEasingProp,
     barScale,
     composedBarDataKeys,
     composedBarSize,
@@ -119,6 +119,8 @@ export function SeriesBar({
     composedStackGap,
     tooltipData,
   } = useChart();
+
+  const animationEasing = animationEasingProp ?? DEFAULT_ANIMATION_EASING;
 
   const barKeys = useMemo(() => {
     if (composedBarDataKeys && composedBarDataKeys.length > 0) {
@@ -223,6 +225,7 @@ export function SeriesBar({
           return (
             <SeriesBarRect
               animationDuration={barDuration}
+              animationEasing={animationEasing}
               barHeight={barHeight}
               barWidth={barWidth}
               calculatedStaggerDelay={calculatedStaggerDelay}
@@ -271,6 +274,7 @@ interface SeriesBarRectProps {
   innerHeight: number;
   calculatedStaggerDelay: number;
   animationDuration: number;
+  animationEasing: string;
   isFaded: boolean;
   fadedOpacity: number;
 }
@@ -286,6 +290,7 @@ function SeriesBarRect({
   innerHeight,
   calculatedStaggerDelay,
   animationDuration,
+  animationEasing,
   isFaded,
   fadedOpacity,
 }: SeriesBarRectProps) {
@@ -312,7 +317,7 @@ function SeriesBarRect({
       rx={radius}
       ry={radius}
       style={{
-        transition: `height ${animationDuration}ms ${BAR_EASING}, y ${animationDuration}ms ${BAR_EASING}`,
+        transition: `height ${animationDuration}ms ${animationEasing}, y ${animationDuration}ms ${animationEasing}`,
       }}
       transition={{ opacity: { duration: 0.12 } }}
       width={barWidth}

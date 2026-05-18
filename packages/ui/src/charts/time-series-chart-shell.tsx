@@ -12,6 +12,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { DEFAULT_ANIMATION_EASING } from "./animation";
 import { ChartProvider, type LineConfig, type Margin } from "./chart-context";
 import { useChartInteraction } from "./use-chart-interaction";
 
@@ -55,6 +56,7 @@ export interface TimeSeriesChartInnerProps {
   xDataKey: string;
   margin: Margin;
   animationDuration: number;
+  animationEasing?: string;
   children: ReactNode;
   containerRef: React.RefObject<HTMLDivElement | null>;
   /** Series keys driving y-domain and tooltip (Line / Area / SeriesBar configs). */
@@ -80,6 +82,7 @@ export function TimeSeriesChartInner({
   xDataKey,
   margin,
   animationDuration,
+  animationEasing = DEFAULT_ANIMATION_EASING,
   children,
   containerRef,
   lines,
@@ -231,6 +234,7 @@ export function TimeSeriesChartInner({
     lines,
     isLoaded,
     animationDuration,
+    animationEasing,
     xAccessor,
     dateLabels,
     selection,
@@ -254,7 +258,7 @@ export function TimeSeriesChartInner({
               style={{
                 transition: isLoaded
                   ? "none"
-                  : `width ${animationDuration}ms cubic-bezier(0.85, 0, 0.15, 1)`,
+                  : `width ${animationDuration}ms ${animationEasing}`,
               }}
               width={isLoaded ? innerWidth : 0}
               x={0}

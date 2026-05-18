@@ -53,10 +53,20 @@ export type StudioControl =
       secondaryColor?: string;
     } & Pick<NumberControlBase, "min" | "max" | "step">);
 
+export interface StudioControlGroup {
+  title: string;
+  controls: StudioControl[];
+}
+
 export interface StudioChartConfig {
   slug: ChartSlug;
   label: string;
+  /** Flat list — used when `controlGroups` is omitted */
   controls: StudioControl[];
+  /** Grouped sidebar sections (takes precedence over `controls` in the studio UI) */
+  controlGroups?: StudioControlGroup[];
+  /** When set, sidebar shows a Motion section at the top. */
+  motionPanel?: "gauge" | "css-reveal" | "motion-enter" | "motion-stagger";
   supportsPatterns?: boolean;
   supportsCurves?: boolean;
   render: (state: StudioUrlState, ctx: StudioRenderContext) => ReactNode;
