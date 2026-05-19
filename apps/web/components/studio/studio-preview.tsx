@@ -45,6 +45,7 @@ export function StudioPreview() {
   const frameSizeBeforeRecording = useRef<{ w: number; h: number } | null>(
     null
   );
+  const [capturePrepared, setCapturePrepared] = useState(false);
   const reducedMotion = useReducedMotion();
   const {
     phase,
@@ -97,6 +98,8 @@ export function StudioPreview() {
         aspect
       );
 
+      setCapturePrepared(true);
+
       if (aspect === "16:9") {
         frameSizeBeforeRecording.current = saved;
         setFrameSize(dimensions.frameWidth, dimensions.frameHeight);
@@ -109,22 +112,27 @@ export function StudioPreview() {
         frameSizeBeforeRecording.current = null;
       }
 
-      await startRecording({
-        element,
-        width: dimensions.captureWidth,
-        height: dimensions.captureHeight,
-        state: displayState,
-        chart: state.chart,
-        replay,
-        interactionMs,
-        onFinished: () => {
-          const previous = frameSizeBeforeRecording.current;
-          if (previous) {
-            setFrameSize(previous.w, previous.h);
-            frameSizeBeforeRecording.current = null;
-          }
-        },
-      });
+      try {
+        await startRecording({
+          element,
+          width: dimensions.captureWidth,
+          height: dimensions.captureHeight,
+          state: displayState,
+          chart: state.chart,
+          replay,
+          interactionMs,
+          onFinished: () => {
+            const previous = frameSizeBeforeRecording.current;
+            if (previous) {
+              setFrameSize(previous.w, previous.h);
+              frameSizeBeforeRecording.current = null;
+            }
+            setCapturePrepared(false);
+          },
+        });
+      } finally {
+        setCapturePrepared(false);
+      }
     },
     [
       displayState,
@@ -138,7 +146,8 @@ export function StudioPreview() {
   );
 
   const recordingBlocked = reducedMotion === true;
-  const controlsDisabled = isRecording;
+  const controlsDisabled = isRecording || capturePrepared;
+  const showCaptureLayout = isRecording || capturePrepared;
   const showRecordingChrome = isRecording && timeline;
 
   return (
@@ -185,11 +194,11 @@ export function StudioPreview() {
       <div
         className={cn(
           "studio-preview-canvas relative flex min-h-0 flex-1 flex-col overflow-auto p-6 pt-16",
-          isRecording ? "gap-4" : "items-center justify-center gap-5"
+          showCaptureLayout ? "gap-4" : "items-center justify-center gap-5"
         )}
         ref={canvasRef}
       >
-        {isRecording ? (
+        {showCaptureLayout ? (
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 z-1 bg-zinc-950/88"
@@ -199,7 +208,7 @@ export function StudioPreview() {
         <div
           className={cn(
             "relative z-2 flex min-h-0 w-full flex-1 flex-col",
-            isRecording
+            showCaptureLayout
               ? "gap-4"
               : "max-w-3xl items-center justify-center gap-5"
           )}
@@ -209,20 +218,20 @@ export function StudioPreview() {
             ref={chartAreaRef}
           >
             <StudioRecordingMask
-              active={isRecording}
+              active={showCaptureLayout}
               containerRef={chartAreaRef}
               targetRef={recordCaptureRef}
             />
 
             <div
               className={cn(
-                isRecording
+                showCaptureLayout
                   ? "studio-recording-capture relative shrink-0"
                   : "inline-flex"
               )}
               ref={recordCaptureRef}
               style={
-                isRecording
+                showCaptureLayout
                   ? {
                       width:
                         state.frameW + STUDIO_RECORDING_CAPTURE_INSET_PX * 2,
@@ -233,13 +242,10 @@ export function StudioPreview() {
               }
             >
               <div
-                className={cn(
-                  isRecording && "absolute",
-                  !isRecording && "contents"
-                )}
                 style={
-                  isRecording
+                  showCaptureLayout
                     ? {
+                        position: "absolute",
                         top: STUDIO_RECORDING_CAPTURE_INSET_PX,
                         left: STUDIO_RECORDING_CAPTURE_INSET_PX,
                       }

@@ -61,6 +61,8 @@ export interface RecordChartStreamOptions {
   signal?: AbortSignal;
   onProgress?: (progress: number) => void;
   isPaused?: () => boolean;
+  /** Called once the display stream is cropped and capture is about to begin. */
+  onCaptureReady?: () => void;
 }
 
 /**
@@ -80,6 +82,7 @@ export async function recordChartStream(
     signal,
     onProgress,
     isPaused = () => false,
+    onCaptureReady,
   } = options;
 
   if (!canRecordChartStream()) {
@@ -118,6 +121,7 @@ export async function recordChartStream(
   }
 
   await croppable.cropTo(cropTarget);
+  onCaptureReady?.();
 
   const recorder = new MediaRecorder(stream, {
     mimeType,

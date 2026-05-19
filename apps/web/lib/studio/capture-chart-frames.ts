@@ -62,6 +62,7 @@ export interface CaptureChartFramesOptions {
   signal?: AbortSignal;
   onProgress?: (progress: number) => void;
   isPaused?: () => boolean;
+  onCaptureReady?: () => void;
 }
 
 /**
@@ -82,6 +83,7 @@ export async function captureChartFrames(
     signal,
     onProgress,
     isPaused = () => false,
+    onCaptureReady,
   } = options;
 
   if (signal?.aborted) {
@@ -94,6 +96,7 @@ export async function captureChartFrames(
   const pauseState = createRecordingPauseState();
   let capturing = false;
   let replayFired = false;
+  onCaptureReady?.();
 
   while (true) {
     if (signal?.aborted) {

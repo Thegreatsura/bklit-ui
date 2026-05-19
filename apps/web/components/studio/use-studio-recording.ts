@@ -93,9 +93,9 @@ export function useStudioRecording() {
       setElapsedMs(0);
       isPausedRef.current = false;
       setIsPaused(false);
-      setPhase("capturing");
 
       const useStream = canRecordChartStream();
+      const onCaptureReady = () => setPhase("capturing");
 
       try {
         if (useStream) {
@@ -108,6 +108,7 @@ export function useStudioRecording() {
             signal: controller.signal,
             onProgress: setProgress,
             isPaused: () => isPausedRef.current,
+            onCaptureReady,
           });
         } else {
           const frames = await captureChartFrames({
@@ -119,6 +120,7 @@ export function useStudioRecording() {
             onTimelineTick: setElapsedMs,
             signal: controller.signal,
             isPaused: () => isPausedRef.current,
+            onCaptureReady,
             onProgress: (captureProgress) => {
               setProgress(captureProgress * 0.7);
             },

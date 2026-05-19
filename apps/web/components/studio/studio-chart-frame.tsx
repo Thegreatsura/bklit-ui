@@ -263,41 +263,37 @@ export const StudioChartFrame = forwardRef<
       )}
       ref={wrapRef}
     >
-      {isRecording ? (
-        <motion.div
-          animate={{ width: size.width, height: size.height }}
-          className="relative overflow-hidden bg-card"
-          layout
-          ref={captureRef}
-          style={style}
-          transition={{ duration: 0 }}
-        >
-          {frameContent}
-        </motion.div>
-      ) : (
-        <motion.div
-          animate={{ width: size.width, height: size.height }}
-          className={cn(
-            "relative overflow-hidden rounded-lg border-2 bg-card shadow-sm transition-[border-color,border-style]",
-            isDragging
-              ? "border-foreground/50 border-dotted"
-              : "border-border hover:border-foreground/35"
-          )}
-          layout
-          ref={captureRef}
-          style={style}
-          transition={
-            isDragging || reducedMotion
-              ? { duration: 0 }
-              : { ...frameSpring, layout: frameSpring }
-          }
-        >
-          {frameContent}
-          <ResizeHandle edge="right" onPointerDown={startDrag("right")} />
-          <ResizeHandle edge="bottom" onPointerDown={startDrag("bottom")} />
-          <ResizeHandle edge="corner" onPointerDown={startDrag("corner")} />
-        </motion.div>
-      )}
+      <motion.div
+        animate={{ width: size.width, height: size.height }}
+        className={cn(
+          "relative overflow-hidden border-2 bg-card",
+          isRecording
+            ? "border-transparent shadow-none"
+            : cn(
+                "rounded-lg shadow-sm transition-[border-color,border-style]",
+                isDragging
+                  ? "border-foreground/50 border-dotted"
+                  : "border-border hover:border-foreground/35"
+              )
+        )}
+        layout={!isRecording}
+        ref={captureRef}
+        style={style}
+        transition={
+          isDragging || reducedMotion || isRecording
+            ? { duration: 0 }
+            : { ...frameSpring, layout: frameSpring }
+        }
+      >
+        {frameContent}
+        {isRecording ? null : (
+          <>
+            <ResizeHandle edge="right" onPointerDown={startDrag("right")} />
+            <ResizeHandle edge="bottom" onPointerDown={startDrag("bottom")} />
+            <ResizeHandle edge="corner" onPointerDown={startDrag("corner")} />
+          </>
+        )}
+      </motion.div>
       <AnimatePresence initial={false}>
         {isDragging ? (
           <>
