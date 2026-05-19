@@ -71,7 +71,7 @@ export function SliderInputGroup({
         value={[local]}
       />
       <Input
-        className="h-8 w-17 shrink-0 px-2 text-center text-xs tabular-nums"
+        className="h-8 w-16 shrink-0 px-1.5 text-center text-xs tabular-nums"
         max={max}
         min={min}
         onChange={(e) => {

@@ -48,7 +48,7 @@ export function StudioPreview() {
   );
 
   return (
-    <StudioPanel className="relative min-h-[min(70vh,720px)] min-w-0 flex-1 overflow-visible">
+    <StudioPanel className="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
       <div className="absolute top-6 right-6 z-10 flex items-center gap-2.5">
         <Button
           aria-label="Replay animation"
@@ -68,7 +68,7 @@ export function StudioPreview() {
         <StudioCodeSheet state={state} />
       </div>
 
-      <div className="studio-preview-canvas flex min-h-0 flex-1 flex-col items-center justify-center overflow-visible p-6 pt-16">
+      <div className="studio-preview-canvas flex min-h-0 flex-1 flex-col items-center justify-center overflow-auto p-6 pt-16">
         <StudioChartFrame
           height={state.frameH}
           onResize={handleFrameResize}

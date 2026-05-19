@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { ReactNode } from "react";
-import { SiteFooter } from "@/components/docs/site-footer";
 import { SiteHeader } from "@/components/docs/site-header";
 
 export const metadata: Metadata = {
@@ -21,16 +20,15 @@ const studioNavLinks = [
 
 export default function StudioLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex h-dvh flex-col overflow-hidden">
       <SiteHeader
         discordUrl="https://discord.com/invite/9yyK8FwPcU"
         githubUrl="https://github.com/bklit/bklit-ui"
         links={studioNavLinks}
       />
-      <main className="flex min-h-0 flex-1 flex-col pt-14">
+      <main className="flex min-h-0 flex-1 flex-col overflow-hidden pt-14">
         <NuqsAdapter>{children}</NuqsAdapter>
       </main>
-      <SiteFooter />
     </div>
   );
 }

@@ -3,14 +3,7 @@
 import { PlayIcon, StopIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { animate, motion, type Transition } from "motion/react";
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -99,7 +92,9 @@ export function MotionCurveEditor({
   const displayRef = useRef(displayPoints);
   const skipMorphRef = useRef(false);
   const hasMountedRef = useRef(false);
-  const playLabelId = useId();
+  const [curveA11yLabel, setCurveA11yLabel] = useState(
+    "Interactive motion curve"
+  );
 
   displayRef.current = displayPoints;
 
@@ -110,6 +105,10 @@ export function MotionCurveEditor({
   );
   const activeBezier = dragBezier ?? committedBezier;
   const isEase = state.motionType === "ease";
+
+  useEffect(() => {
+    setCurveA11yLabel(`Interactive ${isEase ? "easing" : "spring"} curve`);
+  }, [isEase]);
 
   const stopPlay = useCallback(() => {
     playControls.current?.stop();
@@ -277,24 +276,17 @@ export function MotionCurveEditor({
   return (
     <div className="space-y-2">
       <div
-        className={cn(
-          "studio-motion-curve-card relative w-full rounded-lg border border-border",
-          isEase || dragging ? "overflow-visible" : "overflow-hidden"
-        )}
+        className="studio-motion-curve-card relative w-full max-w-full overflow-hidden rounded-lg border border-border px-1"
         ref={containerRef}
       >
         <svg
-          aria-labelledby={playLabelId}
+          aria-label={curveA11yLabel}
           className="block h-[180px] w-full touch-none select-none text-foreground"
           preserveAspectRatio="none"
           ref={svgRef}
           role="img"
           viewBox={`0 0 ${width} ${PREVIEW_H}`}
         >
-          <title id={playLabelId}>
-            Interactive {isEase ? "easing" : "spring"} curve
-          </title>
-
           {isEase && easeGeom ? (
             <>
               <path

@@ -13,8 +13,10 @@ function StudioFallback() {
 
 export default function StudioPage() {
   return (
-    <Suspense fallback={<StudioFallback />}>
-      <StudioShell />
-    </Suspense>
+    <div className="flex h-full min-h-0 flex-1 flex-col">
+      <Suspense fallback={<StudioFallback />}>
+        <StudioShell />
+      </Suspense>
+    </div>
   );
 }

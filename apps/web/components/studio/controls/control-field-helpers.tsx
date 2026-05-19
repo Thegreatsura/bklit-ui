@@ -5,9 +5,9 @@ import { Label } from "@/components/ui/label";
 import type { StudioControl } from "@/lib/studio/types";
 import { cn } from "@/lib/utils";
 
-export const studioControlLabelClass = "w-32 shrink-0 text-xs leading-tight";
+export const studioControlLabelClass = "w-28 shrink-0 text-xs leading-tight";
 
-export const studioControlRowClass = "flex items-center gap-3";
+export const studioControlRowClass = "flex min-w-0 items-center gap-2.5";
 
 const GROUP_LABELED_TYPES = new Set<StudioControl["type"]>([
   "pattern",

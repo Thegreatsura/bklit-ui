@@ -34,7 +34,7 @@ export function StudioControlGroup({
       </header>
       <div
         className={cn(
-          "studio-control-group-fields space-y-3.5",
+          "studio-control-group-fields min-w-0 space-y-3.5",
           fieldsClassName
         )}
       >

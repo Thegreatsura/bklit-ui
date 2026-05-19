@@ -1,11 +1,22 @@
 "use client";
 
 import { motion, useAnimationControls } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface AnimatedBrandProps {
   onAnimationComplete?: () => void;
   className?: string;
+}
+
+function delay(ms: number, signal: { cancelled: boolean }) {
+  return new Promise<void>((resolve) => {
+    const id = window.setTimeout(() => {
+      if (!signal.cancelled) {
+        resolve();
+      }
+    }, ms);
+    signal.timeouts.push(id);
+  });
 }
 
 export function AnimatedBrand({
@@ -17,16 +28,20 @@ export function AnimatedBrand({
   );
   const acControls = useAnimationControls();
   const uiControls = useAnimationControls();
+  const onCompleteRef = useRef(onAnimationComplete);
+  onCompleteRef.current = onAnimationComplete;
 
   useEffect(() => {
+    const signal = { cancelled: false, timeouts: [] as number[] };
+
     const runAnimation = async () => {
-      // Wait a moment before starting
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      await delay(800, signal);
+      if (signal.cancelled) {
+        return;
+      }
 
       setPhase("morphing");
 
-      // 1. Fade out "ac"
-      // Duration 0.8s
       const acFade = acControls.start({
         opacity: 0,
         filter: "blur(2px)",
@@ -35,17 +50,21 @@ export function AnimatedBrand({
         transition: { duration: 0.8, ease: [0.4, 0, 0.2, 1] },
       });
 
-      // 2. Shrink "ac" width to pull "klit" left
-      // Starts 0.4s into the fade (halfway)
-      await new Promise((resolve) => setTimeout(resolve, 400));
+      await delay(400, signal);
+      if (signal.cancelled) {
+        return;
+      }
+
       const acShrink = acControls.start({
         width: 0,
         transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] },
       });
 
-      // 3. Reveal "UI"
-      // Starts 0.4s into the shrink (0.8s from start)
-      await new Promise((resolve) => setTimeout(resolve, 400));
+      await delay(400, signal);
+      if (signal.cancelled) {
+        return;
+      }
+
       setPhase("complete");
 
       const uiReveal = uiControls.start({
@@ -57,16 +76,30 @@ export function AnimatedBrand({
         transition: { duration: 0.8, ease: "easeOut" },
       });
 
-      // Wait for UI to be almost done before signaling completion
-      // Signaling at 75% of the UI reveal (0.8s * 0.75 = 0.6s)
-      await new Promise((resolve) => setTimeout(resolve, 400));
-      onAnimationComplete?.();
+      await delay(400, signal);
+      if (signal.cancelled) {
+        return;
+      }
+
+      onCompleteRef.current?.();
 
       await Promise.all([acFade, acShrink, uiReveal]);
     };
 
-    runAnimation();
-  }, [acControls, uiControls, onAnimationComplete]);
+    const frame = requestAnimationFrame(() => {
+      runAnimation().catch(() => undefined);
+    });
+
+    return () => {
+      signal.cancelled = true;
+      cancelAnimationFrame(frame);
+      for (const id of signal.timeouts) {
+        clearTimeout(id);
+      }
+      acControls.stop();
+      uiControls.stop();
+    };
+  }, [acControls, uiControls]);
 
   return (
     <motion.h1
@@ -80,10 +113,8 @@ export function AnimatedBrand({
         transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1] }}
       >
         <div className="flex items-baseline">
-          {/* "B" - fixed position relative to container start */}
           <span>B</span>
 
-          {/* "ac" - fades out and shrinks width to pull klit left */}
           <motion.span
             animate={acControls}
             className="inline-block overflow-hidden whitespace-nowrap"
@@ -101,11 +132,9 @@ export function AnimatedBrand({
             ac
           </motion.span>
 
-          {/* "klit" - moves left naturally as ac shrinks */}
           <span>klit</span>
         </div>
 
-        {/* Space and UI - always in DOM but invisible until phase complete */}
         <div className="flex items-baseline">
           <motion.span
             animate={phase === "complete" ? { opacity: 1 } : { opacity: 0 }}

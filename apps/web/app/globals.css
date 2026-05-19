@@ -225,7 +225,7 @@
     cursor: pointer;
   }
   html {
-    @apply font-mono;
+    @apply font-sans;
   }
 }
 
@@ -253,11 +253,13 @@
       transparent 1px
     );
     background-size: 20px 20px;
+    border-radius: var(--radius-lg);
   }
 
-  /* Studio sidebar: dotted card for curve / motion editors and similar pickers */
+  /* Motion bezier handles stay inside the sidebar (no overflow: visible on section) */
   .studio-motion-section {
-    overflow: visible;
+    max-width: 100%;
+    min-width: 0;
   }
 
   /* Motion spline editor: preview canvas colors, finer dot grid */
@@ -271,34 +273,32 @@
     background-size: 10px 10px;
   }
 
-  /* Studio sidebar: slim scrollbar */
-  .studio-sidebar-viewport {
+  /* Docs + studio sidebars: thin scrollbar in reserved gutter */
+  .docs-scroll-area,
+  .studio-sidebar-scroll {
+    --studio-scrollbar-width: 4px;
+    scrollbar-gutter: stable;
     scrollbar-width: thin;
-    scrollbar-color: color-mix(in oklch, var(--foreground) 22%, transparent)
+    scrollbar-color: color-mix(in oklch, var(--foreground) 32%, transparent)
       transparent;
   }
 
-  .studio-sidebar-viewport > div {
-    display: block !important;
-    min-width: 0;
-    width: 100%;
+  .studio-sidebar-scroll::-webkit-scrollbar {
+    width: var(--studio-scrollbar-width);
   }
 
-  .studio-sidebar-viewport::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  .studio-sidebar-viewport::-webkit-scrollbar-track {
+  .studio-sidebar-scroll::-webkit-scrollbar-track {
+    margin-block: 6px;
     background: transparent;
   }
 
-  .studio-sidebar-viewport::-webkit-scrollbar-thumb {
+  .studio-sidebar-scroll::-webkit-scrollbar-thumb {
     border-radius: 999px;
-    background: color-mix(in oklch, var(--foreground) 22%, transparent);
+    background: color-mix(in oklch, var(--foreground) 24%, transparent);
   }
 
-  .studio-sidebar-viewport::-webkit-scrollbar-thumb:hover {
-    background: color-mix(in oklch, var(--foreground) 34%, transparent);
+  .studio-sidebar-scroll::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklch, var(--foreground) 38%, transparent);
   }
 }
 

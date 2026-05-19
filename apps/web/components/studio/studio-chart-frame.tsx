@@ -1,11 +1,12 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   StudioFrameRulerX,
   StudioFrameRulerY,
+  studioRulerFade,
 } from "@/components/studio/studio-frame-rulers";
 import { cn } from "@/lib/utils";
 
@@ -257,12 +258,22 @@ export function StudioChartFrame({
         <ResizeHandle edge="bottom" onPointerDown={startDrag("bottom")} />
         <ResizeHandle edge="corner" onPointerDown={startDrag("corner")} />
       </motion.div>
-      {isDragging ? (
-        <>
-          <StudioFrameRulerX width={size.width} />
-          <StudioFrameRulerY height={size.height} />
-        </>
-      ) : null}
+      <AnimatePresence initial={false}>
+        {isDragging ? (
+          <>
+            <StudioFrameRulerX
+              key="studio-ruler-x"
+              transition={reducedMotion ? { duration: 0 } : studioRulerFade}
+              width={size.width}
+            />
+            <StudioFrameRulerY
+              height={size.height}
+              key="studio-ruler-y"
+              transition={reducedMotion ? { duration: 0 } : studioRulerFade}
+            />
+          </>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }
