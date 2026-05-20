@@ -11,8 +11,7 @@ export const previewCardContentClassName =
   "flex w-full items-center justify-center p-8";
 
 /** Fills a flex/grid cell when the preview card should stretch (homepage grid). */
-export const previewCardContentFillClassName =
-  "min-h-0 size-full flex-1";
+export const previewCardContentFillClassName = "min-h-0 size-full flex-1";
 
 function Card({
   className,

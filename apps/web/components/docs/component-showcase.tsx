@@ -69,7 +69,9 @@ export function ComponentShowcase({
         className={cn(previewCardContentClassName, "shrink-0")}
         style={{ minHeight: previewMinHeight }}
       >
-        <div className="flex w-full items-center justify-center">{children}</div>
+        <div className="flex w-full items-center justify-center">
+          {children}
+        </div>
       </CardContent>
 
       {hasCode ? (
