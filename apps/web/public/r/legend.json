@@ -5,6 +5,7 @@
   "title": "Chart Legend",
   "description": "Composable legend components for charts",
   "dependencies": [
+    "@base-ui/react",
     "@number-flow/react"
   ],
   "registryDependencies": [

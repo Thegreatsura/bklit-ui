@@ -27,7 +27,8 @@
         "@visx/event@4.0.1-alpha.0",
         "@visx/responsive@4.0.1-alpha.0",
         "@visx/scale@4.0.1-alpha.0",
-        "d3-array"
+        "d3-array",
+        "motion"
       ],
       "cssVars": {
         "light": {
@@ -211,7 +212,7 @@
       "title": "Chart Legend",
       "description": "Composable legend components for charts",
       "registryDependencies": ["@bklit/utils"],
-      "dependencies": ["@number-flow/react"],
+      "dependencies": ["@base-ui/react", "@number-flow/react"],
       "cssVars": {
         "light": {
           "--legend": "oklch(1 0 0)",
@@ -537,6 +538,7 @@
       "registryDependencies": ["@bklit/chart-animation", "@bklit/utils"],
       "dependencies": [
         "@number-flow/react",
+        "@visx/group@4.0.1-alpha.0",
         "@visx/responsive@4.0.1-alpha.0",
         "@visx/shape@4.0.1-alpha.0",
         "d3-shape",
@@ -581,7 +583,14 @@
       "title": "Radar Chart",
       "description": "A composable radar/spider chart with multiple data series",
       "registryDependencies": ["@bklit/chart-animation", "@bklit/utils"],
-      "dependencies": ["@visx/responsive@4.0.1-alpha.0", "d3-shape", "motion"],
+      "dependencies": [
+        "@visx/group@4.0.1-alpha.0",
+        "@visx/responsive@4.0.1-alpha.0",
+        "@visx/scale@4.0.1-alpha.0",
+        "@visx/shape@4.0.1-alpha.0",
+        "d3-shape",
+        "motion"
+      ],
       "files": [
         {
           "path": "src/charts/radar-chart.tsx",
@@ -622,7 +631,9 @@
       "description": "A composable donut/ring chart with progress indicators",
       "registryDependencies": ["@bklit/chart-animation", "@bklit/utils"],
       "dependencies": [
+        "@visx/group@4.0.1-alpha.0",
         "@visx/responsive@4.0.1-alpha.0",
+        "@visx/shape@4.0.1-alpha.0",
         "@number-flow/react",
         "motion"
       ],
@@ -702,6 +713,7 @@
       "description": "A geographic map chart with zoom, pan, and data visualization",
       "registryDependencies": ["@bklit/chart-animation", "@bklit/utils"],
       "dependencies": [
+        "@types/geojson",
         "@visx/geo@4.0.1-alpha.0",
         "@visx/responsive@4.0.1-alpha.0",
         "@visx/zoom@4.0.1-alpha.0",
@@ -764,10 +776,12 @@
       "description": "A flow diagram for visualizing data transfers between nodes",
       "registryDependencies": ["@bklit/chart-animation", "@bklit/utils"],
       "dependencies": [
+        "@visx/event@4.0.1-alpha.0",
         "@visx/gradient@4.0.1-alpha.0",
         "@visx/pattern@4.0.1-alpha.0",
         "@visx/responsive@4.0.1-alpha.0",
         "@visx/sankey@4.0.1-alpha.0",
+        "d3-sankey",
         "motion"
       ],
       "files": [
