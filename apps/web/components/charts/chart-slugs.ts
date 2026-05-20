@@ -15,3 +15,7 @@ export const validChartSlugs = [
 ] as const;
 
 export type ChartSlug = (typeof validChartSlugs)[number];
+
+export function isChartSlug(name: string): name is ChartSlug {
+  return (validChartSlugs as readonly string[]).includes(name);
+}

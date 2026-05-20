@@ -13,13 +13,27 @@ Before installing Bklit UI components, make sure you have shadcn/ui set up in yo
 npx shadcn@latest init
 ```
 
+## Registry namespace
+
+Bklit is published on the shadcn registry index as `@bklit`. Add it to your `components.json` if it is not already configured:
+
+```json
+{
+  "registries": {
+    "@bklit": "https://ui.bklit.com/r/{name}.json"
+  }
+}
+```
+
+Then install components with the namespace, for example `npx shadcn@latest add @bklit/area-chart`.
+
 ## Install Components
 
 Install any Bklit UI component using the CLI:
 
 <PackageManagerTabs name="area-chart" />
 
-The registry is configured automatically — no manual setup needed. This will:
+The `@bklit` namespace is configured automatically for new projects — no manual setup needed. This will:
 - Download the component source code
 - Install any required dependencies
 - Place files in your configured component directory

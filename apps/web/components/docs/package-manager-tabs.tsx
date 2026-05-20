@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { CopyButton } from "@/components/copy-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { codeThemes } from "@/lib/code-theme";
-import { registryJsonUrlForName } from "@/lib/studio/chart-links";
+import { shadcnAddItem } from "@/lib/studio/chart-links";
 import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "bklit-package-manager";
@@ -53,7 +53,7 @@ export function PackageManagerTabs({ name }: PackageManagerTabsProps) {
     if (isDepsOnly) {
       return `${PM_ADD_COMMANDS[manager]} ${depsString}`;
     }
-    return `${PM_SHADCN_COMMANDS[manager]} ${registryJsonUrlForName(name)}`;
+    return `${PM_SHADCN_COMMANDS[manager]} ${shadcnAddItem(name)}`;
   };
 
   const command = getCommand(pm);

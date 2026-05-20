@@ -6,6 +6,10 @@ const withMDX = createMDX();
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ["@bklitui/ui"],
+  experimental: {
+    // Keeps dev/prod from pulling the entire charts package per MDX page.
+    optimizePackageImports: ["@bklitui/ui", "@bklitui/ui/charts"],
+  },
   images: {
     remotePatterns: [
       {

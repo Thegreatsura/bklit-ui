@@ -8,21 +8,30 @@ const STORAGE_KEY = "bklit-install-type";
 interface CodeTabsProps {
   children: ReactNode;
   defaultValue?: "cli" | "manual";
+  onTabChange?: (tab: "cli" | "manual") => void;
 }
 
-export function CodeTabs({ children, defaultValue = "cli" }: CodeTabsProps) {
+export function CodeTabs({
+  children,
+  defaultValue = "cli",
+  onTabChange,
+}: CodeTabsProps) {
   const [value, setValue] = useState<string>(defaultValue);
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored === "cli" || stored === "manual") {
       setValue(stored);
+      onTabChange?.(stored);
     }
-  }, []);
+  }, [onTabChange]);
 
   const handleValueChange = (newValue: string) => {
     setValue(newValue);
     localStorage.setItem(STORAGE_KEY, newValue);
+    if (newValue === "cli" || newValue === "manual") {
+      onTabChange?.(newValue);
+    }
   };
 
   return (

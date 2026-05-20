@@ -41,17 +41,13 @@ import { useEffect, useState } from "react";
 import type { ChartSlug } from "@/components/charts/chart-slugs";
 import { useWorldDataStandalone } from "@/components/docs/use-world-data";
 import { Button } from "@/components/ui/button";
-import { studioChartDocsHref } from "@/lib/studio/chart-links";
+import { studioChartDocsHref, studioChartHref } from "@/lib/studio/chart-links";
 import { cn } from "@/lib/utils";
 
 const easeOutQuint = [0.23, 1, 0.32, 1] as const;
 const actionEnterDuration = 0.2;
 const actionExitDuration = 0.16;
 const actionStagger = 0.04;
-
-function studioChartHref(slug: ChartSlug) {
-  return `/studio?chart=${slug}`;
-}
 
 function CardAction({
   href,

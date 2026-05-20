@@ -5,8 +5,8 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { OpenInV0Button } from "@/components/docs/open-in-v0-button";
 import { PackageManagerTabs } from "@/components/docs/package-manager-tabs";
-import { V0Icon } from "@/components/icons/v0";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,8 +18,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import {
+  registryV0ExampleJsonUrl,
   studioChartDocsHref,
-  studioOpenInV0Href,
 } from "@/lib/studio/chart-links";
 import { generateStudioCode } from "@/lib/studio/codegen";
 import type { StudioUrlState } from "@/lib/studio/studio-parsers";
@@ -75,21 +75,9 @@ export function StudioCodeSheet({ state }: { state: StudioUrlState }) {
                   Documentation
                 </Link>
               </Button>
-              <Button
-                asChild
-                className="h-8 gap-1 text-xs"
-                size="sm"
-                // variant="secondary"
-              >
-                <a
-                  aria-label="Open in v0"
-                  href={studioOpenInV0Href(state.chart)}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  Open in <V0Icon className="h-2.5" />
-                </a>
-              </Button>
+              <OpenInV0Button
+                registryJsonUrl={registryV0ExampleJsonUrl(state.chart)}
+              />
             </div>
           </div>
         </SheetHeader>

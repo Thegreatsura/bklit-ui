@@ -5,8 +5,8 @@
   "title": "X Axis",
   "description": "X-axis component for time-series charts",
   "registryDependencies": [
-    "https://ui.bklit.com/r/chart-context.json",
-    "https://ui.bklit.com/r/utils.json"
+    "@bklit/chart-context",
+    "@bklit/utils"
   ],
   "files": [
     {

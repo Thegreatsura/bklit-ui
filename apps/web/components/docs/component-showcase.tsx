@@ -117,26 +117,3 @@ export function ComponentShowcase({
     </div>
   );
 }
-
-/**
- * A simple preview container without expandable code.
- * Use this for demos that don't need to show source code.
- */
-export function ComponentPreview({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "not-prose my-6 flex min-h-[200px] items-center justify-center rounded-xl border border-border bg-card p-8 shadow-sm",
-        className
-      )}
-    >
-      {children}
-    </div>
-  );
-}

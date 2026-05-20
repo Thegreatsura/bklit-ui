@@ -5,8 +5,8 @@
   "title": "Y Axis",
   "description": "Y-axis component for value labels in line and area charts",
   "registryDependencies": [
-    "https://ui.bklit.com/r/chart-context.json",
-    "https://ui.bklit.com/r/utils.json"
+    "@bklit/chart-context",
+    "@bklit/utils"
   ],
   "files": [
     {

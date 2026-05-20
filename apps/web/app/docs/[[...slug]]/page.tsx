@@ -5,10 +5,8 @@ import type { TOCItemType } from "fumadocs-core/toc";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import { notFound } from "next/navigation";
 import type { ComponentType } from "react";
-import {
-  ComponentPreview,
-  ComponentShowcase,
-} from "@/components/docs/component-showcase";
+import { ComponentPreview } from "@/components/docs/component-preview";
+import { ComponentShowcase } from "@/components/docs/component-showcase";
 import { ComponentsList } from "@/components/docs/components-list";
 import { CopyPageButton } from "@/components/docs/copy-page-button";
 import { InstallationTabs } from "@/components/docs/installation-tabs";

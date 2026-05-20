@@ -138,32 +138,48 @@ export function InstallationTabs({
   dependencies,
 }: InstallationTabsProps) {
   const [registryData, setRegistryData] = useState<RegistryData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [installTab, setInstallTab] = useState<"cli" | "manual">("cli");
 
   useEffect(() => {
+    if (installTab !== "manual") {
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+
     async function fetchRegistry() {
       try {
         const res = await fetch(`/r/${name}.json`);
         if (res.ok) {
           const data = await res.json();
-          setRegistryData(data);
+          if (!cancelled) {
+            setRegistryData(data);
+          }
         }
       } catch {
         // Silently fail - we'll use the provided dependencies prop as fallback
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
     fetchRegistry();
-  }, [name]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [installTab, name]);
 
   // Use registry dependencies if available, otherwise fall back to prop
   const deps = registryData?.dependencies || dependencies || [];
   const files = registryData?.files || [];
 
   return (
-    <CodeTabs>
+    <CodeTabs onTabChange={setInstallTab}>
       <TabsContent value="cli">
         <PackageManagerTabs name={name} />
       </TabsContent>

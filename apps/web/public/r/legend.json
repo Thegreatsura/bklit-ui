@@ -8,7 +8,7 @@
     "@number-flow/react"
   ],
   "registryDependencies": [
-    "https://ui.bklit.com/r/utils.json"
+    "@bklit/utils"
   ],
   "files": [
     {

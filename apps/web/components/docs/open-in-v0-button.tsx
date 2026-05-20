@@ -1,0 +1,25 @@
+import { V0Icon } from "@/components/icons/v0";
+import { Button } from "@/components/ui/button";
+import { openInV0Href } from "@/lib/studio/chart-links";
+
+/**
+ * Opens a public registry item JSON in v0.
+ * @see https://ui.shadcn.com/docs/registry/open-in-v0
+ */
+export function OpenInV0Button({
+  registryJsonUrl,
+}: {
+  registryJsonUrl: string;
+}) {
+  return (
+    <Button
+      aria-label="Open in v0"
+      asChild
+      className="h-8 gap-1 rounded-[6px] bg-black px-3 text-white text-xs hover:bg-black hover:text-white dark:bg-white dark:text-black"
+    >
+      <a href={openInV0Href(registryJsonUrl)} rel="noreferrer" target="_blank">
+        Open in <V0Icon className="h-5 w-5" />
+      </a>
+    </Button>
+  );
+}
