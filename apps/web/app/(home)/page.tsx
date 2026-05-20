@@ -1,12 +1,13 @@
 "use client";
 
+import { ArrowRightIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useState } from "react";
 import { AnimatedBrand } from "@/components/animated-brand";
 import { HomeComponents } from "@/components/home-components";
-import { TestimonialMarquee } from "@/components/testimonial-marquee";
-import { Badge } from "@/components/ui/badge";
+import { TestimonialGrid } from "@/components/testimonial-grid";
 import { Button } from "@/components/ui/button";
 
 const staggerDelay = 0.12;
@@ -26,17 +27,31 @@ export default function HomePage() {
   const [showContent, setShowContent] = useState(false);
 
   return (
-    <main className="flex flex-1 flex-col items-center justify-center space-y-24 px-4 py-24 text-center">
-      <div className="max-w-xl space-y-6">
+    <main className="flex flex-1 flex-col items-center justify-center space-y-24 px-4 py-18 text-center">
+      <div className="max-w-xl space-y-5">
         <motion.div
           animate="animate"
-          className="mx-auto flex w-fit items-center justify-center rounded-full border p-px"
+          className="mx-auto flex w-fit"
           initial="initial"
           transition={{ duration: 0.5 }}
           variants={fadeInBlur}
         >
-          <Badge variant="secondary">Version</Badge>
-          <Badge variant="ghost">Pre-release</Badge>
+          <Button
+            asChild
+            className="h-auto rounded-full px-0.5 py-0.5"
+            size="lg"
+            variant="outline"
+          >
+            <Link href="/studio" title="Studio">
+              <span className="flex items-center gap-1 rounded-full bg-muted px-2.5 py-1">
+                Introducing
+              </span>
+              <span className="flex items-center gap-1 px-2.5 py-1">
+                Studio
+                <HugeiconsIcon icon={ArrowRightIcon} size={14} />
+              </span>
+            </Link>
+          </Button>
         </motion.div>
 
         <AnimatedBrand onAnimationComplete={() => setShowContent(true)} />
@@ -90,13 +105,12 @@ export default function HomePage() {
 
             <motion.div
               animate="animate"
-              className="relative w-full before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:z-10 before:w-32 before:bg-gradient-to-r before:from-background before:to-transparent after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:z-10 after:w-32 after:bg-gradient-to-l after:from-background after:to-transparent"
+              className="container mx-auto w-full max-w-6xl"
               initial="initial"
               transition={{ delay: staggerDelay * 3, duration: 0.6 }}
               variants={fadeInOnly}
             >
-              <TestimonialMarquee direction="ltr" duration={70} />
-              <TestimonialMarquee direction="rtl" duration={70} />
+              <TestimonialGrid />
             </motion.div>
           </>
         )}
