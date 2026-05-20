@@ -9,6 +9,8 @@ import { BklitLogo } from "../icons/bklit";
 import { DiscordIcon } from "../icons/discord";
 import { GitHubIcon } from "../icons/github";
 import { Button } from "../ui/button";
+import { Separator } from "../ui/separator";
+import { DocsSearchTrigger } from "./docs-search-trigger";
 
 interface NavLink {
   text: string;
@@ -385,22 +387,32 @@ export function SiteHeader({
           </div>
 
           <div className="flex items-center gap-1">
+            <DocsSearchTrigger
+              className="hidden w-30 justify-between md:inline-flex"
+              hideIfDisabled
+            />
             {githubUrl && (
-              <Link
-                aria-label="GitHub"
-                className="hidden md:block"
-                external
-                href={githubUrl}
-              >
-                <Button
-                  className="gap-2 font-light font-mono text-muted-foreground text-xs"
-                  size="default"
-                  variant="ghost"
+              <>
+                <Separator
+                  className="mx-1 hidden h-5 self-center data-vertical:self-center md:block"
+                  orientation="vertical"
+                />
+                <Link
+                  aria-label="GitHub"
+                  className="hidden md:block"
+                  external
+                  href={githubUrl}
                 >
-                  <GitHubIcon />
-                  <GithubStarCount />
-                </Button>
-              </Link>
+                  <Button
+                    className="gap-2 font-light font-mono text-muted-foreground text-xs"
+                    size="default"
+                    variant="ghost"
+                  >
+                    <GitHubIcon />
+                    <GithubStarCount />
+                  </Button>
+                </Link>
+              </>
             )}
             {discordUrl && (
               <Link
