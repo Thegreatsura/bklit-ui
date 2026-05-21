@@ -5,9 +5,13 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useReducedMotion } from "motion/react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { PresetSelect } from "@/components/studio/controls/preset-select";
-import { StudioChartFrame } from "@/components/studio/studio-chart-frame";
+import {
+  STUDIO_EXPORT_ROOT_ATTR,
+  StudioChartFrame,
+} from "@/components/studio/studio-chart-frame";
 import { StudioChartViewport } from "@/components/studio/studio-chart-viewport";
 import { StudioCodeSheet } from "@/components/studio/studio-code-sheet";
+import { StudioExportSvgButton } from "@/components/studio/studio-export-svg-button";
 import { StudioPanel } from "@/components/studio/studio-panel";
 import { StudioRecordPopover } from "@/components/studio/studio-record-popover";
 import { StudioRecordingMask } from "@/components/studio/studio-recording-mask";
@@ -26,6 +30,7 @@ import {
   type StudioRecordingFormat,
   type StudioRecordingInteractionMs,
 } from "@/lib/studio/studio-recording";
+import { exportStudioChartSvg } from "@/lib/studio/svg-export/export-studio-chart-svg";
 import { cn } from "@/lib/utils";
 
 export function StudioPreview() {
@@ -153,6 +158,22 @@ export function StudioPreview() {
   const showCaptureLayout = isRecording || capturePrepared;
   const showRecordingChrome = isRecording && timeline;
 
+  const handleExportSvg = useCallback(async () => {
+    const root = chartAreaRef.current?.querySelector<HTMLElement>(
+      `[${STUDIO_EXPORT_ROOT_ATTR}]`
+    );
+    if (!root) {
+      return;
+    }
+
+    await exportStudioChartSvg({
+      root,
+      width: state.frameW,
+      height: state.frameH,
+      filename: `${state.chart}.svg`,
+    });
+  }, [state.chart, state.frameH, state.frameW]);
+
   return (
     <StudioPanel className="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
       <div className="absolute top-6 right-6 z-30 flex items-center gap-2.5">
@@ -168,6 +189,10 @@ export function StudioPreview() {
         >
           <HugeiconsIcon icon={Refresh01Icon} size={20} strokeWidth={1.5} />
         </Button>
+        <StudioExportSvgButton
+          disabled={controlsDisabled}
+          onExport={handleExportSvg}
+        />
         <StudioRecordPopover
           disabled={recordingBlocked}
           isRecording={isRecording}

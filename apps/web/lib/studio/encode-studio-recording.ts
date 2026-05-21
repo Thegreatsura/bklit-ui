@@ -4,6 +4,7 @@ import {
   StudioCaptureComposition,
   type StudioCaptureCompositionProps,
 } from "@/components/studio/studio-capture-composition";
+import { downloadBlob } from "./download-blob";
 import {
   framesForNativeTimeline,
   type StudioRecordingFormat,
@@ -20,15 +21,6 @@ export interface EncodeStudioRecordingOptions {
   chartSlug: string;
   onProgress?: (progress: number) => void;
   signal?: AbortSignal;
-}
-
-function downloadBlob(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = filename;
-  anchor.click();
-  URL.revokeObjectURL(url);
 }
 
 /** Fallback encode: one video frame per DOM snapshot at native capture rate. */

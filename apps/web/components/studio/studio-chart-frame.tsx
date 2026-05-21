@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 
 export const STUDIO_CHART_FRAME_HEIGHT = 400;
 export const STUDIO_CHART_FRAME_WIDTH = 720;
+export const STUDIO_EXPORT_ROOT_ATTR = "data-studio-export-root";
 
 const MIN_WIDTH = 280;
 const MIN_HEIGHT = 200;
@@ -276,6 +277,7 @@ export const StudioChartFrame = forwardRef<
                   : "border-border hover:border-foreground/35"
               )
         )}
+        data-studio-export-root=""
         layout={!isRecording}
         ref={captureRef}
         style={style}
