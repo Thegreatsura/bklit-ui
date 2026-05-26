@@ -5,4 +5,5 @@ export const siteNavLinks = [
   { text: "Theming", url: "/docs/theming" },
   { text: "Charts", url: "/charts" },
   { text: "Studio", url: "/studio" },
+  { text: "Skills", url: "/docs/skills" },
 ] as const;

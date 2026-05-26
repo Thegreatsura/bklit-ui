@@ -1,16 +1,16 @@
 ---
-name: bklit-ui
-description: This skill is for transitioning a chart or component from prototype to production.
+name: bklit-ship
+description: bklit-ui monorepo contributors only — ship a chart or component from playground prototype to production in packages/ui with docs and registry.
 disable-model-invocation: true
 ---
 
-# Bklit UI Skill
+# Bklit Ship Skill
 
-This skill is for taking an experimental chart or component from **prototype** (usually on an untracked route like the playground) into **production**: published in the UI package, documented, and ready for users.
+This skill is for **bklit-ui monorepo contributors** taking an experimental chart or component from **prototype** (usually on an untracked route like the playground) into **production**: published in the UI package, documented, and ready for users.
 
 ## When to use this skill
 
-- You have a working prototype on a temporary route (e.g. `apps/web/app/playground/page.tsx`) and want to ship it.
+- You cloned `bklit/bklit-ui` and have a working prototype on a temporary route (e.g. `apps/web/app/playground/page.tsx`) and want to ship it.
 - You are ready to move from "scaffolding" to "permanent": the API and key props/variants are decided from the prototyping phase.
 
 ---
