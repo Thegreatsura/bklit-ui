@@ -1,6 +1,11 @@
 {
   "version": 1,
   "skills": {
+    "bklit-ui": {
+      "source": "/Users/matt/Bklit/bklit-ui/skills/bklit-ui",
+      "sourceType": "local",
+      "computedHash": "ace89f8b9a6d5d8f0367307f886cb9654065356db537df7b57b3d849aa503534"
+    },
     "shadcn": {
       "source": "shadcn/ui",
       "sourceType": "github",
