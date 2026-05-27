@@ -42,24 +42,26 @@ export function AreaGradientDefs({
         </linearGradient>
       )}
 
-      <linearGradient id={strokeGradientId} x1="0%" x2="100%" y1="0%" y2="0%">
-        <stop
-          offset="0%"
-          style={{ stopColor: resolvedStroke, stopOpacity: 0 }}
-        />
-        <stop
-          offset="15%"
-          style={{ stopColor: resolvedStroke, stopOpacity: 1 }}
-        />
-        <stop
-          offset="85%"
-          style={{ stopColor: resolvedStroke, stopOpacity: 1 }}
-        />
-        <stop
-          offset="100%"
-          style={{ stopColor: resolvedStroke, stopOpacity: 0 }}
-        />
-      </linearGradient>
+      {fadeEdges ? (
+        <linearGradient id={strokeGradientId} x1="0%" x2="100%" y1="0%" y2="0%">
+          <stop
+            offset="0%"
+            style={{ stopColor: resolvedStroke, stopOpacity: 0 }}
+          />
+          <stop
+            offset="15%"
+            style={{ stopColor: resolvedStroke, stopOpacity: 1 }}
+          />
+          <stop
+            offset="85%"
+            style={{ stopColor: resolvedStroke, stopOpacity: 1 }}
+          />
+          <stop
+            offset="100%"
+            style={{ stopColor: resolvedStroke, stopOpacity: 0 }}
+          />
+        </linearGradient>
+      ) : null}
 
       {fadeEdges && !isPatternFill ? (
         <>

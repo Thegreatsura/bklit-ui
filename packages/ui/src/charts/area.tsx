@@ -117,7 +117,9 @@ export function Area({
   );
 
   const hasDashTail = resolveDashTailBounds(dashFromIndex, data.length);
-  const strokePaint = `url(#${strokeGradientId})`;
+  // Stroke gradient is only emitted when fadeEdges is on, so fall back to the
+  // resolved solid color otherwise — avoids painting via an invalid url(#...).
+  const strokePaint = fadeEdges ? `url(#${strokeGradientId})` : resolvedStroke;
   const highlightEnabled = showHighlight && showLine;
 
   return (
