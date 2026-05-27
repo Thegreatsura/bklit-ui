@@ -41,6 +41,7 @@ import {
   StudioRadialCenter,
   studioRadialSize,
 } from "@/components/studio/charts/studio-chart-layout";
+import { fadeEdgesPropValue } from "@/components/studio/controls/fade-edges-picker";
 import {
   getStudioCssRevealPropsForPreview,
   getStudioMotionEnterProps,
@@ -147,7 +148,11 @@ const areaConfig: StudioChartConfig = {
               <Area
                 curve={curve}
                 dataKey={key}
-                fadeEdges={patternThisSeries ? false : state.fadeEdges}
+                fadeEdges={
+                  patternThisSeries
+                    ? false
+                    : fadeEdgesPropValue(state.fadeEdges)
+                }
                 fill={isPrimary ? undefined : STUDIO_SERIES_COLORS[idx]}
                 fillOpacity={patternThisSeries ? 0 : state.fillOpacity}
                 gradientToOpacity={state.gradientToOpacity}
@@ -210,7 +215,7 @@ const lineConfig: StudioChartConfig = {
             <Line
               curve={resolveCurve(state.curve)}
               dataKey={key}
-              fadeEdges={state.fadeEdges}
+              fadeEdges={fadeEdgesPropValue(state.fadeEdges)}
               key={key}
               showHighlight={state.showHighlight}
               stroke={idx === 0 ? undefined : STUDIO_SERIES_COLORS[idx]}
@@ -391,7 +396,7 @@ const composedConfig: StudioChartConfig = {
                 <Area
                   curve={curve}
                   dataKey={key}
-                  fadeEdges={state.fadeEdges}
+                  fadeEdges={fadeEdgesPropValue(state.fadeEdges)}
                   fill={color}
                   fillOpacity={state.fillOpacity}
                   key={`area-${key}`}
@@ -400,7 +405,7 @@ const composedConfig: StudioChartConfig = {
                 <Line
                   curve={curve}
                   dataKey={key}
-                  fadeEdges={state.fadeEdges}
+                  fadeEdges={fadeEdgesPropValue(state.fadeEdges)}
                   key={`line-${key}`}
                   stroke={color}
                   strokeWidth={state.strokeWidth}

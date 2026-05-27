@@ -52,7 +52,12 @@ export const studioSearchParams = {
   motionStaggerScale: parseAsFloat.withDefault(1),
   showLine: parseAsBoolean.withDefault(true),
   showHighlight: parseAsBoolean.withDefault(true),
-  fadeEdges: parseAsBoolean.withDefault(true),
+  fadeEdges: parseAsStringLiteral([
+    "both",
+    "none",
+    "left",
+    "right",
+  ]).withDefault("both"),
   gradientToOpacity: parseAsFloat.withDefault(0),
   innerRadius: parseAsInteger.withDefault(0),
   padAngle: parseAsFloat.withDefault(0),
@@ -172,7 +177,7 @@ export interface StudioUrlState {
   motionStaggerScale: number;
   showLine: boolean;
   showHighlight: boolean;
-  fadeEdges: boolean;
+  fadeEdges: "both" | "none" | "left" | "right";
   gradientToOpacity: number;
   innerRadius: number;
   padAngle: number;
@@ -289,7 +294,7 @@ export function defaultStudioState(
     motionStaggerScale: 1,
     showLine: true,
     showHighlight: true,
-    fadeEdges: true,
+    fadeEdges: "both",
     gradientToOpacity: 0,
     innerRadius: 0,
     padAngle: 0,

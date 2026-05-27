@@ -10,6 +10,7 @@ type CurveFactory = any;
 import { useCallback, useId, useRef } from "react";
 import { AreaGradientDefs } from "./area-gradient-defs";
 import { chartCssVars, useChartStable } from "./chart-context";
+import { type FadeEdges, resolveFadeSides } from "./fade-edges";
 import {
   resolveDashTailBounds,
   usePathStrokeMetrics,
@@ -41,8 +42,14 @@ export interface AreaProps {
   showHighlight?: boolean;
   /** Gradient opacity at bottom (0 = fully transparent). Default: 0 */
   gradientToOpacity?: number;
-  /** Whether to fade the area fill at left/right edges. Default: false */
-  fadeEdges?: boolean;
+  /**
+   * Fade the area fill (and stroke) toward transparent at the chart edges.
+   * - `true` fades both edges, `false` disables the fade entirely.
+   * - `"left"` / `"right"` fades only that side — useful when the opposite
+   *   edge butts up against another element you don't want to fade into.
+   * Default: false
+   */
+  fadeEdges?: FadeEdges;
   /** Render scatter-style circle markers at each data point. Default: false */
   showMarkers?: boolean;
   /** Marker styling (same options as Scatter). */
@@ -117,9 +124,12 @@ export function Area({
   );
 
   const hasDashTail = resolveDashTailBounds(dashFromIndex, data.length);
-  // Stroke gradient is only emitted when fadeEdges is on, so fall back to the
-  // resolved solid color otherwise — avoids painting via an invalid url(#...).
-  const strokePaint = fadeEdges ? `url(#${strokeGradientId})` : resolvedStroke;
+  // The stroke gradient is only emitted when at least one edge fades, so fall
+  // back to the resolved solid color otherwise — avoids an invalid url(#...).
+  const fadeSides = resolveFadeSides(fadeEdges);
+  const strokePaint = fadeSides.any
+    ? `url(#${strokeGradientId})`
+    : resolvedStroke;
   const highlightEnabled = showHighlight && showLine;
 
   return (
@@ -144,7 +154,9 @@ export function Area({
         {showAreaFill ? (
           <g
             mask={
-              fadeEdges && !isPatternFill ? `url(#${edgeMaskId})` : undefined
+              fadeSides.any && !isPatternFill
+                ? `url(#${edgeMaskId})`
+                : undefined
             }
           >
             <AreaClosed
