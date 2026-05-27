@@ -128,6 +128,7 @@ const areaConfig: StudioChartConfig = {
       seriesCount,
       pointCount: state.dataPoints,
       xAxis: "date",
+      seed: ctx.dataSeed,
     });
     const seriesStroke = seriesStrokePropsFromState(state, data.length);
     return (
@@ -200,6 +201,7 @@ const lineConfig: StudioChartConfig = {
       seriesCount,
       pointCount: state.dataPoints,
       xAxis: "date",
+      seed: ctx.dataSeed,
     });
     const seriesStroke = seriesStrokePropsFromState(state, data.length);
     return (
@@ -306,6 +308,7 @@ const barConfig: StudioChartConfig = {
         seriesCount,
         pointCount: state.dataPoints,
         xAxis: "month",
+        seed: ctx.dataSeed,
       }) as unknown as Record<string, unknown>[];
       xKey = "month";
       seriesKeys = STUDIO_SERIES_KEYS.slice(0, seriesCount);
@@ -367,6 +370,7 @@ const composedConfig: StudioChartConfig = {
       seriesCount,
       pointCount: state.dataPoints,
       xAxis: "date",
+      seed: ctx.dataSeed,
     });
     const seriesStroke = seriesStrokePropsFromState(state, data.length);
     const barKey = STUDIO_SERIES_KEYS[0];
