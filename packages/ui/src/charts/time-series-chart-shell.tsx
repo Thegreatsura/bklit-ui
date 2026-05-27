@@ -5,6 +5,7 @@ import { bisector, extent } from "d3-array";
 import type { Transition } from "motion/react";
 import {
   Children,
+  cloneElement,
   isValidElement,
   memo,
   type ReactElement,
@@ -95,6 +96,13 @@ export function isPostOverlayComponent(child: ReactElement): boolean {
       : "";
 
   return componentName === "ChartMarkers" || componentName === "MarkerGroup";
+}
+
+function ensureChildKey(child: ReactElement, index: number): ReactElement {
+  if (child.key != null) {
+    return child;
+  }
+  return cloneElement(child, { key: `chart-child-${index}` });
 }
 
 export interface TimeSeriesChartInnerProps {
@@ -253,20 +261,22 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
   const preOverlayChildren: ReactElement[] = [];
   const postOverlayChildren: ReactElement[] = [];
 
-  Children.forEach(children, (child) => {
+  Children.forEach(children, (child, index) => {
     if (!isValidElement(child)) {
       return;
     }
 
-    if (isGradientDefComponent(child)) {
-      defsChildren.push(child);
-    } else if (isPatternDefComponent(child)) {
+    const keyedChild = ensureChildKey(child, index);
+
+    if (isGradientDefComponent(keyedChild)) {
+      defsChildren.push(keyedChild);
+    } else if (isPatternDefComponent(keyedChild)) {
       // Keep pattern defs in the plot <g> (same as main) — hoisting breaks url(#id) fills.
-      preOverlayChildren.push(child);
-    } else if (isPostOverlayComponent(child)) {
-      postOverlayChildren.push(child);
+      preOverlayChildren.push(keyedChild);
+    } else if (isPostOverlayComponent(keyedChild)) {
+      postOverlayChildren.push(keyedChild);
     } else {
-      preOverlayChildren.push(child);
+      preOverlayChildren.push(keyedChild);
     }
   });
 
