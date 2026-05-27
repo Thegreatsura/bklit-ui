@@ -306,7 +306,17 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
   // animation instead of N, with all series referencing the same `<clipPath>`.
   // The wipe semantics (left-to-right unveil of static path geometry) are
   // identical to the previous per-series clips.
-  const showReveal = renderData.length > 1 && innerWidth > 0;
+  // animationDuration === 0 truly disables the reveal (no clipPath wrapper),
+  // so consumers can opt out without having to also pass enterTransition.
+  const showReveal =
+    renderData.length > 1 && innerWidth > 0 && animationDuration > 0;
+  // If the consumer didn't pass an explicit enterTransition, derive one from
+  // animationDuration so clipRevealTransition picks up the override instead
+  // of falling back to its 1100ms default.
+  const effectiveEnterTransition: Transition = enterTransition ?? {
+    type: "tween",
+    duration: animationDuration / 1000,
+  };
 
   return (
     <ChartProvider value={contextValue}>
@@ -316,7 +326,7 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
           {showReveal ? (
             <ChartRevealClip
               clipPathId={clipPathId}
-              enterTransition={enterTransition}
+              enterTransition={effectiveEnterTransition}
               height={innerHeight + 20}
               revealEpoch={revealEpoch}
               targetWidth={innerWidth}

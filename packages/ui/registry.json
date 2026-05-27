@@ -218,6 +218,11 @@
           "path": "src/charts/area-gradient-defs.tsx",
           "type": "registry:component",
           "target": "components/charts/area-gradient-defs.tsx"
+        },
+        {
+          "path": "src/charts/fade-edges.ts",
+          "type": "registry:component",
+          "target": "components/charts/fade-edges.ts"
         }
       ]
     },

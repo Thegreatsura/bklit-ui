@@ -37,6 +37,7 @@ export type StudioControl =
   | { type: "lineCap"; key: "barLineCap"; label: string }
   | { type: "pieHoverEffect"; key: "pieHoverEffect"; label: string }
   | { type: "funnelEdges"; key: "funnelEdges"; label: string }
+  | { type: "fadeEdges"; key: "fadeEdges"; label: string }
   | { type: "graticuleToggle"; key: "showGraticule"; label: string }
   | ({
       type: "innerRadius";
