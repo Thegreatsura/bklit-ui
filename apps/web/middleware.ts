@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { SITE_URL } from "@/lib/site-url";
 
 const canonicalUrl = new URL(SITE_URL);
