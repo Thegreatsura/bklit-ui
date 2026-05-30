@@ -38,9 +38,10 @@ export default function PlaygroundPage() {
       size={size}
       viewport={viewport}
     >
-      {({ size: frameSize, boundsRef, onResize, mobileViewport }) => (
+      {({ size: frameSize, boundsRef, onResize, mobileViewport, canvasScale }) => (
         <EditorChartFrame
           boundsRef={boundsRef}
+          canvasScale={canvasScale}
           height={frameSize.height}
           onResize={onResize}
           resizable={!mobileViewport}

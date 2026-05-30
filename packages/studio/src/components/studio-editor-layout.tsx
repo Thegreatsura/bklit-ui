@@ -59,6 +59,7 @@ function StudioEditorCanvas({
   boundsRef,
   onResize,
   mobileViewport,
+  canvasScale,
 }: {
   animationKey: number;
   dataSeed: number;
@@ -86,6 +87,7 @@ function StudioEditorCanvas({
   boundsRef: RefObject<HTMLDivElement | null>;
   onResize: (width: number, height: number) => void;
   mobileViewport: boolean;
+  canvasScale: number;
 }) {
   return (
     <div
@@ -152,6 +154,7 @@ function StudioEditorCanvas({
             >
               <StudioChartFrame
                 boundsRef={boundsRef}
+                canvasScale={canvasScale}
                 height={size.height}
                 isRecording={isRecording}
                 onResize={onResize}
@@ -346,10 +349,11 @@ export function StudioEditorLayout({
         size={{ width: state.frameW, height: state.frameH }}
         viewport={viewport}
       >
-        {({ size, boundsRef, onResize, mobileViewport }) => (
+        {({ size, boundsRef, onResize, mobileViewport, canvasScale }) => (
           <StudioEditorCanvas
             animationKey={animationKey}
             boundsRef={boundsRef}
+            canvasScale={canvasScale}
             chartAreaRef={chartAreaRef}
             config={config}
             dataSeed={dataSeed}

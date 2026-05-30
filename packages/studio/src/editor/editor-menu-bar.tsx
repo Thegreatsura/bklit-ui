@@ -1,6 +1,13 @@
 "use client";
 
-import { Monitor, Smartphone, Tablet } from "lucide-react";
+import {
+  Maximize2,
+  Minus,
+  Monitor,
+  Plus,
+  Smartphone,
+  Tablet,
+} from "lucide-react";
 import { useEffect } from "react";
 import { EditorReplayButton } from "@/editor/editor-replay-button";
 import { EditorSidebarToggle } from "@/editor/editor-sidebar-toggle";
@@ -84,6 +91,12 @@ export function EditorMenuBar({
   onViewportChange,
   onReplay,
   actions,
+  showZoomControls = false,
+  canvasScale = 1,
+  onZoomIn,
+  onZoomOut,
+  onFitView,
+  onResetZoom,
 }: {
   className?: string;
   viewport: ViewportPreset | null;
@@ -92,9 +105,15 @@ export function EditorMenuBar({
   sidebarsOpen: boolean;
   showSidebarToggle?: boolean;
   showViewportToggles?: boolean;
+  showZoomControls?: boolean;
+  canvasScale?: number;
   onSidebarsOpenChange: (open: boolean) => void;
   onViewportChange: (preset: ViewportPreset) => void;
   onReplay: () => void;
+  onZoomIn?: () => void;
+  onZoomOut?: () => void;
+  onFitView?: () => void;
+  onResetZoom?: () => void;
   actions?: React.ReactNode;
 }) {
   useEffect(() => {
@@ -155,6 +174,68 @@ export function EditorMenuBar({
         <Separator className="mx-0.5 h-5" orientation="vertical" />
 
         <EditorThemeToggle />
+
+        {showZoomControls ? (
+          <>
+            <Separator className="mx-0.5 h-5 shrink-0" orientation="vertical" />
+
+            <Tooltip>
+              <TooltipTrigger render={<span className="inline-flex" />}>
+                <Button
+                  aria-label="Zoom out"
+                  className="size-8"
+                  onClick={onZoomOut}
+                  size="icon-sm"
+                  type="button"
+                  variant="ghost"
+                >
+                  <Minus />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Zoom out</TooltipContent>
+            </Tooltip>
+
+            <button
+              className="min-w-12 shrink-0 px-1 font-mono text-[11px] text-muted-foreground tabular-nums hover:text-foreground"
+              onClick={onResetZoom}
+              type="button"
+            >
+              {Math.round(canvasScale * 100)}%
+            </button>
+
+            <Tooltip>
+              <TooltipTrigger render={<span className="inline-flex" />}>
+                <Button
+                  aria-label="Zoom in"
+                  className="size-8"
+                  onClick={onZoomIn}
+                  size="icon-sm"
+                  type="button"
+                  variant="ghost"
+                >
+                  <Plus />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Zoom in</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger render={<span className="inline-flex" />}>
+                <Button
+                  aria-label="Zoom to fit"
+                  className="size-8"
+                  onClick={onFitView}
+                  size="icon-sm"
+                  type="button"
+                  variant="ghost"
+                >
+                  <Maximize2 />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Zoom to fit (double-click canvas)</TooltipContent>
+            </Tooltip>
+          </>
+        ) : null}
 
         {actions ? (
           <>

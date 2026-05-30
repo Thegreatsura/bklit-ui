@@ -2,20 +2,16 @@
 
 import type { ReactNode, RefObject } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  EDITOR_MOBILE_CHART_ASPECT_RATIO,
-  fitSizeToAspectRatio,
-} from "@/editor/editor-aspect-ratio";
+import { EditorCanvas } from "@/editor/editor-canvas";
+import { EditorCanvasMinimap } from "@/editor/editor-canvas-minimap";
 import { EditorMenuBar } from "@/editor/editor-menu-bar";
 import { EditorMobilePanelTriggers } from "@/editor/editor-mobile-panel-sheets";
 import { EditorRuler, EditorRulerCorner } from "@/editor/editor-rulers";
 import { FpsCounter } from "@/editor/fps-counter";
+import { useEditorCanvasView } from "@/editor/use-editor-canvas-view";
 import type { ViewportPreset } from "@/editor/viewport-presets";
 import { resolveViewportSize } from "@/editor/viewport-presets";
 import { cn } from "@/lib/utils";
-
-const MOBILE_CANVAS_MIN_WIDTH = 240;
-const MOBILE_CANVAS_MIN_HEIGHT = 180;
 
 export function EditorMainPane({
   className,
@@ -53,12 +49,20 @@ export function EditorMainPane({
     boundsRef: RefObject<HTMLDivElement | null>;
     onResize: (width: number, height: number) => void;
     mobileViewport: boolean;
+    canvasScale: number;
   }) => ReactNode;
 }) {
   const canvasRef = useRef<HTMLDivElement>(null);
-  const onSizeChangeRef = useRef(onSizeChange);
-  onSizeChangeRef.current = onSizeChange;
   const [maxWidth, setMaxWidth] = useState(960);
+  const canvasEnabled = true;
+
+  const canvas = useEditorCanvasView({
+    enabled: canvasEnabled,
+    viewportRef: canvasRef,
+    artboardWidth: size.width,
+    artboardHeight: size.height,
+    persist: !mobileViewport,
+  });
 
   useEffect(() => {
     const element = canvasRef.current;
@@ -77,48 +81,8 @@ export function EditorMainPane({
   }, []);
 
   useEffect(() => {
-    if (!mobileViewport) {
-      return;
-    }
-
-    const element = canvasRef.current;
-    if (!element) {
-      return;
-    }
-
-    const fitToCanvas = () => {
-      const style = getComputedStyle(element);
-      const padX =
-        Number.parseFloat(style.paddingLeft) +
-        Number.parseFloat(style.paddingRight);
-      const padY =
-        Number.parseFloat(style.paddingTop) +
-        Number.parseFloat(style.paddingBottom);
-      const width = Math.max(
-        Math.round(element.clientWidth - padX),
-        MOBILE_CANVAS_MIN_WIDTH
-      );
-      const height = Math.max(
-        Math.round(element.clientHeight - padY),
-        MOBILE_CANVAS_MIN_HEIGHT
-      );
-      const next = fitSizeToAspectRatio(
-        width,
-        height,
-        EDITOR_MOBILE_CHART_ASPECT_RATIO,
-        MOBILE_CANVAS_MIN_WIDTH,
-        MOBILE_CANVAS_MIN_HEIGHT
-      );
-      if (next.width !== size.width || next.height !== size.height) {
-        onSizeChangeRef.current(next.width, next.height);
-      }
-    };
-
-    fitToCanvas();
-    const observer = new ResizeObserver(fitToCanvas);
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [mobileViewport, size.height, size.width]);
+    canvas.centerArtboard();
+  }, [canvas.centerArtboard]);
 
   const handleViewportChange = useCallback(
     (preset: ViewportPreset) => {
@@ -137,32 +101,58 @@ export function EditorMainPane({
     [onSizeChange, onViewportChange]
   );
 
+  const handlePanTo = useCallback(
+    (panX: number, panY: number) => {
+      canvas.setPan(panX, panY);
+    },
+    [canvas]
+  );
+
+  const artboard = (
+    <div
+      className="inline-flex"
+      style={{ width: size.width, height: size.height }}
+    >
+      {children({
+        size,
+        boundsRef: canvasRef,
+        onResize: handleResize,
+        mobileViewport,
+        canvasScale: canvas.view.scale,
+      })}
+    </div>
+  );
+
   return (
     <div className={cn("flex h-full min-h-0 flex-col", className)}>
       <div className="flex h-full min-h-0 flex-1">
         <div className="flex h-full w-8 shrink-0 flex-col">
           <EditorRulerCorner />
-          <EditorRuler className="min-h-0 flex-1" orientation="vertical" />
+          <EditorRuler
+            canvasView={canvas.view}
+            className="min-h-0 flex-1"
+            orientation="vertical"
+          />
         </div>
 
-        <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
-          <EditorRuler orientation="horizontal" />
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+          <EditorRuler canvasView={canvas.view} orientation="horizontal" />
 
-          <div
-            className={cn(
-              "studio-preview-canvas relative flex min-h-0 flex-1 flex-col items-center justify-center",
-              mobileViewport
-                ? "overflow-hidden overscroll-none p-3"
-                : "overflow-auto p-8"
-            )}
-            ref={canvasRef}
-          >
-            {children({
-              size,
-              boundsRef: canvasRef,
-              onResize: handleResize,
-              mobileViewport,
-            })}
+          <div className="relative min-h-0 flex-1">
+            <EditorCanvas
+              enabled={canvasEnabled}
+              onDoubleClick={canvas.onDoubleClick}
+              onPointerDown={canvas.onPointerDown}
+              onPointerMove={canvas.onPointerMove}
+              onPointerUp={canvas.onPointerUp}
+              onWheel={canvas.onWheel}
+              registerPinchHandlers={canvas.registerPinchHandlers}
+              spacePressed={canvas.spacePressed}
+              view={canvas.view}
+              viewportRef={canvasRef}
+            >
+              {artboard}
+            </EditorCanvas>
 
             {mobileViewport && onLeftSheetOpen && onRightSheetOpen ? (
               <EditorMobilePanelTriggers
@@ -174,24 +164,40 @@ export function EditorMainPane({
             {showFpsCounter ? (
               <FpsCounter
                 className={cn(
-                  "absolute top-3 z-20",
+                  "pointer-events-none absolute top-3 z-20",
                   mobileViewport ? "right-14" : "right-3"
                 )}
               />
             ) : null}
 
+            {canvasEnabled && !mobileViewport ? (
+              <EditorCanvasMinimap
+                artboardHeight={size.height}
+                artboardWidth={size.width}
+                onPanTo={handlePanTo}
+                view={canvas.view}
+                viewportRef={canvasRef}
+              />
+            ) : null}
+
             <EditorMenuBar
               actions={menuBarActions}
+              canvasScale={canvas.view.scale}
               className={cn(
-                "absolute left-1/2 z-20 -translate-x-1/2",
+                "pointer-events-auto absolute left-1/2 z-20 -translate-x-1/2",
                 mobileViewport ? "bottom-3" : "bottom-6"
               )}
               height={size.height}
+              onFitView={canvas.fitToView}
               onReplay={onReplay}
+              onResetZoom={canvas.resetTo100}
               onSidebarsOpenChange={onSidebarsOpenChange}
               onViewportChange={handleViewportChange}
+              onZoomIn={() => canvas.zoomBy(1.12)}
+              onZoomOut={() => canvas.zoomBy(1 / 1.12)}
               showSidebarToggle={showSidebarToggle}
               showViewportToggles={!mobileViewport}
+              showZoomControls={canvasEnabled}
               sidebarsOpen={sidebarsOpen}
               viewport={viewport}
               width={size.width}

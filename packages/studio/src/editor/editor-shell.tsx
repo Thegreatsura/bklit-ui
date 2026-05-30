@@ -66,6 +66,7 @@ export function EditorShell({
     boundsRef: RefObject<HTMLDivElement | null>;
     onResize: (width: number, height: number) => void;
     mobileViewport: boolean;
+    canvasScale: number;
   }) => ReactNode;
 }) {
   const { compact: compactLayout, ready: layoutReady } =

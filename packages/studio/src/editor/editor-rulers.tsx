@@ -1,49 +1,63 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { EditorCanvasView } from "@/editor/editor-canvas-view";
+import { pickWorldTickInterval } from "@/editor/editor-canvas-view";
 import { cn } from "@/lib/utils";
 
-const TICK_INTERVAL = 20;
-const LABEL_INTERVAL = 100;
+function getWorldRange(
+  length: number,
+  view: EditorCanvasView,
+  axis: "x" | "y"
+) {
+  const pan = axis === "x" ? view.panX : view.panY;
+  const start = Math.floor((0 - pan) / view.scale);
+  const end = Math.ceil((length - pan) / view.scale);
+  return { start, end };
+}
 
-const rulerTickClass = "absolute bg-foreground/25";
-const rulerMajorTickClass = "absolute bg-foreground/40";
-
-function RulerTicks({
+function CanvasRulerContent({
   length,
   orientation,
+  view,
 }: {
   length: number;
   orientation: "horizontal" | "vertical";
+  view: EditorCanvasView;
 }) {
-  const ticks = Math.ceil(length / TICK_INTERVAL);
+  const axis = orientation === "horizontal" ? "x" : "y";
+  const pan = axis === "x" ? view.panX : view.panY;
+  const interval = pickWorldTickInterval(view.scale);
+  const { end } = getWorldRange(length, view, axis);
+  const firstTick =
+    Math.floor(getWorldRange(length, view, axis).start / interval) * interval;
   const isHorizontal = orientation === "horizontal";
+
+  const ticks = useMemo(() => {
+    const items: number[] = [];
+    for (let value = firstTick; value <= end; value += interval) {
+      items.push(value);
+    }
+    return items;
+  }, [end, firstTick, interval]);
 
   return (
     <>
-      {Array.from({ length: ticks + 1 }, (_, index) => {
-        const position = index * TICK_INTERVAL;
-        const isMajor = position % LABEL_INTERVAL === 0;
+      {ticks.map((value) => {
+        const screen = value * view.scale + pan;
+        if (screen < -2 || screen > length + 2) {
+          return null;
+        }
+
+        const isMajor = value % (interval * 2) === 0 || interval >= 100;
 
         return (
-          <div
-            className={isMajor ? rulerMajorTickClass : rulerTickClass}
-            key={`${orientation}-${position}`}
-            style={
-              isHorizontal
-                ? {
-                    left: position,
-                    bottom: 0,
-                    width: 1,
-                    height: isMajor ? 10 : 6,
-                  }
-                : {
-                    top: position,
-                    right: 0,
-                    height: 1,
-                    width: isMajor ? 10 : 6,
-                  }
-            }
+          <RulerTickMark
+            isHorizontal={isHorizontal}
+            isMajor={isMajor}
+            key={`${orientation}-${value}`}
+            screen={screen}
+            value={value}
           />
         );
       })}
@@ -51,44 +65,122 @@ function RulerTicks({
   );
 }
 
-function RulerLabels({
+function RulerTickMark({
+  isHorizontal,
+  isMajor,
+  screen,
+  value,
+}: {
+  isHorizontal: boolean;
+  isMajor: boolean;
+  screen: number;
+  value: number;
+}) {
+  return (
+    <div>
+      <div
+        className={cn(
+          "absolute bg-foreground/25",
+          isMajor && "bg-foreground/40"
+        )}
+        style={
+          isHorizontal
+            ? {
+                left: screen,
+                bottom: 0,
+                width: 1,
+                height: isMajor ? 10 : 6,
+              }
+            : {
+                top: screen,
+                right: 0,
+                height: 1,
+                width: isMajor ? 10 : 6,
+              }
+        }
+      />
+      {isMajor ? (
+        <span
+          className={cn(
+            "absolute font-mono text-[9px] text-foreground/45 tabular-nums",
+            isHorizontal ? "top-0.5" : "left-2"
+          )}
+          style={
+            isHorizontal
+              ? { left: screen + 2 }
+              : {
+                  top: screen + 4,
+                  writingMode: "vertical-lr",
+                }
+          }
+        >
+          {value}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+function StaticRulerContent({
   length,
   orientation,
 }: {
   length: number;
   orientation: "horizontal" | "vertical";
 }) {
-  const labels = Math.ceil(length / LABEL_INTERVAL);
+  const tickInterval = 20;
+  const labelInterval = 100;
+  const ticks = Math.ceil(length / tickInterval);
   const isHorizontal = orientation === "horizontal";
 
   return (
     <>
-      {Array.from({ length: labels + 1 }, (_, index) => {
-        const position = index * LABEL_INTERVAL;
-
-        if (isHorizontal) {
-          return (
-            <span
-              className="absolute top-0.5 font-mono text-[9px] text-foreground/45 tabular-nums"
-              key={`${orientation}-label-${position}`}
-              style={{ left: position + 2 }}
-            >
-              {position}
-            </span>
-          );
-        }
+      {Array.from({ length: ticks + 1 }, (_, index) => {
+        const position = index * tickInterval;
+        const isMajor = position % labelInterval === 0;
 
         return (
-          <span
-            className="absolute left-2 font-mono text-[9px] text-foreground/45 tabular-nums"
-            key={`${orientation}-label-${position}`}
-            style={{
-              top: position + 4,
-              writingMode: "vertical-lr",
-            }}
-          >
-            {position}
-          </span>
+          <div key={`${orientation}-${position}`}>
+            <div
+              className={cn(
+                "absolute bg-foreground/25",
+                isMajor && "bg-foreground/40"
+              )}
+              style={
+                isHorizontal
+                  ? {
+                      left: position,
+                      bottom: 0,
+                      width: 1,
+                      height: isMajor ? 10 : 6,
+                    }
+                  : {
+                      top: position,
+                      right: 0,
+                      height: 1,
+                      width: isMajor ? 10 : 6,
+                    }
+              }
+            />
+            {isMajor ? (
+              <span
+                className={cn(
+                  "absolute font-mono text-[9px] text-foreground/45 tabular-nums",
+                  isHorizontal ? "top-0.5" : "left-2"
+                )}
+                style={
+                  isHorizontal
+                    ? { left: position + 2 }
+                    : {
+                        top: position + 4,
+                        writingMode: "vertical-lr",
+                      }
+                }
+              >
+                {position}
+              </span>
+            ) : null}
+          </div>
         );
       })}
     </>
@@ -98,9 +190,11 @@ function RulerLabels({
 export function EditorRuler({
   orientation,
   className,
+  canvasView,
 }: {
   orientation: "horizontal" | "vertical";
   className?: string;
+  canvasView?: EditorCanvasView;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [length, setLength] = useState(0);
@@ -138,8 +232,15 @@ export function EditorRuler({
       )}
       ref={ref}
     >
-      <RulerTicks length={length} orientation={orientation} />
-      <RulerLabels length={length} orientation={orientation} />
+      {canvasView ? (
+        <CanvasRulerContent
+          length={length}
+          orientation={orientation}
+          view={canvasView}
+        />
+      ) : (
+        <StaticRulerContent length={length} orientation={orientation} />
+      )}
     </div>
   );
 }

@@ -138,6 +138,7 @@ export const StudioChartFrame = forwardRef<
     style?: CSSProperties;
     isRecording?: boolean;
     resizable?: boolean;
+    canvasScale?: number;
     children: React.ReactNode;
   }
 >(function StudioChartFrame(
@@ -151,6 +152,7 @@ export const StudioChartFrame = forwardRef<
     style,
     isRecording = false,
     resizable = true,
+    canvasScale = 1,
     children,
   },
   ref
@@ -181,14 +183,21 @@ export const StudioChartFrame = forwardRef<
       return;
     }
     const update = () => {
+      const scaleFactor = 1 / Math.max(canvasScale, 0.01);
       setMaxSize({
         width: Math.max(
           MIN_WIDTH,
-          Math.min(STUDIO_CHART_FRAME_MAX_WIDTH, bounds.clientWidth - 48)
+          Math.min(
+            STUDIO_CHART_FRAME_MAX_WIDTH,
+            (bounds.clientWidth - 48) * scaleFactor
+          )
         ),
         height: Math.max(
           MIN_HEIGHT,
-          Math.min(STUDIO_CHART_FRAME_MAX_HEIGHT, bounds.clientHeight - 48)
+          Math.min(
+            STUDIO_CHART_FRAME_MAX_HEIGHT,
+            (bounds.clientHeight - 48) * scaleFactor
+          )
         ),
       });
     };
@@ -196,7 +205,7 @@ export const StudioChartFrame = forwardRef<
     const observer = new ResizeObserver(update);
     observer.observe(bounds);
     return () => observer.disconnect();
-  }, [boundsRef]);
+  }, [boundsRef, canvasScale]);
 
   useEffect(() => {
     if (draggingRef.current) {
@@ -236,15 +245,17 @@ export const StudioChartFrame = forwardRef<
         maxSize.height
       );
 
+      const scaleFactor = 1 / Math.max(canvasScale, 0.01);
+
       const onPointerMove = (moveEvent: PointerEvent) => {
         let nextWidth = startWidth;
         let nextHeight = startHeight;
 
         if (edge === "right" || edge === "corner") {
-          nextWidth = startWidth + (moveEvent.clientX - startX);
+          nextWidth = startWidth + (moveEvent.clientX - startX) * scaleFactor;
         }
         if (edge === "bottom" || edge === "corner") {
-          nextHeight = startHeight + (moveEvent.clientY - startY);
+          nextHeight = startHeight + (moveEvent.clientY - startY) * scaleFactor;
         }
 
         latest = clampFrameSize(
@@ -274,6 +285,7 @@ export const StudioChartFrame = forwardRef<
     [
       isRecording,
       resizable,
+      canvasScale,
       maxSize.height,
       maxSize.width,
       onDraggingChange,
