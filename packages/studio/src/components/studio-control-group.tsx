@@ -35,7 +35,7 @@ export function StudioControlGroup({
       )}
       data-studio-control-group={title}
     >
-      <header className="studio-control-group-header flex items-center justify-between gap-2 h-10">
+      <header className="studio-control-group-header flex h-10 items-center justify-between gap-2">
         {collapsible ? (
           <button
             aria-expanded={open}
