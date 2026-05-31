@@ -10,6 +10,7 @@ import {
   TypeIcon,
 } from "lucide-react";
 import { StudioControlGroup } from "@/components/studio-control-group";
+import { StudioScrambleDataButton } from "@/components/studio-scramble-data-button";
 import {
   flattenStudioComponents,
   studioComponentDepth,
@@ -40,10 +41,14 @@ export function StudioComponentsPanel({
   components,
   selectedId,
   onSelect,
+  controlsDisabled = false,
+  onScramble,
 }: {
   components: StudioComponentDefinition[];
   selectedId: string;
   onSelect: (id: string) => void;
+  controlsDisabled?: boolean;
+  onScramble?: () => void;
 }) {
   const ordered = flattenStudioComponents(components);
 
@@ -82,6 +87,14 @@ export function StudioComponentsPanel({
           );
         })}
       </ul>
+      {onScramble ? (
+        <div className="pt-2">
+          <StudioScrambleDataButton
+            disabled={controlsDisabled}
+            onScramble={onScramble}
+          />
+        </div>
+      ) : null}
     </StudioControlGroup>
   );
 }

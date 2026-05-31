@@ -4,7 +4,6 @@ import { PanelLeftOpen } from "lucide-react";
 import type { ReactNode } from "react";
 import { StudioComponentsPanel } from "@/components/studio-components-panel";
 import { StudioPropertiesPanel } from "@/components/studio-properties-panel";
-import { StudioScrambleDataButton } from "@/components/studio-scramble-data-button";
 import { StudioScrollArea } from "@/components/studio-scroll-area";
 import { EditorAnimationSection } from "@/editor/editor-animation-section";
 import { EditorDataSection } from "@/editor/editor-data-section";
@@ -140,15 +139,11 @@ export function EditorMobilePanelSheets({
               ) : null}
               <StudioComponentsPanel
                 components={components}
+                controlsDisabled={controlsDisabled}
+                onScramble={onScramble}
                 onSelect={setSelectedComponentId}
                 selectedId={selectedComponentId}
               />
-              <div className="border-border/60 border-b pt-1 pb-4">
-                <StudioScrambleDataButton
-                  disabled={controlsDisabled}
-                  onScramble={onScramble}
-                />
-              </div>
               <EditorDataSection
                 groups={dataControlGroups}
                 onChange={onChange}

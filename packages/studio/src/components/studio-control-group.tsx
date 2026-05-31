@@ -30,12 +30,12 @@ export function StudioControlGroup({
   return (
     <section
       className={cn(
-        "studio-control-group flex flex-col border-border/60 border-b pb-4",
+        "studio-control-group flex flex-col border-border border-b pb-3",
         className
       )}
       data-studio-control-group={title}
     >
-      <header className="studio-control-group-header flex items-center justify-between gap-2 pb-4">
+      <header className="studio-control-group-header flex items-center justify-between gap-2 h-10">
         {collapsible ? (
           <button
             aria-expanded={open}
@@ -63,7 +63,7 @@ export function StudioControlGroup({
       {open ? (
         <div
           className={cn(
-            "studio-control-group-fields min-w-0 space-y-3.5",
+            "studio-control-group-fields min-w-0 space-y-1.5",
             fieldsClassName
           )}
         >
