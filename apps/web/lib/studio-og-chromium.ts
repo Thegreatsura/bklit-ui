@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import chromium from "@sparticuz/chromium";
 import puppeteer, { type Browser } from "puppeteer-core";
 
@@ -27,6 +29,21 @@ function shouldUseLocalChrome(): boolean {
   return process.env.NODE_ENV === "development" || process.env.VERCEL !== "1";
 }
 
+const SERVERLESS_CHROMIUM_BIN_CANDIDATES = [
+  join(process.cwd(), "node_modules/@sparticuz/chromium/bin"),
+  join(process.cwd(), "apps/web/node_modules/@sparticuz/chromium/bin"),
+];
+
+async function resolveServerlessChromiumPath(): Promise<string> {
+  for (const binPath of SERVERLESS_CHROMIUM_BIN_CANDIDATES) {
+    if (existsSync(binPath)) {
+      return await chromium.executablePath(binPath);
+    }
+  }
+
+  return await chromium.executablePath();
+}
+
 export async function launchStudioOgBrowser(): Promise<Browser> {
   const localChrome = shouldUseLocalChrome();
 
@@ -47,7 +64,7 @@ export async function launchStudioOgBrowser(): Promise<Browser> {
     },
     executablePath: localChrome
       ? await resolveLocalChromePath()
-      : await chromium.executablePath(),
+      : await resolveServerlessChromiumPath(),
     headless: true,
   });
 }
