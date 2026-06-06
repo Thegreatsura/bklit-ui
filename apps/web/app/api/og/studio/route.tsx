@@ -15,6 +15,7 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 const size = { width: 1200, height: 630 };
 const RIGHT_PADDING = 48;

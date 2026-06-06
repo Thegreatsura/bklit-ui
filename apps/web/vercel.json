@@ -1,0 +1,12 @@
+{
+  "functions": {
+    "app/api/og/studio/chart/route.ts": {
+      "memory": 3008,
+      "maxDuration": 60
+    },
+    "app/api/og/studio/route.tsx": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  }
+}

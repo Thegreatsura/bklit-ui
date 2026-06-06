@@ -23,10 +23,18 @@ async function resolveLocalChromePath(): Promise<string> {
   );
 }
 
-export async function launchStudioOgBrowser(): Promise<Browser> {
-  const isDev = process.env.NODE_ENV === "development";
+function shouldUseLocalChrome(): boolean {
+  return process.env.NODE_ENV === "development" || process.env.VERCEL !== "1";
+}
 
-  const chromiumArgs: string[] = isDev
+export async function launchStudioOgBrowser(): Promise<Browser> {
+  const localChrome = shouldUseLocalChrome();
+
+  if (!localChrome) {
+    chromium.setGraphicsMode = false;
+  }
+
+  const chromiumArgs: string[] = localChrome
     ? await Promise.resolve(puppeteer.defaultArgs())
     : await Promise.resolve(chromium.args);
 
@@ -37,7 +45,7 @@ export async function launchStudioOgBrowser(): Promise<Browser> {
       height: 800,
       deviceScaleFactor: 2,
     },
-    executablePath: isDev
+    executablePath: localChrome
       ? await resolveLocalChromePath()
       : await chromium.executablePath(),
     headless: true,

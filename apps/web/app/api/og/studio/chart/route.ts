@@ -13,6 +13,7 @@ import { launchStudioOgBrowser } from "@/lib/studio-og-chromium";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 const OG_READY_TIMEOUT_MS = 10_000;
 /** Retina capture multiplier — keep in sync with `OG_PREVIEW_MAX_WIDTH` in studio-og-preview */
