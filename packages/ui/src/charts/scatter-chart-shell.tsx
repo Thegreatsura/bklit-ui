@@ -22,7 +22,7 @@ import {
 } from "./chart-context";
 import { isGradientDefComponent, isPatternDefComponent } from "./chart-defs";
 import { shortDateFmt } from "./chart-formatters";
-import { DEFAULT_CHART_LIFECYCLE } from "./chart-phase";
+import { type ChartPhase, DEFAULT_CHART_LIFECYCLE } from "./chart-phase";
 import { isPostOverlayComponent } from "./time-series-chart-shell";
 import { useScatterChartInteraction } from "./use-scatter-chart-interaction";
 import { buildYScalesForLines, getPrimaryYScale } from "./y-axis-scales";
@@ -40,6 +40,7 @@ export interface ScatterChartInnerProps {
   children: ReactNode;
   containerRef: React.RefObject<HTMLDivElement | null>;
   lines: LineConfig[];
+  onPhaseChange?: (phase: ChartPhase) => void;
 }
 
 export function ScatterChartInner({
@@ -55,6 +56,7 @@ export function ScatterChartInner({
   children,
   containerRef,
   lines,
+  onPhaseChange,
 }: ScatterChartInnerProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [revealEpoch, setRevealEpoch] = useState(0);
@@ -145,6 +147,10 @@ export function ScatterChartInner({
     }, animationDuration);
     return () => clearTimeout(timer);
   }, [animationDuration, revealSignature]);
+
+  useEffect(() => {
+    onPhaseChange?.(isLoaded ? "ready" : "revealing");
+  }, [isLoaded, onPhaseChange]);
 
   const canInteract = isLoaded;
 
