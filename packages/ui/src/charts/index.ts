@@ -31,6 +31,11 @@ export {
   type BarProps,
 } from "./bar";
 export { BarChart, type BarChartProps, type BarOrientation } from "./bar-chart";
+// Bar chart loading skeleton (a `status="loading"` shortcut)
+export {
+  BarChartLoading,
+  type BarChartLoadingProps,
+} from "./bar-chart-loading";
 // Bar 3D depth + glass surfaces (composable layers for BarChart)
 export {
   BarDepthBack,
@@ -124,6 +129,7 @@ export {
   DEFAULT_CHART_STATUS,
   DEFAULT_Y_DOMAIN_TWEEN_MS,
   isChartInteractionPhase,
+  type LoadingStyle,
   resolveRestingChartPhase,
 } from "./chart-phase";
 export {
@@ -225,6 +231,14 @@ export {
 } from "./live-line-chart";
 export { LiveXAxis, type LiveXAxisProps } from "./live-x-axis";
 export { LiveYAxis, type LiveYAxisProps } from "./live-y-axis";
+// Sweep loading visuals: `loadingStyle="sweep"` on Line/Area + bar skeleton
+export {
+  BarLoadingSkeleton,
+  type BarLoadingSkeletonProps,
+  getSkeletonHeights,
+  LineLoadingSweep,
+  type LineLoadingSweepProps,
+} from "./loading-sweep";
 // Marker components
 export {
   type ChartMarker,

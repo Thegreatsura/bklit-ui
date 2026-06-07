@@ -266,6 +266,7 @@ Pair `Grid` `stroke` / `loadingStroke` with shimmer props. Pair `Area` `loadingS
 
 <ComponentShowcase
   code={`const [status, setStatus] = useState<"loading" | "ready">("loading");
+const [loadingStyle, setLoadingStyle] = useState<"pulse" | "sweep">("pulse");
 
 <AreaChart
   data={data}
@@ -287,6 +288,7 @@ Pair `Grid` `stroke` / `loadingStroke` with shimmer props. Pair `Area` `loadingS
     fillOpacity={0.35}
     loadingStroke="var(--foreground)"
     loadingStrokeOpacity={0.5}
+    loadingStyle={loadingStyle}
     strokeWidth={2}
   />
 </AreaChart>`}
@@ -296,7 +298,7 @@ Pair `Grid` `stroke` / `loadingStroke` with shimmer props. Pair `Area` `loadingS
   <AreaChartYDomainDemo />
 </ComponentShowcase>
 
-Toggle **Loading** / **Ready** in the preview to replay the transition. When target data spans a different y-range than the skeleton, `yDomainTween` morphs the scale before the area reveals.
+Toggle **Loading** / **Ready** in the preview to replay the transition, and **Pulse** / **Sweep** to switch the loading animation style. When target data spans a different y-range than the skeleton, `yDomainTween` morphs the scale before the area reveals.
 
 ### Studio
 
@@ -311,6 +313,22 @@ Open [Studio in loading mode](/studio?chart=area-chart&areaChartState=loading) a
 Data and animation panels stay collapsed in loading mode; scramble data is disabled. See the [area chart gallery](/charts/area-chart) (**Loading** example).
 
 Add `@ncdai` to your [registry config](/docs/installation#registry-namespace) (`https://chanhdai.com/r/{name}.json`) — installing `@bklit/area-chart` pulls in `@ncdai/shimmering-text` automatically.
+
+### Loading style: pulse or sweep
+
+The loading state has two animation styles, set with `loadingStyle` on the `Area`: the default `"pulse"` (a segment travels along the skeleton stroke) or `"sweep"` (a soft diagonal shimmer sweeps across the whole area). Set it on the `Area` inside a `status="loading"` chart, or on the `AreaChartLoading` wrapper:
+
+```tsx
+<AreaChart data={data} status="loading">
+  <Grid horizontal shimmer />
+  <Area dataKey="revenue" loadingStyle="sweep" />
+</AreaChart>
+
+// or, with the turnkey wrapper:
+<AreaChartLoading loadingStyle="sweep" />;
+```
+
+The sweep masks over the real skeleton stroke, so it follows whatever `curve` the `Area` uses and respects `prefers-reduced-motion`. The sweep is used only during steady loading; the pulse still drives the exit transition. See the **Loading (Sweep)** example on the [area chart gallery](/charts/area-chart).
 
 ## Dashed tail
 

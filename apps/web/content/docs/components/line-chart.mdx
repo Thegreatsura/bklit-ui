@@ -246,6 +246,7 @@ Pair `Grid` `stroke` / `loadingStroke` with shimmer props. Pair `Line` `loadingS
 
 <ComponentShowcase
   code={`const [status, setStatus] = useState<"loading" | "ready">("loading");
+const [loadingStyle, setLoadingStyle] = useState<"pulse" | "sweep">("pulse");
 
 <LineChart
   data={data}
@@ -265,6 +266,7 @@ Pair `Grid` `stroke` / `loadingStroke` with shimmer props. Pair `Line` `loadingS
     fadeEdges
     loadingStroke="var(--foreground)"
     loadingStrokeOpacity={0.5}
+    loadingStyle={loadingStyle}
     stroke="var(--chart-line-primary)"
   />
 </LineChart>`}
@@ -274,7 +276,7 @@ Pair `Grid` `stroke` / `loadingStroke` with shimmer props. Pair `Line` `loadingS
   <LineChartYDomainDemo />
 </ComponentShowcase>
 
-Toggle **Loading** / **Ready** in the preview to replay the transition. When target data spans a different y-range than the skeleton, `yDomainTween` morphs the scale before the line reveals.
+Toggle **Loading** / **Ready** in the preview to replay the transition, and **Pulse** / **Sweep** to switch the loading animation style. When target data spans a different y-range than the skeleton, `yDomainTween` morphs the scale before the line reveals.
 
 ### Studio
 
@@ -289,6 +291,22 @@ Open [Studio in loading mode](/studio?chart=line-chart&lineChartState=loading) a
 Data and animation panels stay collapsed in loading mode; scramble data is disabled. See the [line chart gallery](/charts/line-chart) (**Loading** example).
 
 Add `@ncdai` to your [registry config](/docs/installation#registry-namespace) (`https://chanhdai.com/r/{name}.json`) — installing `@bklit/line-chart` pulls in `@ncdai/shimmering-text` automatically.
+
+### Loading style: pulse or sweep
+
+The loading state has two animation styles, set with `loadingStyle` on the `Line`: the default `"pulse"` (a segment travels along the skeleton stroke) or `"sweep"` (a soft diagonal shimmer sweeps across the whole line). Set it on the `Line` inside a `status="loading"` chart, or on the `LineChartLoading` wrapper:
+
+```tsx
+<LineChart data={data} status="loading">
+  <Grid horizontal shimmer />
+  <Line dataKey="revenue" loadingStyle="sweep" />
+</LineChart>
+
+// or, with the turnkey wrapper:
+<LineChartLoading loadingStyle="sweep" />;
+```
+
+The sweep masks over the real skeleton line, so it follows whatever `curve` the `Line` uses (`curveStepAfter`, `curveNatural`, …) and respects `prefers-reduced-motion`. To keep the loading→ready handoff smooth, the sweep is used only during steady loading; the pulse still drives the exit transition. See the **Loading (Sweep)** example on the [line chart gallery](/charts/line-chart).
 
 ## Dashed tail
 

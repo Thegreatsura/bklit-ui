@@ -27,7 +27,12 @@ import {
 } from "./chart-context";
 import { isGradientDefComponent, isPatternDefComponent } from "./chart-defs";
 import { shortDateFmt } from "./chart-formatters";
-import { type ChartPhase, DEFAULT_CHART_LIFECYCLE } from "./chart-phase";
+import {
+  type ChartPhase,
+  type ChartStatus,
+  DEFAULT_CHART_LIFECYCLE,
+} from "./chart-phase";
+import { BarLoadingSkeleton } from "./loading-sweep";
 import { useScheduledTooltip } from "./use-scheduled-tooltip";
 import {
   buildYScalesForLines,
@@ -35,6 +40,9 @@ import {
   normalizeYAxisId,
   wrapSingleYScale,
 } from "./y-axis-scales";
+
+/** Skeleton bars to show when `status="loading"` and `data` is empty. */
+const FALLBACK_LOADING_BARS = 12;
 
 export type BarOrientation = "vertical" | "horizontal";
 
@@ -67,10 +75,14 @@ export interface BarChartProps {
   stacked?: boolean;
   /** Gap between stacked bar segments in pixels. Default: 0 */
   stackGap?: number;
-  /** Child components (Bar, Grid, ChartTooltip, etc.) */
-  children: ReactNode;
+  /** Child components (Bar, Grid, ChartTooltip, etc.). Optional — omit for a
+   * pure `status="loading"` skeleton. */
+  children?: ReactNode;
   /** Reports reveal lifecycle for OG screenshots and loading orchestration. */
   onPhaseChange?: (phase: ChartPhase) => void;
+  /** Fetch / display status. When `"loading"`, a shimmer skeleton replaces the
+   * bars (no chart data required). Default: `"ready"`. */
+  status?: ChartStatus;
 }
 
 const DEFAULT_MARGIN: Margin = { top: 40, right: 40, bottom: 40, left: 40 };
@@ -160,6 +172,7 @@ interface ChartInnerProps {
   children: ReactNode;
   containerRef: React.RefObject<HTMLDivElement | null>;
   onPhaseChange?: (phase: ChartPhase) => void;
+  status: ChartStatus;
 }
 
 function ChartInner(props: ChartInnerProps) {
@@ -188,6 +201,7 @@ const ChartCore = memo(function ChartCore({
   children,
   containerRef,
   onPhaseChange,
+  status,
 }: ChartInnerProps) {
   const { tooltipData, setTooltipData, scheduleTooltip, clearTooltip } =
     useScheduledTooltip<TooltipData>();
@@ -368,11 +382,16 @@ const ChartCore = memo(function ChartCore({
   useEffect(() => {
     setRevealEpoch((n) => n + 1);
     setIsLoaded(false);
+    // While loading, hold the skeleton (no reveal, no interaction). When
+    // status flips to "ready" this effect re-runs and plays the grow reveal.
+    if (status === "loading") {
+      return;
+    }
     const timer = setTimeout(() => {
       setIsLoaded(true);
     }, animationDuration);
     return () => clearTimeout(timer);
-  }, [animationDuration, revealSignature]);
+  }, [animationDuration, revealSignature, status]);
 
   useEffect(() => {
     onPhaseChange?.(isLoaded ? "ready" : "revealing");
@@ -606,8 +625,16 @@ const ChartCore = memo(function ChartCore({
             y={0}
           />
 
-          {/* SVG children rendered before markers */}
-          {preOverlayChildren}
+          {/* Loading skeleton replaces the bars while status="loading" */}
+          {status === "loading" ? (
+            <BarLoadingSkeleton
+              barCount={data.length || FALLBACK_LOADING_BARS}
+              innerHeight={innerHeight}
+              innerWidth={innerWidth}
+            />
+          ) : (
+            preOverlayChildren
+          )}
 
           {/* Markers rendered last so they're on top for interaction */}
           {postOverlayChildren}
@@ -634,6 +661,7 @@ export function BarChart({
   stackGap = 0,
   children,
   onPhaseChange,
+  status = "ready",
 }: BarChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const margin = { ...DEFAULT_MARGIN, ...marginProp };
@@ -661,6 +689,7 @@ export function BarChart({
             revealSignature={revealSignature}
             stacked={stacked}
             stackGap={stackGap}
+            status={status}
             width={width}
             xDataKey={xDataKey}
           >

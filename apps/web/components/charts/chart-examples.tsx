@@ -7,6 +7,7 @@ import {
   Background,
   Bar,
   BarChart,
+  BarChartLoading,
   BarDepthBack,
   BarDepthFront,
   BarDepthProvider,
@@ -866,6 +867,7 @@ ${chartClose}`,
 const AreaExampleChart = createChartExamplePreview(AreaChart);
 const AreaChartLoadingExample = createChartExamplePreview(AreaChartLoading);
 const BarExampleChart = createChartExamplePreview(BarChart);
+const BarChartLoadingExample = createChartExamplePreview(BarChartLoading);
 const LineExampleChart = createChartExamplePreview(LineChart);
 const LineChartLoadingExample = createChartExamplePreview(LineChartLoading);
 const ComposedExampleChart = createChartExamplePreview(ComposedChart);
@@ -1104,6 +1106,15 @@ function makeAreaExamples(): ChartExample[] {
       render: () => <AreaChartLoadingExample />,
     },
     {
+      title: "Area Chart - Loading (Sweep)",
+      description:
+        "Diagonal shimmer sweeping across the skeleton area while data loads",
+      code: `<AreaChartLoading loadingStyle="sweep" />`,
+      footer:
+        'Set loadingStyle="sweep" on Area or AreaChartLoading; defaults to the traveling pulse.',
+      render: () => <AreaChartLoadingExample loadingStyle="sweep" />,
+    },
+    {
       title: "Area Chart - Segment Selection",
       description: "Click and drag to select a range",
       code: `<AreaChart data={chartData}>
@@ -1331,6 +1342,16 @@ function makeBarExamples(): ChartExample[] {
           <ChartTooltip />
         </BarExampleChart>
       ),
+    },
+    {
+      title: "Bar Chart - Loading",
+      description:
+        "Diagonal shimmer sweeping across placeholder bars while data loads",
+      code: `// Shortcut for <BarChart status="loading" />
+<BarChartLoading />`,
+      footer:
+        'Set status="loading" on BarChart, or use the BarChartLoading shortcut.',
+      render: () => <BarChartLoadingExample />,
     },
     {
       title: "Bar Chart - 3D Depth",
@@ -2321,6 +2342,15 @@ import {
       footer:
         "Uses @ncdai/shimmering-text for the label — installed with @bklit/line-chart",
       render: () => <LineChartLoadingExample />,
+    },
+    {
+      title: "Line Chart - Loading (Sweep)",
+      description:
+        "Diagonal shimmer sweeping across the skeleton line while data loads",
+      code: `<LineChartLoading loadingStyle="sweep" />`,
+      footer:
+        'Set loadingStyle="sweep" on Line or LineChartLoading; defaults to the traveling pulse.',
+      render: () => <LineChartLoadingExample loadingStyle="sweep" />,
     },
     {
       title: "Line Chart - Dashed Tail",
