@@ -87,7 +87,14 @@ function extractBarConfigs(children: ReactNode): LineConfig[] {
     const childType = child.type as {
       displayName?: string;
       name?: string;
+      __isBarDepthLayer?: boolean;
     };
+    // Bar-depth surface layers (BarDepthBack/Front, BarPulse) carry a
+    // `dataKey` to pair with a Bar but are not series themselves — skip them
+    // so they don't inflate the series count and shrink the real bars.
+    if (childType.__isBarDepthLayer) {
+      return;
+    }
     const componentName =
       typeof child.type === "function"
         ? childType.displayName || childType.name || ""
@@ -572,7 +579,12 @@ const ChartCore = memo(function ChartCore({
 
   return (
     <ChartProvider value={contextValue}>
-      <svg aria-hidden="true" height={height} width={width}>
+      <svg
+        aria-hidden="true"
+        className="overflow-visible"
+        height={height}
+        width={width}
+      >
         {/* Gradient and pattern definitions */}
         {defsChildren.length > 0 && <defs>{defsChildren}</defs>}
 
@@ -628,7 +640,7 @@ export function BarChart({
 
   return (
     <div
-      className={cn("relative w-full", className)}
+      className={cn("relative w-full overflow-visible", className)}
       ref={containerRef}
       style={{ aspectRatio }}
     >
