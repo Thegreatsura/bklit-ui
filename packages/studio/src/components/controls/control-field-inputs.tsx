@@ -15,6 +15,7 @@ import {
 } from "@/ui/select";
 import { Switch } from "@/ui/switch";
 import { studioControlInputClass } from "./control-field-helpers";
+import { CrosshairFadePicker } from "./crosshair-fade-picker";
 import { CurvePicker } from "./curve-picker";
 import { type FadeEdgesOption, FadeEdgesPicker } from "./fade-edges-picker";
 import { FunnelEdgesPicker } from "./funnel-edges-picker";
@@ -24,6 +25,7 @@ import { OrientationPicker } from "./orientation-picker";
 import { PatternPicker } from "./pattern-picker";
 import { PieFillPicker } from "./pie-fill-picker";
 import { PieHoverEffectPicker } from "./pie-hover-effect-picker";
+import { StrokeStylePicker } from "./stroke-style-picker";
 
 export function ControlFieldInputs({
   control,
@@ -152,6 +154,24 @@ export function ControlFieldInputs({
         <GraticuleToggle
           onChange={(v) => onChange("showGraticule", v)}
           value={Boolean(value)}
+        />
+      );
+    case "strokeStyle":
+      return (
+        <StrokeStylePicker
+          onChange={(v) =>
+            onChange(control.key, v as StudioUrlState[typeof control.key])
+          }
+          value={value as "solid" | "dashed"}
+        />
+      );
+    case "crosshairFade":
+      return (
+        <CrosshairFadePicker
+          onChange={(v) =>
+            onChange(control.key, v as StudioUrlState[typeof control.key])
+          }
+          value={value as "both" | "none" | "top" | "bottom"}
         />
       );
     default:

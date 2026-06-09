@@ -239,6 +239,19 @@ export const studioSearchParams = {
   showCrosshair: parseAsBoolean.withDefault(true),
   crosshairFollowsValue: parseAsBoolean.withDefault(true),
   crosshairColor: parseAsString.withDefault("var(--chart-crosshair)"),
+  crosshairStyle: parseAsStringLiteral(["solid", "dashed"]).withDefault(
+    "solid"
+  ),
+  crosshairDashArray: parseAsString.withDefault("4,4"),
+  crosshairFadeEdges: parseAsStringLiteral([
+    "both",
+    "none",
+    "top",
+    "bottom",
+  ]).withDefault("both"),
+  crosshairFadeLength: parseAsFloat.withDefault(10),
+  tooltipMatchCrosshair: parseAsBoolean.withDefault(true),
+  tooltipDamping: parseAsInteger.withDefault(20),
   showBrush: parseAsBoolean.withDefault(false),
   brushHeight: parseAsInteger.withDefault(76),
   brushFadeEdges: parseAsBoolean.withDefault(true),
@@ -455,6 +468,12 @@ export interface StudioUrlState {
   showCrosshair: boolean;
   crosshairFollowsValue: boolean;
   crosshairColor: string;
+  crosshairStyle: "solid" | "dashed";
+  crosshairDashArray: string;
+  crosshairFadeEdges: "both" | "none" | "top" | "bottom";
+  crosshairFadeLength: number;
+  tooltipMatchCrosshair: boolean;
+  tooltipDamping: number;
   showBrush: boolean;
   brushHeight: number;
   brushFadeEdges: boolean;
@@ -675,6 +694,12 @@ export function defaultStudioState(
     showCrosshair: true,
     crosshairFollowsValue: true,
     crosshairColor: "var(--chart-crosshair)",
+    crosshairStyle: "solid",
+    crosshairDashArray: "4,4",
+    crosshairFadeEdges: "both",
+    crosshairFadeLength: 10,
+    tooltipMatchCrosshair: true,
+    tooltipDamping: 20,
     showBrush: false,
     brushHeight: 76,
     brushFadeEdges: true,

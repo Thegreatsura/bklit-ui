@@ -18,16 +18,55 @@ export function studioTooltipPanelStyle(
   };
 }
 
+export function chartTooltipCodegenProps(state: StudioUrlState): string {
+  const parts: string[] = [];
+
+  if (state.crosshairStyle === "dashed") {
+    parts.push(`indicatorDasharray="${state.crosshairDashArray}"`);
+  }
+  if (state.crosshairFadeEdges !== "both") {
+    parts.push(`indicatorFadeEdges="${state.crosshairFadeEdges}"`);
+  }
+  if (state.crosshairFadeLength !== 10) {
+    parts.push(`indicatorFadeLength={${state.crosshairFadeLength}}`);
+  }
+  if (!state.tooltipMatchCrosshair) {
+    parts.push("matchCrosshair={false}");
+  }
+  if (!state.tooltipMatchCrosshair && state.tooltipDamping !== 20) {
+    parts.push(`damping={${state.tooltipDamping}}`);
+  }
+
+  return parts.length > 0 ? `\n          ${parts.join("\n          ")}` : "";
+}
+
 export function chartTooltipPropsFromState(
   state: StudioUrlState,
   overrides: Partial<ChartTooltipProps> = {}
 ): ChartTooltipProps {
   const panelStyle = studioTooltipPanelStyle(state);
+  const indicatorDasharray =
+    state.crosshairStyle === "dashed" ? state.crosshairDashArray : undefined;
+  const indicatorFadeEdges =
+    state.crosshairFadeEdges === "both" ? undefined : state.crosshairFadeEdges;
+  const indicatorFadeLength =
+    state.crosshairFadeLength === 10 ? undefined : state.crosshairFadeLength;
+  const matchCrosshair = state.tooltipMatchCrosshair ? undefined : false;
+  const damping =
+    state.tooltipMatchCrosshair || state.tooltipDamping === 20
+      ? undefined
+      : state.tooltipDamping;
+
   return {
     showCrosshair: state.showCrosshair,
     showDots: state.showTooltipDots,
     showDatePill: state.showTooltipDatePill,
     indicatorColor: state.crosshairColor,
+    indicatorDasharray,
+    indicatorFadeEdges,
+    indicatorFadeLength,
+    matchCrosshair,
+    damping,
     panelStyle,
     ...overrides,
   };
