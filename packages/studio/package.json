@@ -1,6 +1,7 @@
 {
   "name": "@bklitui/studio",
   "version": "0.0.0",
+  "license": "UNLICENSED",
   "private": true,
   "sideEffects": [
     "./src/styles/studio.css"
