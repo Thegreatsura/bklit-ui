@@ -1,15 +1,5 @@
 /*
  * Studio sidebar theme tokens — override these in your app CSS to theme the editor.
- *
- * Example (apps/studio-desktop/src/index.css):
- *
- *   .dark {
- *     --studio-label: oklch(0.72 0.014 214.4);
- *     --studio-section-label: oklch(0.65 0.014 214.4);
- *     --studio-input-background: oklch(0.12 0.004 263);
- *     --studio-control-surface-top: oklch(0.28 0.02 290 / 0.5);
- *     --studio-control-surface-bottom: oklch(0.28 0.02 290 / 0.1);
- *   }
  */
 @layer base {
   :root {

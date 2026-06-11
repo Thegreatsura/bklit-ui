@@ -174,4 +174,8 @@ See [Installation](https://ui.bklit.com/docs/installation) for registry setup an
 
 ## License
 
-MIT
+**Chart components** (`packages/ui`, shadcn registry) are [MIT licensed](./LICENSE).
+
+**Bklit Studio** (`packages/studio`, hosted at [ui.bklit.com/studio](https://ui.bklit.com/studio))
+is proprietary. See [LICENSE-STUDIO.md](./LICENSE-STUDIO.md). You may not reuse,
+resell, or redistribute Studio without written permission.
