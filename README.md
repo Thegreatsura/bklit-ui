@@ -10,14 +10,9 @@
     <a href="https://github.com/bklit/bklit-ui/actions"><img src="https://www.shieldcn.dev/github/ci/bklit/bklit-ui.svg?variant=secondary&size=xs&theme=zinc" alt="CI" /></a>
     <a href="https://discord.gg/75s4frfE8X"><img src="https://www.shieldcn.dev/discord/members/75s4frfE8X.svg?variant=secondary&size=xs&theme=zinc" alt="Discord Members" /></a>
     <a href="https://x.com/uixmat"><img src="https://www.shieldcn.dev/x/follow/uixmat.svg?variant=branded&size=xs&theme=zinc" alt="X Follow" /></a>
+    <a href="https://vercel.com/oss"><img src="https://shieldcn.dev/badge/Vercel_OSS_Program_Member.svg?variant=branded&logo=vercel" alt="Vercel OSS Program Member" /></a>
   </p>
 </p>
-
-## Vercel OS Program - Spring 2026 Cohort
-
-<a href="https://vercel.com/open-source-program">
-  <img alt="Vercel OSS Program" src="https://vercel.com/oss/program-badge-2026.svg" />
-</a>
 
 ## Premium Sponsors
 
