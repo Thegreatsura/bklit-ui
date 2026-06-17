@@ -13,6 +13,12 @@
   </p>
 </p>
 
+## Vercel OS Program - Spring 2026 Cohort
+
+<a href="https://vercel.com/open-source-program">
+  <img alt="Vercel OSS Program" src="https://vercel.com/oss/program-badge-2026.svg" />
+</a>
+
 ## Premium Sponsors
 
 Bklit UI is supported by our premium sponsors.
