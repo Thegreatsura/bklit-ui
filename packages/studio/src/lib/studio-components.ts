@@ -338,6 +338,9 @@ export function getStudioDataControlGroups(
 }
 
 function loadingGridControlGroups(state: StudioUrlState): StudioControlGroup[] {
+  const showGridShimmer =
+    state.loadingStyle !== "sweep" && state.lineLoadingGridShimmer;
+
   return [
     ...gridControlGroups,
     controlGroup("Loading", [
@@ -350,8 +353,9 @@ function loadingGridControlGroups(state: StudioUrlState): StudioControlGroup[] {
         type: "boolean",
         key: "lineLoadingGridShimmer",
         label: "Shimmer",
+        visibleWhen: { key: "loadingStyle", not: "sweep" },
       },
-      ...(state.lineLoadingGridShimmer
+      ...(showGridShimmer
         ? [
             {
               type: "color" as const,
@@ -370,7 +374,7 @@ function loadingGridControlGroups(state: StudioUrlState): StudioControlGroup[] {
           ]
         : []),
     ]),
-    ...(state.lineLoadingGridShimmer
+    ...(showGridShimmer
       ? [
           controlGroup("Animation", [
             {

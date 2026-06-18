@@ -50,6 +50,7 @@ import {
   barCodegen,
   candlestickCodegen,
   cartesianCodegen,
+  cartesianLoadingCodegen,
   choroplethDataSnippet,
   composedCodegen,
   funnelCodegen,
@@ -151,10 +152,18 @@ const areaConfig: StudioChartConfig = {
   controlGroups: areaChartControlGroups,
   resolveComponents: resolveAreaComponents,
   render: (state, ctx) => <AreaStudioPreview ctx={ctx} state={state} />,
-  generateCode: (state) => ({
-    code: cartesianCodegen("AreaChart", state),
-    data: areaChartDataSnippet(state),
-  }),
+  generateCode: (state) => {
+    if (state.areaChartState === "loading") {
+      return {
+        ...cartesianLoadingCodegen("AreaChart", state),
+        data: areaChartDataSnippet(state),
+      };
+    }
+    return {
+      code: cartesianCodegen("AreaChart", state),
+      data: areaChartDataSnippet(state),
+    };
+  },
 };
 
 const lineConfig: StudioChartConfig = {
@@ -180,13 +189,21 @@ const lineConfig: StudioChartConfig = {
 
     return <LineChartStudioStandardPreview ctx={ctx} state={state} />;
   },
-  generateCode: (state) =>
-    isProfitLossLineMode(state)
-      ? profitLossLineCodegen(state)
-      : {
-          code: cartesianCodegen("LineChart", state),
-          data: lineChartDataSnippet(state),
-        },
+  generateCode: (state) => {
+    if (isProfitLossLineMode(state)) {
+      return profitLossLineCodegen(state);
+    }
+    if (state.lineChartState === "loading") {
+      return {
+        ...cartesianLoadingCodegen("LineChart", state),
+        data: lineChartDataSnippet(state),
+      };
+    }
+    return {
+      code: cartesianCodegen("LineChart", state),
+      data: lineChartDataSnippet(state),
+    };
+  },
 };
 
 const scatterConfig: StudioChartConfig = {

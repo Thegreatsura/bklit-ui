@@ -269,6 +269,89 @@ function referenceAreaCodegenImport(
   }
 }
 
+function loadingGridPropsCodegen(state: StudioUrlState): string {
+  const props = [`loadingStroke="${state.lineLoadingGridStroke}"`];
+  const useShimmer =
+    state.loadingStyle !== "sweep" && state.lineLoadingGridShimmer;
+
+  if (useShimmer) {
+    props.push("shimmer");
+    if (state.lineLoadingGridShimmerSync) {
+      props.push("shimmerSync");
+    }
+    if (
+      state.lineLoadingGridShimmerStroke !==
+      "color-mix(in oklch, var(--foreground) 68%, transparent)"
+    ) {
+      props.push(`shimmerStroke="${state.lineLoadingGridShimmerStroke}"`);
+    }
+    if (state.lineLoadingGridShimmerLength !== 140) {
+      props.push(`shimmerLength={${state.lineLoadingGridShimmerLength}}`);
+    }
+    if (
+      !state.lineLoadingGridShimmerSync &&
+      state.lineLoadingGridShimmerSpeed !== 1
+    ) {
+      props.push(`shimmerSpeed={${state.lineLoadingGridShimmerSpeed}}`);
+    }
+  }
+
+  return `${gridPropsCodegen(state)} ${props.join(" ")}`;
+}
+
+export function cartesianLoadingCodegen(
+  chartType: "AreaChart" | "LineChart",
+  state: StudioUrlState
+) {
+  const chartPrefix = chartType === "LineChart" ? "line" : "area";
+  const primaryKey = seriesKeysForState(state)[0] ?? "revenue";
+  const anim = `\n  ${cssRevealAnimationCodegen(state.animationDuration, motionSliceFromState(state))}`;
+  const loadingLabel =
+    state.lineLoadingLabel.length > 0
+      ? `\n  loadingLabel="${state.lineLoadingLabel.replace(/"/g, '\\"')}"`
+      : "";
+  const loadingStyleAttr =
+    state.loadingStyle === "sweep" ? ' loadingStyle="sweep"' : "";
+  const loadingStrokeAttr = `loadingStroke="${state.lineLoadingStroke}" loadingStrokeOpacity={${state.lineLoadingStrokeOpacity}}`;
+
+  const backgroundBlock = backgroundCodegenBlock(state, chartPrefix);
+  const usesBackground = backgroundBlock.length > 0;
+  const gridVisible = isStudioComponentVisible(state, `${chartPrefix}.grid`);
+  const gridBlock = gridVisible
+    ? `\n  <Grid${loadingGridPropsCodegen(state)} />`
+    : "";
+  const referenceAreaBlock = referenceAreaCodegenBlock(state, chartPrefix);
+
+  const chartImports = [chartType, "Grid"];
+  referenceAreaCodegenImport(state, chartPrefix, chartImports);
+  if (usesBackground) {
+    chartImports.push("Background");
+  }
+
+  let child = "";
+  if (chartType === "LineChart") {
+    chartImports.push("Line");
+    const curveName = curveImportName(getSeriesCurve(state, 0));
+    child = `\n  <Line dataKey="${primaryKey}" curve={${curveName}} strokeWidth={${getSeriesStrokeWidth(state, 0)}} ${fadeEdgesCodegen(getSeriesFadeEdges(state, 0))} ${loadingStrokeAttr}${loadingStyleAttr} />`;
+  } else {
+    chartImports.push("Area");
+    const curveName = curveImportName(getSeriesCurve(state, 0));
+    child = `\n  <Area dataKey="${primaryKey}" curve={${curveName}} fillOpacity={${state.fillOpacity}} strokeWidth={${getSeriesStrokeWidth(state, 0)}} ${fadeEdgesCodegen(getSeriesFadeEdges(state, 0))} gradientToOpacity={${state.gradientToOpacity}} showLine={${getSeriesShowLine(state, 0)}} ${loadingStrokeAttr}${loadingStyleAttr} />`;
+  }
+
+  const curveImports = visxCurveImportLines(state, [0]);
+
+  return {
+    code: `import { ${chartImports.join(", ")} } from "@bklitui/ui/charts";
+${curveImports}
+
+<${chartType} data={chartData}${anim}
+  status="loading"${loadingLabel}
+  yDomainTween>${backgroundBlock}${gridBlock}${referenceAreaBlock}${child}
+</${chartType}>`,
+  };
+}
+
 export function cartesianCodegen(
   chartType: "AreaChart" | "LineChart",
   state: StudioUrlState

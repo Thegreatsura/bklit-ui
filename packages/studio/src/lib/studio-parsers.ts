@@ -215,6 +215,7 @@ export const studioSearchParams = {
   barChartState: parseAsStringLiteral(["ready", "loading"]).withDefault(
     "ready"
   ),
+  loadingStyle: parseAsStringLiteral(["pulse", "sweep"]).withDefault("pulse"),
   lineLoadingStroke: parseAsString.withDefault("var(--foreground)"),
   lineLoadingStrokeOpacity: parseAsFloat.withDefault(0.5),
   lineLoadingGridStroke: parseAsString.withDefault(
@@ -513,6 +514,7 @@ export interface StudioUrlState {
   lineChartState: "ready" | "loading";
   areaChartState: "ready" | "loading";
   barChartState: "ready" | "loading";
+  loadingStyle: "pulse" | "sweep";
   lineLoadingStroke: string;
   lineLoadingStrokeOpacity: number;
   lineLoadingGridStroke: string;
@@ -786,6 +788,7 @@ export function defaultStudioState(
     lineChartState: "ready",
     areaChartState: "ready",
     barChartState: "ready",
+    loadingStyle: "pulse",
     lineLoadingStroke: "var(--foreground)",
     lineLoadingStrokeOpacity: 0.5,
     lineLoadingGridStroke:
