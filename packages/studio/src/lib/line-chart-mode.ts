@@ -16,8 +16,16 @@ export function isAreaChartLoadingMode(state: StudioUrlState) {
   return state.chart === "area-chart" && state.areaChartState === "loading";
 }
 
+export function isBarChartLoadingMode(state: StudioUrlState) {
+  return state.chart === "bar-chart" && state.barChartState === "loading";
+}
+
 export function isCartesianLoadingMode(state: StudioUrlState) {
-  return isLineChartLoadingMode(state) || isAreaChartLoadingMode(state);
+  return (
+    isLineChartLoadingMode(state) ||
+    isAreaChartLoadingMode(state) ||
+    isBarChartLoadingMode(state)
+  );
 }
 
 export const lineChartProfitLossDefaults: Partial<StudioUrlState> = {

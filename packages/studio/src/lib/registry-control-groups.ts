@@ -309,6 +309,16 @@ export const composedOverlayLineControlGroups: StudioControlGroup[] = [
   seriesDashTailControlGroup,
 ];
 
+const loadingStyleControl = {
+  type: "select" as const,
+  key: "loadingStyle" as const,
+  label: "Loading style",
+  options: [
+    { value: "pulse", label: "Pulse" },
+    { value: "sweep", label: "Sweep" },
+  ],
+};
+
 export const areaChartControlGroups: StudioControlGroup[] = [
   controlGroup("Settings", [
     {
@@ -319,6 +329,10 @@ export const areaChartControlGroups: StudioControlGroup[] = [
         { value: "ready", label: "Ready" },
         { value: "loading", label: "Loading" },
       ],
+    },
+    {
+      ...loadingStyleControl,
+      visibleWhen: { key: "areaChartState", equals: "loading" },
     },
   ]),
   dataGroup(),
@@ -551,15 +565,21 @@ function lineChartSettingsGroup(
   ];
 
   if (mode === "standard") {
-    controls.push({
-      type: "select",
-      key: "lineChartState",
-      label: "State",
-      options: [
-        { value: "ready", label: "Ready" },
-        { value: "loading", label: "Loading" },
-      ],
-    });
+    controls.push(
+      {
+        type: "select",
+        key: "lineChartState",
+        label: "State",
+        options: [
+          { value: "ready", label: "Ready" },
+          { value: "loading", label: "Loading" },
+        ],
+      },
+      {
+        ...loadingStyleControl,
+        visibleWhen: { key: "lineChartState", equals: "loading" },
+      }
+    );
   }
 
   return controlGroup("Settings", controls);
@@ -688,6 +708,17 @@ export const profitLossLineChartControlGroups = getLineChartControlGroups({
 });
 
 export const barChartControlGroups: StudioControlGroup[] = [
+  controlGroup("Settings", [
+    {
+      type: "select",
+      key: "barChartState",
+      label: "State",
+      options: [
+        { value: "ready", label: "Ready" },
+        { value: "loading", label: "Loading" },
+      ],
+    },
+  ]),
   dataGroup(),
   referenceAreaBoundsControlGroup,
   controlGroup("Series", [

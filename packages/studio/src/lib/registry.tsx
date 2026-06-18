@@ -50,6 +50,7 @@ import {
   barCodegen,
   candlestickCodegen,
   cartesianCodegen,
+  cartesianLoadingCodegen,
   choroplethDataSnippet,
   composedCodegen,
   funnelCodegen,
@@ -151,10 +152,18 @@ const areaConfig: StudioChartConfig = {
   controlGroups: areaChartControlGroups,
   resolveComponents: resolveAreaComponents,
   render: (state, ctx) => <AreaStudioPreview ctx={ctx} state={state} />,
-  generateCode: (state) => ({
-    code: cartesianCodegen("AreaChart", state),
-    data: areaChartDataSnippet(state),
-  }),
+  generateCode: (state) => {
+    if (state.areaChartState === "loading") {
+      return {
+        ...cartesianLoadingCodegen("AreaChart", state),
+        data: areaChartDataSnippet(state),
+      };
+    }
+    return {
+      code: cartesianCodegen("AreaChart", state),
+      data: areaChartDataSnippet(state),
+    };
+  },
 };
 
 const lineConfig: StudioChartConfig = {
@@ -180,13 +189,21 @@ const lineConfig: StudioChartConfig = {
 
     return <LineChartStudioStandardPreview ctx={ctx} state={state} />;
   },
-  generateCode: (state) =>
-    isProfitLossLineMode(state)
-      ? profitLossLineCodegen(state)
-      : {
-          code: cartesianCodegen("LineChart", state),
-          data: lineChartDataSnippet(state),
-        },
+  generateCode: (state) => {
+    if (isProfitLossLineMode(state)) {
+      return profitLossLineCodegen(state);
+    }
+    if (state.lineChartState === "loading") {
+      return {
+        ...cartesianLoadingCodegen("LineChart", state),
+        data: lineChartDataSnippet(state),
+      };
+    }
+    return {
+      code: cartesianCodegen("LineChart", state),
+      data: lineChartDataSnippet(state),
+    };
+  },
 };
 
 const scatterConfig: StudioChartConfig = {
@@ -284,6 +301,7 @@ const barConfig: StudioChartConfig = {
   controlGroups: barChartControlGroups,
   resolveComponents: resolveBarComponents,
   render: (state, ctx) => {
+    const isLoading = state.barChartState === "loading";
     const horizontal = state.barOrientation === "horizontal";
     const seriesCount = clampStudioSeriesCount(state.dataSeries);
     // barSeriesMode "single" is treated as grouped when dataSeries > 1.
@@ -317,7 +335,9 @@ const barConfig: StudioChartConfig = {
     return (
       <StudioChartShell
         legendComponentId="bar.legend"
-        legendItems={studioCartesianLegendItems(state, seriesCount)}
+        legendItems={
+          isLoading ? [] : studioCartesianLegendItems(state, seriesCount)
+        }
         state={ctx.chromeState}
       >
         <StudioCartesianFill>
@@ -337,6 +357,7 @@ const barConfig: StudioChartConfig = {
             orientation={state.barOrientation}
             stacked={stacked}
             stackGap={stacked ? 3 : 0}
+            status={state.barChartState}
             xDataKey={xKey}
           >
             {studioCartesianBackgroundLayer(
@@ -349,34 +370,41 @@ const barConfig: StudioChartConfig = {
               componentId="bar.reference-area"
               state={state}
             />
-            {ctx.patternDefs}
-            {seriesKeys.map((key, idx) => (
-              <Bar
-                dataKey={key}
-                fadedOpacity={state.barFadedOpacity}
-                fill={seriesFillAt(idx)}
-                groupGap={state.groupGap}
-                key={key}
-                lineCap={lineCap}
-                stackGap={stacked ? 3 : 0}
-                yAxisId={
-                  horizontal ? undefined : getLineSeriesYAxisId(state, idx)
-                }
-              />
-            ))}
-            {horizontal ? (
+            {isLoading ? null : ctx.patternDefs}
+            {isLoading
+              ? null
+              : seriesKeys.map((key, idx) => (
+                  <Bar
+                    dataKey={key}
+                    fadedOpacity={state.barFadedOpacity}
+                    fill={seriesFillAt(idx)}
+                    groupGap={state.groupGap}
+                    key={key}
+                    lineCap={lineCap}
+                    stackGap={stacked ? 3 : 0}
+                    yAxisId={
+                      horizontal ? undefined : getLineSeriesYAxisId(state, idx)
+                    }
+                  />
+                ))}
+            {!isLoading && horizontal ? (
               <StudioVisibleLayer componentId="bar.baryaxis" state={state}>
                 <BarYAxis />
               </StudioVisibleLayer>
-            ) : (
+            ) : null}
+            {isLoading || horizontal ? null : (
               <StudioChartYAxisLayers chartPrefix="bar" state={state} />
             )}
-            <StudioVisibleLayer componentId="bar.xaxis" state={state}>
-              <BarXAxis />
-            </StudioVisibleLayer>
-            <StudioVisibleLayer componentId="bar.tooltip" state={state}>
-              <ChartTooltip showCrosshair={false} />
-            </StudioVisibleLayer>
+            {isLoading ? null : (
+              <StudioVisibleLayer componentId="bar.xaxis" state={state}>
+                <BarXAxis />
+              </StudioVisibleLayer>
+            )}
+            {isLoading ? null : (
+              <StudioVisibleLayer componentId="bar.tooltip" state={state}>
+                <ChartTooltip showCrosshair={false} />
+              </StudioVisibleLayer>
+            )}
           </BarChart>
         </StudioCartesianFill>
       </StudioChartShell>

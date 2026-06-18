@@ -68,6 +68,7 @@ function clamp(n: number, min: number, max: number) {
 
 const CHART_STATE_KEYS = new Set<keyof StudioUrlState>([
   "areaChartState",
+  "barChartState",
   "lineChartState",
   "heatmapChartState",
 ]);

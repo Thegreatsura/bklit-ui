@@ -8,6 +8,7 @@ import {
 } from "@/lib/demo-data";
 import {
   isAreaChartLoadingMode,
+  isBarChartLoadingMode,
   isProfitLossLineMode,
 } from "@/lib/line-chart-mode";
 import type { LineYAxisId } from "@/lib/line-series-y-axis";
@@ -336,6 +337,67 @@ export function getStudioDataControlGroups(
   return result;
 }
 
+function loadingGridControlGroups(state: StudioUrlState): StudioControlGroup[] {
+  const showGridShimmer =
+    state.loadingStyle !== "sweep" && state.lineLoadingGridShimmer;
+
+  return [
+    ...gridControlGroups,
+    controlGroup("Loading", [
+      {
+        type: "color",
+        key: "lineLoadingGridStroke",
+        label: "Grid",
+      },
+      {
+        type: "boolean",
+        key: "lineLoadingGridShimmer",
+        label: "Shimmer",
+        visibleWhen: { key: "loadingStyle", not: "sweep" },
+      },
+      ...(showGridShimmer
+        ? [
+            {
+              type: "color" as const,
+              key: "lineLoadingGridShimmerStroke" as const,
+              label: "Shimmer",
+            },
+            {
+              type: "number" as const,
+              key: "lineLoadingGridShimmerLength" as const,
+              label: "Length",
+              min: 40,
+              max: 280,
+              step: 10,
+              unit: "px",
+            },
+          ]
+        : []),
+    ]),
+    ...(showGridShimmer
+      ? [
+          controlGroup("Animation", [
+            {
+              type: "boolean" as const,
+              key: "lineLoadingGridShimmerSync" as const,
+              label: "Sync with line",
+            },
+            {
+              type: "number" as const,
+              key: "lineLoadingGridShimmerSpeed" as const,
+              label: "Speed",
+              min: 0.5,
+              max: 3,
+              step: 0.1,
+              unit: "×",
+              disabledWhen: "lineLoadingGridShimmerSync" as const,
+            },
+          ]),
+        ]
+      : []),
+  ];
+}
+
 function resolveCartesianLoadingStudioComponents(options: {
   chartId: string;
   chartLabel: string;
@@ -374,60 +436,7 @@ function resolveCartesianLoadingStudioComponents(options: {
       label: "Grid",
       parentId: chartId,
       kind: "chart",
-      controlGroups: [
-        ...gridControlGroups,
-        controlGroup("Loading", [
-          {
-            type: "color",
-            key: "lineLoadingGridStroke",
-            label: "Grid",
-          },
-          {
-            type: "boolean",
-            key: "lineLoadingGridShimmer",
-            label: "Shimmer",
-          },
-          ...(state.lineLoadingGridShimmer
-            ? [
-                {
-                  type: "color" as const,
-                  key: "lineLoadingGridShimmerStroke" as const,
-                  label: "Shimmer",
-                },
-                {
-                  type: "number" as const,
-                  key: "lineLoadingGridShimmerLength" as const,
-                  label: "Length",
-                  min: 40,
-                  max: 280,
-                  step: 10,
-                  unit: "px",
-                },
-              ]
-            : []),
-        ]),
-        ...(state.lineLoadingGridShimmer
-          ? [
-              controlGroup("Animation", [
-                {
-                  type: "boolean" as const,
-                  key: "lineLoadingGridShimmerSync" as const,
-                  label: "Sync with line",
-                },
-                {
-                  type: "number" as const,
-                  key: "lineLoadingGridShimmerSpeed" as const,
-                  label: "Speed",
-                  min: 0.5,
-                  max: 3,
-                  step: 0.1,
-                  unit: "×",
-                  disabledWhen: "lineLoadingGridShimmerSync" as const,
-                },
-              ]),
-            ]
-          : []),
-      ],
+      controlGroups: loadingGridControlGroups(state),
     },
     {
       id: labelId,
@@ -558,9 +567,34 @@ export function resolveAreaComponents(
 export function resolveBarComponents(
   state: StudioUrlState
 ): StudioComponentDefinition[] {
-  const seriesCount = clampStudioSeriesCount(state.dataSeries);
-  const [seriesLayout, design] = barChartControlGroups;
+  const settings = barChartControlGroups.find(
+    (group) => group.title === "Settings"
+  );
+  const referenceAreaBounds = barChartControlGroups.find(
+    (group) => group.title === "Reference range"
+  );
   const chartId = "bar.chart";
+
+  if (isBarChartLoadingMode(state)) {
+    return [
+      {
+        id: chartId,
+        label: "BarChart",
+        kind: "chart",
+        treeIcon: "layers",
+        controlGroups: settings ? [settings] : [],
+      },
+      {
+        id: "bar.grid",
+        label: "Grid",
+        parentId: chartId,
+        kind: "chart",
+        controlGroups: loadingGridControlGroups(state),
+      },
+    ];
+  }
+
+  const seriesCount = clampStudioSeriesCount(state.dataSeries);
 
   const components: StudioComponentDefinition[] = [
     {
@@ -568,7 +602,7 @@ export function resolveBarComponents(
       label: "BarChart",
       kind: "chart",
       treeIcon: "layers",
-      controlGroups: seriesLayout ? [seriesLayout] : [],
+      controlGroups: settings ? [settings] : [],
       design: rootPaletteDesign(true),
     },
     gridNode("bar"),
@@ -580,8 +614,8 @@ export function resolveBarComponents(
 
   for (let index = 0; index < seriesCount; index += 1) {
     const controlGroups: StudioControlGroup[] = [];
-    if (index === 0 && design) {
-      controlGroups.push(design);
+    if (index === 0 && referenceAreaBounds) {
+      controlGroups.push(referenceAreaBounds);
     }
     if (!horizontal) {
       controlGroups.push(seriesYAxisControlGroup(index));

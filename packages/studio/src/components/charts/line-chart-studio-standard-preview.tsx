@@ -110,7 +110,10 @@ function renderMainLines(
         yAxisId={getLineSeriesYAxisId(state, idx)}
         {...seriesStrokePropsFromState(state, options.dataLength, idx)}
         {...(isPrimary
-          ? studioLoadingStrokeProps(state, "line.loading-line")
+          ? {
+              ...studioLoadingStrokeProps(state, "line.loading-line"),
+              loadingStyle: state.loadingStyle,
+            }
           : {})}
       />
     );
