@@ -8,6 +8,7 @@ import {
   computeReferenceAreaRect,
   type ReferenceAreaIfOverflow,
 } from "./reference-area-geometry";
+import { isReferenceAreaVisiblePhase } from "./y-domain-utils";
 
 const DEFAULT_FILL =
   "color-mix(in oklch, var(--chart-foreground-muted) 12%, transparent)";
@@ -106,7 +107,7 @@ export function ReferenceArea({
   ifOverflow = "hidden",
   className,
 }: ReferenceAreaProps) {
-  const { innerWidth, innerHeight, xScale, isLoaded, enterTransition } =
+  const { innerWidth, innerHeight, xScale, chartPhase, enterTransition } =
     useChartStable();
   const yScale = useYScale(yAxisId);
   const uniqueId = useId().replace(/:/g, "");
@@ -171,9 +172,8 @@ export function ReferenceArea({
   const topEdgeY = y;
   const bottomEdgeY = y + height;
   const centerX = x + width / 2;
-  const targetOpacity = fillOpacity;
-  const revealOpacity = isLoaded ? targetOpacity : 0;
-  const enterFade =
+  const visible = isReferenceAreaVisiblePhase(chartPhase);
+  const fadeTransition =
     enterTransition && typeof enterTransition === "object"
       ? enterTransition
       : { duration: ENTER_FADE_MS / 1000, ease: "easeOut" as const };
@@ -181,7 +181,13 @@ export function ReferenceArea({
 
   return (
     // biome-ignore lint/a11y/noAriaHiddenOnFocusable: decorative reference band
-    <g aria-hidden="true" className={className ?? "chart-reference-area"}>
+    <motion.g
+      animate={{ opacity: visible ? 1 : 0 }}
+      aria-hidden="true"
+      className={className ?? "chart-reference-area"}
+      initial={{ opacity: 0 }}
+      transition={fadeTransition}
+    >
       {edgeMask ? (
         <defs>
           <linearGradient id={hGradientId} x1="0%" x2="100%" y1="0%" y2="0%">
@@ -211,13 +217,11 @@ export function ReferenceArea({
         </defs>
       ) : null}
       {patternNode ? <defs>{patternNode}</defs> : null}
-      <motion.rect
-        animate={{ opacity: revealOpacity }}
+      <rect
         fill={areaFill}
+        fillOpacity={fillOpacity}
         height={height}
-        initial={{ opacity: 0 }}
         mask={edgeMask}
-        transition={isLoaded ? enterFade : { duration: 0 }}
         width={width}
         x={x}
         y={y}
@@ -254,7 +258,7 @@ export function ReferenceArea({
           />
         </>
       ) : null}
-    </g>
+    </motion.g>
   );
 }
 
