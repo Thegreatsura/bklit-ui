@@ -2,10 +2,11 @@
 
 <p align="center">
 	<h1 align="center"><b><a href="https://ui.bklit.com">Bklit UI</a></b></h1>
-  <br />
-<a href="https://vercel.com/open-source-program">
-  <img alt="Vercel OSS Program" src="https://vercel.com/oss/program-badge-2026.svg" />
-</a>
+<br />
+<p align="center">
+<img width="324" height="32" alt="vercel-oss 2" src="https://github.com/user-attachments/assets/e6cd5d4c-7707-4271-96cb-10122d193048" />
+</p>
+</br>
 <p align="center">
     A collection of Open Source charts and utility components that you can customize and extend.
     <br />
@@ -22,7 +23,7 @@
 ## Premium Sponsors
 
 Bklit UI is supported by our premium sponsors.
-
+<br />
 <a href="https://openpanel.dev">
 <img alt="OpenPanel" src="https://github.com/user-attachments/assets/279ef3ca-ed28-4a75-bac7-3fb90db4954d" />
 </a>
