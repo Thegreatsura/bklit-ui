@@ -1,6 +1,4 @@
-<a href="https://ui.bklit.com">
 ![hero](https://github.com/bklit/bklit-ui/blob/main/apps/web/app/opengraph-image.png?raw=true)
-</a>
 
 
 <br />
