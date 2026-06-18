@@ -1,5 +1,5 @@
+import { studioStateHref } from "./chart-links";
 import { defaultStudioState, type StudioUrlState } from "./studio-parsers";
-import { studioStateHref } from "./studio-url-codec";
 
 /** Canonical line-chart Studio preset for reference area + projection demos. */
 export function lineReferenceProjectionStudioState(
