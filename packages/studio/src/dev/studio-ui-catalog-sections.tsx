@@ -277,7 +277,12 @@ export function EditorCanvasDemo() {
             registerPinchHandlers={camera.registerPinchHandlers}
             spacePressed={camera.spacePressed}
             viewportRef={viewportRef}
-          />
+          >
+            <div
+              aria-hidden
+              className="absolute top-12 left-12 h-24 w-40 rounded-md border border-border/70 border-dashed bg-muted/30"
+            />
+          </EditorCanvas>
         </div>
       </div>
     </div>
