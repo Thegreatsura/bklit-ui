@@ -25,6 +25,15 @@ const nextConfig = {
           },
         ],
       },
+      {
+        source: "/studio/demo",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors *",
+          },
+        ],
+      },
     ];
   },
   images: {

@@ -212,7 +212,7 @@ export function EditorMainPane({
   return (
     <div className={cn("flex h-full min-h-0 flex-col", className)}>
       <div className="flex h-full min-h-0 flex-1">
-        <div className="flex h-full w-8 shrink-0 flex-col">
+        <div className="flex h-full w-8 shrink-0 flex-col border-border/60 border-r">
           <EditorGridaRulerCorner />
           <EditorGridaRuler
             axis="y"
@@ -226,6 +226,7 @@ export function EditorMainPane({
           <EditorGridaRuler
             axis="x"
             camera={camera.camera}
+            className="border-border/60 border-b"
             viewportRef={canvasRef}
           />
 

@@ -2,14 +2,15 @@
 
 import { Icon } from "@bklitui/icons";
 import { ShimmeringText } from "@bklitui/ui/components/shimmering-text";
-import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
+import { GradientBorderPill } from "@/components/hero/gradient-border-pill";
+import { StaticBorderPill } from "@/components/hero/static-border-pill";
 import { ParticleBadge } from "@/components/particle-badge";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export const heroTitleClassName = "font-bold text-2xl sm:text-4xl";
-export const heroDescriptionClassName = "text-lg sm:text-xl";
+export const heroDescriptionClassName =
+  "font-light text-lg text-muted-foreground";
 export const heroActionsClassName =
   "flex flex-col items-center justify-center gap-1 sm:flex-row";
 
@@ -24,21 +25,33 @@ export function HeroBadgeRow({ children }: { children: ReactNode }) {
 export function HeroStudioPill() {
   return (
     <ParticleBadge>
-      <Button
-        className="relative isolate inline-flex h-auto items-center gap-0 rounded-full bg-background px-0.5 py-0.5 text-xs"
-        nativeButton={false}
-        render={<Link aria-label="Studio Version 2" href="/studio" />}
-        variant="outline"
-      >
-        <span className="flex h-6 items-center rounded-full bg-muted px-2.5 text-xs leading-none">
+      <GradientBorderPill aria-label="Studio Version 2" href="/studio">
+        <span className="flex h-6 items-center rounded-full bg-muted/75 px-2.5 text-xs leading-none backdrop-blur-sm">
           Studio
         </span>
         <span className="flex h-6 items-center gap-1 px-2.5 text-xs leading-none">
           <ShimmeringText className="leading-none" text="Version 2" />
           <Icon className="size-3.5" name="IconArrowRight" />
         </span>
-      </Button>
+      </GradientBorderPill>
     </ParticleBadge>
+  );
+}
+
+export function HeroPlayPill({
+  onClick,
+  ...props
+}: Omit<ComponentProps<typeof StaticBorderPill>, "children">) {
+  return (
+    <StaticBorderPill
+      aria-label="Play Studio video"
+      onClick={onClick}
+      {...props}
+    >
+      <span className="flex size-6 items-center justify-center">
+        <Icon className="size-3.5" name="IconPlay" />
+      </span>
+    </StaticBorderPill>
   );
 }
 

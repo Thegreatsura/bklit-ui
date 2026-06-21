@@ -193,7 +193,7 @@ export function StudioComponentsPanel({
                   className={cn(
                     "group flex w-full min-w-0 items-center gap-1 rounded-md pr-1 transition-colors",
                     selected
-                      ? "bg-accent/15 text-foreground"
+                      ? "bg-accent text-foreground"
                       : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                     !configurable && "opacity-45"
                   )}
@@ -221,7 +221,7 @@ export function StudioComponentsPanel({
                   <button
                     aria-label={visible ? "Hide layer" : "Show layer"}
                     className={cn(
-                      "shrink-0 rounded p-1 opacity-0 transition-opacity hover:bg-muted/80 group-hover:opacity-100",
+                      "shrink-0 rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-transparent hover:text-foreground group-hover:opacity-100",
                       !visible && "opacity-100"
                     )}
                     onClick={(event) => {

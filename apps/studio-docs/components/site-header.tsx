@@ -45,6 +45,15 @@ export function SiteHeader() {
           <DocsSearchTrigger className="hidden w-30 justify-between md:inline-flex" />
           <Link
             className={cn(
+              "hidden rounded-md px-3 py-1.5 font-medium text-muted-foreground text-xs no-underline transition-colors hover:bg-accent hover:text-foreground md:inline-flex",
+              "aria-[current=page]:bg-accent aria-[current=page]:text-foreground"
+            )}
+            href="/catalog"
+          >
+            Catalog
+          </Link>
+          <Link
+            className={cn(
               "hidden rounded-md px-3 py-1.5 font-medium text-muted-foreground text-xs no-underline transition-colors hover:bg-accent hover:text-foreground md:inline-flex"
             )}
             href="http://localhost:3000/studio"

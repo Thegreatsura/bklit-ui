@@ -5,6 +5,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { ModeToggle } from "@/components/mode-toggle";
 import { getAnalyticsUrl, trackEvent } from "@/lib/analytics/track-client";
+import { cn } from "@/lib/utils";
 import { GithubStarCount } from "../github-star-count";
 import { BklitLogo } from "../icons/bklit";
 import { DiscordIcon } from "../icons/discord";
@@ -339,6 +340,7 @@ export function SiteHeader({
 }: SiteHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const { resolvedTheme } = useTheme();
 
   // Calculate stagger delay based on total items to complete in STAGGER_DURATION
@@ -362,87 +364,107 @@ export function SiteHeader({
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    const onScroll = () => {
+      setIsScrolled(window.scrollY > 8);
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   // Only use resolved theme after mount to avoid hydration mismatch
   const logoTheme = mounted && resolvedTheme === "dark" ? "dark" : "light";
 
   return (
     <>
-      <header className="fixed top-0 right-0 left-0 z-50 h-14 bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-full items-center justify-between gap-6 px-6">
-          <div className="flex items-center gap-2">
-            <Link
-              className="font-semibold text-foreground text-lg no-underline transition-opacity hover:opacity-80"
-              href="/"
-            >
-              <BklitLogo size={24} theme={logoTheme} />
-            </Link>
+      <header
+        className={cn(
+          "fixed top-0 right-0 left-0 z-50 flex h-18 items-center transition-[background-color,backdrop-filter] duration-300 ease-out",
+          isScrolled || mobileMenuOpen
+            ? "bg-background/60 backdrop-blur-md hover:bg-background/90"
+            : "bg-transparent hover:bg-background/85 hover:backdrop-blur-md"
+        )}
+      >
+        <div className="container mx-auto">
+          <div className="mx-auto flex h-full items-center justify-between gap-6 px-6">
+            <div className="flex items-center gap-2">
+              <Link
+                className="font-semibold text-foreground text-lg no-underline transition-opacity hover:opacity-80"
+                href="/"
+              >
+                <BklitLogo size={24} theme={logoTheme} />
+              </Link>
 
-            {/* Desktop nav */}
-            <nav className="hidden items-center gap-1 md:flex">
-              {links.map((link) => (
-                <Link href={link.url} key={link.url}>
-                  <Button variant="ghost">
-                    <NavLinkLabel text={link.text} url={link.url} />
-                  </Button>
-                </Link>
-              ))}
-            </nav>
-          </div>
+              {/* Desktop nav */}
+              <nav className="hidden items-center gap-1 md:flex">
+                {links.map((link) => (
+                  <Link href={link.url} key={link.url}>
+                    <Button variant="ghost">
+                      <NavLinkLabel text={link.text} url={link.url} />
+                    </Button>
+                  </Link>
+                ))}
+              </nav>
+            </div>
 
-          <div className="flex items-center gap-1">
-            <DocsSearchTrigger
-              className="hidden w-30 justify-between md:inline-flex"
-              hideIfDisabled
-            />
-            {githubUrl && (
-              <>
-                <Separator
-                  className="mx-1 hidden h-5 self-center data-vertical:self-center md:block"
-                  orientation="vertical"
-                />
+            <div className="flex items-center gap-1">
+              <DocsSearchTrigger
+                className="hidden w-30 justify-between md:inline-flex"
+                hideIfDisabled
+              />
+              {githubUrl && (
+                <>
+                  <Separator
+                    className="mx-1 hidden h-5 self-center data-vertical:self-center md:block"
+                    orientation="vertical"
+                  />
+                  <Link
+                    aria-label="GitHub"
+                    className="hidden md:block"
+                    external
+                    href={githubUrl}
+                  >
+                    <Button
+                      className="gap-2 font-light font-mono text-muted-foreground text-xs"
+                      size="default"
+                      variant="ghost"
+                    >
+                      <GitHubIcon />
+                      <GithubStarCount />
+                    </Button>
+                  </Link>
+                </>
+              )}
+              {discordUrl && (
                 <Link
-                  aria-label="GitHub"
+                  aria-label="Discord"
                   className="hidden md:block"
                   external
-                  href={githubUrl}
+                  href={discordUrl}
+                  onClick={() => trackDiscordClick("header")}
                 >
-                  <Button
-                    className="gap-2 font-light font-mono text-muted-foreground text-xs"
-                    size="default"
-                    variant="ghost"
-                  >
-                    <GitHubIcon />
-                    <GithubStarCount />
+                  <Button size="default" variant="ghost">
+                    <DiscordIcon />
                   </Button>
                 </Link>
-              </>
-            )}
-            {discordUrl && (
-              <Link
-                aria-label="Discord"
-                className="hidden md:block"
-                external
-                href={discordUrl}
-                onClick={() => trackDiscordClick("header")}
-              >
-                <Button size="default" variant="ghost">
-                  <DiscordIcon />
-                </Button>
-              </Link>
-            )}
-            <ModeToggle />
+              )}
+              <ModeToggle />
 
-            {/* Mobile menu button */}
-            <Button
-              aria-expanded={mobileMenuOpen}
-              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-              className="md:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              size="default"
-              variant="ghost"
-            >
-              <MenuIcon open={mobileMenuOpen} />
-            </Button>
+              {/* Mobile menu button */}
+              <Button
+                aria-expanded={mobileMenuOpen}
+                aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                className="md:hidden"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                size="default"
+                variant="ghost"
+              >
+                <MenuIcon open={mobileMenuOpen} />
+              </Button>
+            </div>
           </div>
         </div>
       </header>
