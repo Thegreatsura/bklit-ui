@@ -14,6 +14,11 @@ export {
   LinearGradient,
   RadialGradient,
 } from "@visx/gradient";
+export {
+  DEFAULT_ANIMATION_DURATION_MS,
+  DEFAULT_ANIMATION_EASING,
+  DEFAULT_CHART_ENTER_TRANSITION,
+} from "./animation";
 // Area chart components
 export { Area, type AreaProps } from "./area";
 export { AreaChart, type AreaChartProps } from "./area-chart";

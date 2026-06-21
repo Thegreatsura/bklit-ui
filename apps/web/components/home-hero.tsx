@@ -70,19 +70,11 @@ export function HomeHero({ onContentReady }: HomeHeroProps) {
               <HeroActions>
                 <Button
                   nativeButton={false}
-                  render={<Link href="/docs" />}
+                  render={<Link href="/docs/components" />}
                   size="lg"
                   variant="outline"
                 >
-                  Get Started
-                </Button>
-                <Button
-                  nativeButton={false}
-                  render={<Link href="/docs/components" />}
-                  size="lg"
-                  variant="ghost"
-                >
-                  Components
+                  Get started
                 </Button>
               </HeroActions>
             </motion.div>

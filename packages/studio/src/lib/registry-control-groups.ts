@@ -498,9 +498,14 @@ export const lineChartControlGroups: StudioControlGroup[] = [
 
 export const tooltipAppearanceControlGroup = controlGroup("Appearance", [
   {
+    type: "color",
+    key: "tooltipBackgroundColor",
+    label: "Background color",
+  },
+  {
     type: "opacity",
     key: "tooltipBackgroundOpacity",
-    label: "Background",
+    label: "Background opacity",
     min: 0.2,
     max: 1,
     step: 0.05,

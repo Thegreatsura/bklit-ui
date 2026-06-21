@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils";
 
 const linkStyles = {
   base: "flex w-fit items-center gap-2 rounded-md px-3 py-1.5 font-medium text-xs no-underline",
-  active: "bg-accent text-card-foreground",
-  inactive: "text-accent-foreground  ",
+  active: "bg-muted text-card-foreground",
+  inactive: "text-foreground dark:text-accent-foreground",
   heading:
     "ring-sidebar-ring flex h-8 shrink-0 items-center rounded-md px-2 text-xs outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0 group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0 text-muted-foreground font-medium",
 };

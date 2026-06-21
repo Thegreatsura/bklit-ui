@@ -246,7 +246,7 @@ export function ScrubNumberField({
           {scrubIcon ?? (
             <Icon aria-hidden className="size-4" name="IconArrowTopBottom" />
           )}
-          <NumberFieldScrubAreaCursor className="pointer-events-none rounded-[var(--radius-sm)] bg-foreground px-1 py-0.5 text-background shadow-md">
+          <NumberFieldScrubAreaCursor className="pointer-events-none rounded-sm bg-foreground px-1 py-0.5 text-background shadow-md">
             <Icon aria-hidden className="size-3" name="IconArrowLeftRight" />
           </NumberFieldScrubAreaCursor>
         </NumberFieldScrubArea>

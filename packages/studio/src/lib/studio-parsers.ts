@@ -361,6 +361,9 @@ export const studioSearchParams = {
   legendShowProgress: parseAsBoolean.withDefault(false),
   legendShowMarker: parseAsBoolean.withDefault(true),
   legendShowValue: parseAsBoolean.withDefault(true),
+  tooltipBackgroundColor: parseAsString.withDefault(
+    "var(--chart-tooltip-background)"
+  ),
   tooltipBackgroundOpacity: parseAsFloat.withDefault(0.8),
   tooltipBlur: parseAsInteger.withDefault(12),
   hiddenComponents: parseAsString.withDefault(""),
@@ -679,6 +682,7 @@ export interface StudioUrlState {
   legendShowProgress: boolean;
   legendShowMarker: boolean;
   legendShowValue: boolean;
+  tooltipBackgroundColor: string;
   tooltipBackgroundOpacity: number;
   tooltipBlur: number;
   hiddenComponents: string;
@@ -993,6 +997,7 @@ export function defaultStudioState(
     legendShowProgress: false,
     legendShowMarker: true,
     legendShowValue: true,
+    tooltipBackgroundColor: "var(--chart-tooltip-background)",
     tooltipBackgroundOpacity: 0.8,
     tooltipBlur: 12,
     hiddenComponents: "",
