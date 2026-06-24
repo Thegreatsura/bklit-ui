@@ -16,7 +16,10 @@ import { StudioCopyButton } from "@/components/studio-copy-button";
 import { StudioScrollArea } from "@/components/studio-scroll-area";
 import { BKLIT_CHART_THEME_TOKEN_NAMES } from "@/lib/bklit-chart-theme-tokens";
 import { BKLIT_SHADCN_THEME_TOKEN_NAMES } from "@/lib/bklit-shadcn-theme-tokens";
-import { isValidOklchColor } from "@/lib/chart-theme-color";
+import {
+  isThemeColorToken,
+  normalizeThemeTokenColor,
+} from "@/lib/chart-theme-color";
 import {
   studioScrubSurfaceClass,
   studioSectionLabelClass,
@@ -77,8 +80,9 @@ function ThemeTokenRow({
   onChange: (value: string) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const isColor = name !== "radius" && isValidOklchColor(value);
-  const oklchField = studioColorToOklchField(value);
+  const pickerColor = useMemo(() => normalizeThemeTokenColor(value), [value]);
+  const isColor = isThemeColorToken(name, value);
+  const oklchField = studioColorToOklchField(pickerColor);
   const triggerLabel = isColor && oklchField ? `oklch(${oklchField})` : value;
 
   if (!isColor) {
@@ -130,7 +134,7 @@ function ThemeTokenRow({
           sideOffset={studioSidebarPopoverSideOffset}
         >
           <StudioColorPicker
-            color={value}
+            color={pickerColor}
             onChange={onChange}
             onPreview={onChange}
           />

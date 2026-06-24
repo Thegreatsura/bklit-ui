@@ -6,27 +6,67 @@ import {
   type ReactNode,
   useCallback,
   useContext,
+  useLayoutEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
   BKLIT_CHART_THEME_TOKEN_DEFAULTS,
+  BKLIT_CHART_THEME_TOKEN_NAMES,
   type BklitChartThemeTokenName,
   type BklitChartThemeTokens,
-  bklitChartThemeTokensToCssProperties,
   formatBklitChartThemeTokensCss,
-  resolveBklitChartThemeTokens,
 } from "@/lib/bklit-chart-theme-tokens";
 import {
   BKLIT_SHADCN_THEME_TOKEN_DEFAULTS,
+  BKLIT_SHADCN_THEME_TOKEN_NAMES,
   type BklitShadcnThemeTokenName,
   type BklitShadcnThemeTokens,
   type BklitThemeMode,
-  bklitShadcnThemeTokensToCssProperties,
   formatBklitShadcnThemeTokensCss,
-  resolveBklitShadcnThemeTokens,
 } from "@/lib/bklit-shadcn-theme-tokens";
+import { normalizeThemeTokenColor } from "@/lib/chart-theme-color";
 import { useStudioTheme } from "@/providers/studio-theme-provider";
+
+function readThemeTokensFromShell<T extends string>(
+  shell: Element,
+  names: readonly T[],
+  fallbacks: Record<T, string>
+): Record<T, string> {
+  const styles = getComputedStyle(shell);
+  const tokens = { ...fallbacks };
+
+  for (const name of names) {
+    const value = styles.getPropertyValue(`--${name}`).trim();
+    if (value) {
+      tokens[name] = normalizeThemeTokenColor(value);
+    }
+  }
+
+  return tokens;
+}
+
+function themeOverridesToCssProperties(
+  shadcnOverrides: Partial<BklitShadcnThemeTokens>,
+  chartOverrides: Partial<BklitChartThemeTokens>
+): CSSProperties | undefined {
+  const style: Record<string, string> = {};
+
+  for (const [name, value] of Object.entries(shadcnOverrides)) {
+    if (value !== undefined) {
+      style[`--${name}`] = value;
+    }
+  }
+
+  for (const [name, value] of Object.entries(chartOverrides)) {
+    if (value !== undefined) {
+      style[`--${name}`] = value;
+    }
+  }
+
+  return Object.keys(style).length > 0 ? (style as CSSProperties) : undefined;
+}
 
 export type CatalogThemeTokenGroup = "shadcn" | "chart";
 
@@ -42,7 +82,7 @@ interface CatalogThemeContextValue {
   setShadcnToken: (name: BklitShadcnThemeTokenName, value: string) => void;
   setChartToken: (name: BklitChartThemeTokenName, value: string) => void;
   resetTokens: () => void;
-  cssProperties: CSSProperties;
+  cssProperties: CSSProperties | undefined;
   cssBlock: string;
 }
 
@@ -52,6 +92,7 @@ const CatalogThemeContext = createContext<CatalogThemeContextValue | null>(
 
 export function CatalogThemeProvider({ children }: { children: ReactNode }) {
   const { resolvedTheme } = useStudioTheme();
+  const containerRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(true);
   const [tokenGroup, setTokenGroup] =
     useState<CatalogThemeTokenGroup>("shadcn");
@@ -61,27 +102,62 @@ export function CatalogThemeProvider({ children }: { children: ReactNode }) {
   const [chartOverrides, setChartOverrides] = useState<
     Partial<Record<BklitThemeMode, Partial<BklitChartThemeTokens>>>
   >({});
+  const [cssBaseShadcn, setCssBaseShadcn] = useState<BklitShadcnThemeTokens>(
+    () => BKLIT_SHADCN_THEME_TOKEN_DEFAULTS.light
+  );
+  const [cssBaseChart, setCssBaseChart] = useState<BklitChartThemeTokens>(
+    () => BKLIT_CHART_THEME_TOKEN_DEFAULTS.light
+  );
 
   const shadcnThemeOverrides = shadcnOverrides[resolvedTheme] ?? {};
   const chartThemeOverrides = chartOverrides[resolvedTheme] ?? {};
 
+  const syncBaseTokensFromCss = useCallback(() => {
+    const shell = containerRef.current?.closest(".studio-shell");
+    if (!shell) {
+      return;
+    }
+
+    setCssBaseShadcn(
+      readThemeTokensFromShell(
+        shell,
+        BKLIT_SHADCN_THEME_TOKEN_NAMES,
+        BKLIT_SHADCN_THEME_TOKEN_DEFAULTS[resolvedTheme]
+      ) as BklitShadcnThemeTokens
+    );
+    setCssBaseChart(
+      readThemeTokensFromShell(
+        shell,
+        BKLIT_CHART_THEME_TOKEN_NAMES,
+        BKLIT_CHART_THEME_TOKEN_DEFAULTS[resolvedTheme]
+      ) as BklitChartThemeTokens
+    );
+  }, [resolvedTheme]);
+
+  useLayoutEffect(() => {
+    syncBaseTokensFromCss();
+  }, [syncBaseTokensFromCss]);
+
   const shadcnTokens = useMemo(
-    () => resolveBklitShadcnThemeTokens(resolvedTheme, shadcnThemeOverrides),
-    [resolvedTheme, shadcnThemeOverrides]
+    () => ({
+      ...cssBaseShadcn,
+      ...shadcnThemeOverrides,
+    }),
+    [cssBaseShadcn, shadcnThemeOverrides]
   );
 
   const chartTokens = useMemo(
-    () => resolveBklitChartThemeTokens(resolvedTheme, chartThemeOverrides),
-    [resolvedTheme, chartThemeOverrides]
+    () => ({
+      ...cssBaseChart,
+      ...chartThemeOverrides,
+    }),
+    [cssBaseChart, chartThemeOverrides]
   );
 
   const cssProperties = useMemo(
     () =>
-      ({
-        ...bklitShadcnThemeTokensToCssProperties(shadcnTokens),
-        ...bklitChartThemeTokensToCssProperties(chartTokens),
-      }) as CSSProperties,
-    [chartTokens, shadcnTokens]
+      themeOverridesToCssProperties(shadcnThemeOverrides, chartThemeOverrides),
+    [chartThemeOverrides, shadcnThemeOverrides]
   );
 
   const cssBlock = useMemo(() => {
@@ -98,8 +174,7 @@ export function CatalogThemeProvider({ children }: { children: ReactNode }) {
           ...(current[resolvedTheme] ?? {}),
           [name]: value,
         };
-        const defaults = BKLIT_SHADCN_THEME_TOKEN_DEFAULTS[resolvedTheme];
-        if (nextThemeOverrides[name] === defaults[name]) {
+        if (nextThemeOverrides[name] === cssBaseShadcn[name]) {
           delete nextThemeOverrides[name];
         }
 
@@ -112,7 +187,7 @@ export function CatalogThemeProvider({ children }: { children: ReactNode }) {
         };
       });
     },
-    [resolvedTheme]
+    [cssBaseShadcn, resolvedTheme]
   );
 
   const setChartToken = useCallback(
@@ -122,8 +197,7 @@ export function CatalogThemeProvider({ children }: { children: ReactNode }) {
           ...(current[resolvedTheme] ?? {}),
           [name]: value,
         };
-        const defaults = BKLIT_CHART_THEME_TOKEN_DEFAULTS[resolvedTheme];
-        if (nextThemeOverrides[name] === defaults[name]) {
+        if (nextThemeOverrides[name] === cssBaseChart[name]) {
           delete nextThemeOverrides[name];
         }
 
@@ -136,7 +210,7 @@ export function CatalogThemeProvider({ children }: { children: ReactNode }) {
         };
       });
     },
-    [resolvedTheme]
+    [cssBaseChart, resolvedTheme]
   );
 
   const resetTokens = useCallback(() => {
@@ -145,14 +219,15 @@ export function CatalogThemeProvider({ children }: { children: ReactNode }) {
         ...current,
         [resolvedTheme]: undefined,
       }));
-      return;
+    } else {
+      setShadcnOverrides((current) => ({
+        ...current,
+        [resolvedTheme]: undefined,
+      }));
     }
 
-    setShadcnOverrides((current) => ({
-      ...current,
-      [resolvedTheme]: undefined,
-    }));
-  }, [resolvedTheme, tokenGroup]);
+    syncBaseTokensFromCss();
+  }, [resolvedTheme, syncBaseTokensFromCss, tokenGroup]);
 
   const toggleOpen = useCallback(() => {
     setOpen((current) => !current);
@@ -193,6 +268,7 @@ export function CatalogThemeProvider({ children }: { children: ReactNode }) {
     <CatalogThemeContext.Provider value={value}>
       <div
         className="flex min-h-[inherit] w-full min-w-0"
+        ref={containerRef}
         style={cssProperties}
       >
         {children}
