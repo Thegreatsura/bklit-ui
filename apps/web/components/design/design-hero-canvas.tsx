@@ -1,13 +1,15 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { VercelOss } from "@/components/brands/vercel-oss";
 import { HeroPlayPill, HeroStudioPill } from "@/components/hero";
 import { HomeStudioVideo } from "@/components/home-studio-video";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { getAnalyticsUrl, trackEvent } from "@/lib/analytics/track-client";
+import { cn } from "@/lib/utils";
 
 const easeOutQuint = [0.23, 1, 0.32, 1] as const;
 
@@ -78,9 +80,14 @@ export function DesignHeroCanvas() {
               </p>
             </div>
             <div className="pointer-events-auto flex items-start justify-center">
-              <Button size="lg" variant="default">
+              <Link
+                className={cn(
+                  buttonVariants({ size: "lg", variant: "default" })
+                )}
+                href="/docs/installation"
+              >
                 Get started
-              </Button>
+              </Link>
             </div>
           </div>
 
