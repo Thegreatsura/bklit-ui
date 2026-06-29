@@ -20,6 +20,13 @@ const chartAccentColorOptions = [
 ] as const;
 
 export const gaugeControlGroups: StudioControlGroup[] = [
+  controlGroup("Settings", [
+    {
+      type: "boolean",
+      key: "gaugeLinear",
+      label: "Linear",
+    },
+  ]),
   designGroup([
     {
       type: "number",
@@ -28,16 +35,6 @@ export const gaugeControlGroups: StudioControlGroup[] = [
       min: 0,
       max: 100,
       unit: "%",
-    },
-    {
-      type: "opacity",
-      key: "inactiveFillOpacity",
-      label: "Track",
-      min: 0,
-      max: 1,
-      step: 0.05,
-      color: "var(--chart-1)",
-      secondaryColor: "var(--muted)",
     },
     {
       type: "opacity",
@@ -51,7 +48,20 @@ export const gaugeControlGroups: StudioControlGroup[] = [
     { type: "boolean", key: "useGradient", label: "Gradient fills" },
     { type: "boolean", key: "uniformWidth", label: "Uniform width" },
   ]),
+  controlGroup("Track", [
+    {
+      type: "opacity",
+      key: "inactiveFillOpacity",
+      label: "Opacity",
+      min: 0,
+      max: 1,
+      step: 0.05,
+      color: "var(--chart-1)",
+      secondaryColor: "var(--muted)",
+    },
+  ]),
   controlGroup("Center", [
+    { type: "boolean", key: "gaugeShowLabel", label: "Show label" },
     {
       type: "number",
       key: "centerValue",
@@ -60,14 +70,65 @@ export const gaugeControlGroups: StudioControlGroup[] = [
       max: 999_999,
       step: 1000,
       input: "number",
+      visibleWhen: { key: "gaugeShowLabel", truthy: true },
     },
-    { type: "text", key: "gaugeLabel", label: "Label" },
-    { type: "text", key: "gaugeCenterPrefix", label: "Prefix" },
-    { type: "text", key: "gaugeCenterSuffix", label: "Suffix" },
+    {
+      type: "text",
+      key: "gaugeLabel",
+      label: "Label",
+      visibleWhen: { key: "gaugeShowLabel", truthy: true },
+    },
+    {
+      type: "text",
+      key: "gaugeCenterPrefix",
+      label: "Prefix",
+      visibleWhen: { key: "gaugeShowLabel", truthy: true },
+    },
+    {
+      type: "text",
+      key: "gaugeCenterSuffix",
+      label: "Suffix",
+      visibleWhen: { key: "gaugeShowLabel", truthy: true },
+    },
+    {
+      type: "legendPosition",
+      key: "gaugeLabelPlacement",
+      label: "Position",
+      visibleWhen: [
+        { key: "gaugeShowLabel", truthy: true },
+        { key: "gaugeLinear", truthy: true },
+      ],
+    },
   ]),
   controlGroup("Notches", [
-    { type: "number", key: "totalNotches", label: "Count", min: 8, max: 80 },
-    { type: "number", key: "spacing", label: "Spacing", min: 0, max: 50 },
+    { type: "number", key: "totalNotches", label: "Count", min: 8, max: 120 },
+    {
+      type: "number",
+      key: "spacing",
+      label: "Spacing",
+      min: 0,
+      max: 75,
+      unit: "%",
+      input: "studio",
+    },
+    {
+      type: "number",
+      key: "progressBarHeight",
+      label: "Bar height",
+      min: 12,
+      max: 80,
+      unit: "px",
+      visibleWhen: { key: "gaugeLinear", truthy: true },
+    },
+    {
+      type: "number",
+      key: "notchWidthPercent",
+      label: "Notch width",
+      min: 10,
+      max: 100,
+      unit: "%",
+      visibleWhen: { key: "gaugeLinear", truthy: true },
+    },
     {
       type: "number",
       key: "notchCornerRadius",
@@ -78,7 +139,7 @@ export const gaugeControlGroups: StudioControlGroup[] = [
     {
       type: "number",
       key: "notchLengthPercent",
-      label: "Length",
+      label: "Depth",
       min: 5,
       max: 100,
       unit: "%",
@@ -91,6 +152,7 @@ export const gaugeControlGroups: StudioControlGroup[] = [
       label: "Start",
       min: 0,
       max: 360,
+      visibleWhen: { key: "gaugeLinear", truthy: false },
     },
     {
       type: "angle",
@@ -98,6 +160,7 @@ export const gaugeControlGroups: StudioControlGroup[] = [
       label: "End",
       min: 180,
       max: 450,
+      visibleWhen: { key: "gaugeLinear", truthy: false },
     },
   ]),
 ];

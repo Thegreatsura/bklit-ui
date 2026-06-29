@@ -4413,6 +4413,105 @@ function makeGaugeExamples(): ChartExample[] {
         </div>
       ),
     },
+    {
+      title: "Gauge — linear notch track",
+      description:
+        'Horizontal notch bar via orientation="linear" — same fill model as the arc gauge, responsive parent width.',
+      code: `<Gauge
+  orientation="linear"
+  value={72}
+  totalNotches={72}
+  spacing={0}
+  notchCornerRadius={3}
+  notchLengthPercent={38}
+  inactiveFillOpacity={0.4}
+  useGradient
+/>`,
+      render: () => (
+        <div className="flex w-full items-center px-4 py-6">
+          <Gauge
+            inactiveFillOpacity={0.4}
+            notchCornerRadius={3}
+            notchLengthPercent={38}
+            orientation="linear"
+            spacing={0}
+            totalNotches={72}
+            useGradient
+            value={72}
+          />
+        </div>
+      ),
+    },
+    {
+      title: "Gauge — linear with label below",
+      description:
+        "Optional centerValue and labelPlacement for linear gauges — same placement model as chart legend.",
+      code: `<Gauge
+  orientation="linear"
+  value={72}
+  centerValue={428_000}
+  defaultLabel="ARR run rate"
+  labelPlacement="bottom"
+  labelAlign="center"
+  formatOptions={{ style: "currency", currency: "USD", maximumFractionDigits: 0 }}
+  totalNotches={72}
+  spacing={0}
+  notchCornerRadius={3}
+  inactiveFillOpacity={0.4}
+  useGradient
+/>`,
+      render: () => (
+        <div className="flex w-full items-center px-4 py-6">
+          <Gauge
+            centerValue={428_000}
+            defaultLabel="ARR run rate"
+            formatOptions={gaugeGalleryUsdFormat}
+            inactiveFillOpacity={0.4}
+            labelAlign="center"
+            labelPlacement="bottom"
+            notchCornerRadius={3}
+            orientation="linear"
+            spacing={0}
+            totalNotches={72}
+            useGradient
+            value={72}
+          />
+        </div>
+      ),
+    },
+    {
+      title: "Gauge — linear dual gradients",
+      description:
+        "Active and inactive notches each interpolate along their own hex ramp when useGradient is enabled.",
+      code: `<Gauge
+  orientation="linear"
+  value={72}
+  totalNotches={72}
+  spacing={0}
+  notchCornerRadius={3}
+  notchLengthPercent={38}
+  inactiveFillOpacity={0.4}
+  activeGradient={["#a855f7", "#06b6d4"]}
+  inactiveGradient={["#334155", "#38bdf8"]}
+  useGradient
+/>`,
+      render: () => (
+        <div className="flex w-full items-center px-4 py-6">
+          <Gauge
+            activeGradient={["#a855f7", "#06b6d4"]}
+            inactiveFillOpacity={0.4}
+            inactiveGradient={["#334155", "#38bdf8"]}
+            notchCornerRadius={3}
+            notchLengthPercent={38}
+            orientation="linear"
+            spacing={0}
+            totalNotches={72}
+            useGradient
+            value={72}
+          />
+        </div>
+      ),
+    },
   ];
 }
 

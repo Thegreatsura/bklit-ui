@@ -288,25 +288,42 @@ function groupsToComponents(
     });
 }
 
-export function resolveGaugeComponents(): StudioComponentDefinition[] {
-  const [design, center, notches, arc] = gaugeControlGroups;
+export function resolveGaugeComponents(
+  state: StudioUrlState
+): StudioComponentDefinition[] {
+  const [settings, fillDesign, trackControls, center, notches, arc] =
+    gaugeControlGroups;
+  const isLinear = state.gaugeLinear;
 
-  return [
+  const components: StudioComponentDefinition[] = [
     {
       id: "gauge.chart",
       label: "Gauge",
       kind: "chart",
       treeIcon: "layers",
-      controlGroups: [],
+      controlGroups: settings ? [settings] : [],
       design: rootPaletteDesign(true),
     },
     {
-      id: "gauge.arc-fill",
-      label: "Arc fill",
+      id: "gauge.track",
+      label: "Track",
       parentId: "gauge.chart",
       kind: "chart",
       treeIcon: "layers",
-      controlGroups: design ? [design] : [],
+      controlGroups: trackControls ? [trackControls] : [],
+      design: {
+        accentKey: "progressBarTrackFill",
+        colorLabel: "Track",
+        supportsPattern: false,
+      },
+    },
+    {
+      id: "gauge.arc-fill",
+      label: isLinear ? "Bar fill" : "Arc fill",
+      parentId: "gauge.chart",
+      kind: "chart",
+      treeIcon: "layers",
+      controlGroups: fillDesign ? [fillDesign] : [],
       design: { seriesIndex: 0, supportsPattern: true },
     },
     {
@@ -316,22 +333,27 @@ export function resolveGaugeComponents(): StudioComponentDefinition[] {
       kind: "geometry",
       controlGroups: notches ? [notches] : [],
     },
-    {
+  ];
+
+  if (!isLinear) {
+    components.push({
       id: "gauge.arc",
       label: "Arc",
       parentId: "gauge.chart",
       kind: "geometry",
       controlGroups: arc ? [arc] : [],
-    },
-    {
-      id: "gauge.center",
-      label: "PieCenterShell",
-      parentId: "gauge.chart",
-      kind: "text",
-      controlGroups: center ? [center] : [],
-    },
-    legendNode("gauge"),
-  ];
+    });
+  }
+
+  components.push({
+    id: "gauge.center",
+    label: isLinear ? "Label" : "PieCenterShell",
+    parentId: "gauge.chart",
+    kind: "text",
+    controlGroups: center ? [center] : [],
+  });
+
+  return components;
 }
 
 export function isStudioDataComponent(

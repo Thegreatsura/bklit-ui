@@ -137,7 +137,7 @@ const gaugeConfig: StudioChartConfig = {
   motionStagger: true,
   controls: [],
   controlGroups: gaugeControlGroups,
-  resolveComponents: () => resolveGaugeComponents(),
+  resolveComponents: resolveGaugeComponents,
   render: (state, ctx) => <GaugeStudioPreview ctx={ctx} state={state} />,
   generateCode: (state) => gaugeCodegen(state),
 };
