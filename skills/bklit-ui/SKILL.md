@@ -61,6 +61,7 @@ There is no barrel for component items — import each export from the file that
 | `sunburst-chart`, `sunburst-segment`, `sunburst-center`, `sunburst` (`buildArcs`) … | sunburst parts |
 | `heatmap` · `choropleth` · `sankey` | folder `index.ts` re-exports every part |
 | `grid` · `x-axis` · `y-axis` · `background` · `reference-area` · `projection-line` · `trend-line` | `Grid` · `XAxis` · `YAxis` · `Background` · `ReferenceArea` · `ProjectionLine` · `TrendLine` |
+| `band` · `bollinger` | `Band` · `withBollingerBands` (installed by `@bklit/line-chart`, also `@bklit/band`) |
 | `tooltip` · `legend` · `markers` · `patterns` | folder `index.ts` (`ChartTooltip`, `Legend*`, `ChartMarkers`, `Pattern*`) |
 | `chart-context` | `chartCssVars`, `useChart`, `TooltipData` |
 
@@ -138,7 +139,7 @@ All items install with `npx shadcn@latest add @bklit/<item>`. For any `<item>`:
 
 ### Add-ons (most install automatically as dependencies)
 
-`grid`, `x-axis`, `y-axis` (not pulled in by line/area — add it for a value axis), `chart-tooltip`, `legend`, `markers`, `background`, `patterns`, `reference-area`, `projection-line`, `trend-line` (least-squares trend overlay for line/area/bar/composed), `bar-depth` (3D/extruded bars on `BarChart`), `chart-stat-flow` (animated stat number used by pie/ring/gauge centers and stat cards). Internal plumbing items (`chart-context`, `chart-animation`, `chart-series`, `chart-utils`, `chart-parent-size`, `utils`, `shimmering-text`) come in automatically.
+`grid`, `x-axis`, `y-axis` (not pulled in by line/area — add it for a value axis), `chart-tooltip`, `legend`, `markers`, `background`, `patterns`, `reference-area`, `projection-line`, `trend-line` (least-squares trend overlay for line/area/bar/composed), `band` (range / Bollinger band on `LineChart`; already in `line-chart`), `bar-depth` (3D/extruded bars on `BarChart`), `chart-stat-flow` (animated stat number used by pie/ring/gauge centers and stat cards). Internal plumbing items (`chart-context`, `chart-animation`, `chart-series`, `chart-utils`, `chart-parent-size`, `utils`, `shimmering-text`) come in automatically.
 
 **Brush:** `ChartBrush` / `ChartBrushLayout` (docs: `/docs/utility/brush`) are **not** in any registry item today. If the user needs brush zoom, say so and point to the docs/source rather than inventing an install command.
 

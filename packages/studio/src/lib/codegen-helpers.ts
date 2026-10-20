@@ -32,6 +32,12 @@ import {
 } from "./motion-codegen";
 import { patternCodegenBlock } from "./patterns";
 import { seriesStrokePropsCodegen } from "./series-stroke-props";
+import {
+  bandCodegenParts,
+  bandDataCodegenImport,
+  bandDataCodegenSnippet,
+  EMPTY_BAND_CODEGEN_PARTS,
+} from "./studio-band";
 import { isStudioComponentVisible } from "./studio-component-visibility";
 import type { StudioUrlState } from "./studio-parsers";
 import {
@@ -602,6 +608,11 @@ export function cartesianCodegen(
   if (usesBackground) {
     chartImports.push("Background");
   }
+  const band =
+    chartType === "LineChart"
+      ? bandCodegenParts(state, curveImportName(getSeriesCurve(state, 0)))
+      : EMPTY_BAND_CODEGEN_PARTS;
+  chartImports.push(...band.imports);
   if (chartType === "LineChart") {
     chartImports.push("Line");
     if (getProjectionCount(state) > 0) {
@@ -630,7 +641,7 @@ export function cartesianCodegen(
   return `import { ${chartImports.join(", ")} } from "@bklitui/ui/charts";
 ${curveImports}
 
-<${chartType} data={chartData}${anim}>${backgroundBlock}${gridBlock}${referenceAreaBlock}${child}${trendLineBlock}${projectionBlock}
+<${chartType} data={${band.dataVar}}${anim}>${backgroundBlock}${gridBlock}${referenceAreaBlock}${band.block}${child}${trendLineBlock}${projectionBlock}
   <XAxis />
   <ChartTooltip />
 </${chartType}>`;
@@ -1302,7 +1313,12 @@ export function lineChartDataSnippet(state: StudioUrlState) {
     getProjectionCount(state) > 0
       ? studioTrendingDataSnippet(state, "date")
       : studioCartesianDataSnippet(state, "date");
-  return dataSnippet + projectionCodegenDataSnippets(state);
+  return (
+    bandDataCodegenImport(state) +
+    dataSnippet +
+    bandDataCodegenSnippet(state) +
+    projectionCodegenDataSnippets(state)
+  );
 }
 
 export function areaChartDataSnippet(state: StudioUrlState) {
