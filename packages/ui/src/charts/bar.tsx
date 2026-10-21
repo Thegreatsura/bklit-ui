@@ -102,12 +102,14 @@ interface AnimatedBarProps {
   index: number;
   isFaded: boolean;
   animationType: BarAnimationType;
-  innerHeight: number;
   fadedOpacity: number;
   staggerDelay: number;
   enterTransition?: Transition;
   revealEpoch: number;
   isHorizontal: boolean;
+  /** Value-axis position the grow animation starts from (the zero line for
+   * non-stacked bars, the segment start for horizontal stacked bars). */
+  growOrigin: number;
 }
 
 function AnimatedBar({
@@ -121,12 +123,12 @@ function AnimatedBar({
   index,
   isFaded,
   animationType,
-  innerHeight,
   fadedOpacity,
   staggerDelay,
   enterTransition,
   revealEpoch,
   isHorizontal,
+  growOrigin,
 }: AnimatedBarProps) {
   const enterAnim = transitionWithDelay(enterTransition, index * staggerDelay);
 
@@ -152,8 +154,8 @@ function AnimatedBar({
   }
 
   const initial = isHorizontal
-    ? { width: 0, height, x, y }
-    : { width, height: 0, x, y: innerHeight };
+    ? { width: 0, height, x: growOrigin, y }
+    : { width, height: 0, x, y: growOrigin };
   const target = isHorizontal
     ? { width, height, x, y }
     : { width, height, x, y };
@@ -283,6 +285,8 @@ const BarInner = memo(function BarInner({
         let barW: number;
 
         const scale = isHorizontal ? chartYScale : valueScale;
+        const zeroX = isHorizontal ? (scale(0) ?? 0) : 0;
+        const zeroY = isHorizontal ? 0 : (scale(0) ?? innerHeight);
 
         if (isHorizontal) {
           // Horizontal bars: category on y-axis, value on x-axis
@@ -303,7 +307,10 @@ const BarInner = memo(function BarInner({
               barW = Math.max(0, barW - stackGap);
             }
           } else {
-            x = 0;
+            // Grow from the zero line in either direction (zeroX is 0 for
+            // non-negative data).
+            x = Math.min(valuePos, zeroX);
+            barW = Math.abs(valuePos - zeroX);
             // For grouped bars, offset y position
             const effectiveGroupGap = seriesCount > 1 ? groupGap : 0;
             y = bandPos + seriesIndex * (barWidth + effectiveGroupGap);
@@ -314,8 +321,10 @@ const BarInner = memo(function BarInner({
               seriesIndex * (barWidth + (seriesCount > 1 ? groupGap : 0));
         } else {
           // Vertical bars: category on x-axis, value on y-axis
+          // Measure from the zero line (not the plot floor) so negative
+          // values grow downward. For non-negative data zeroY === innerHeight.
           const valuePos = scale(value) ?? 0;
-          barHeight = innerHeight - valuePos;
+          barHeight = Math.abs(zeroY - valuePos);
           barW = barWidth;
 
           if (stacked && stackOffsets) {
@@ -329,7 +338,7 @@ const BarInner = memo(function BarInner({
               barHeight = Math.max(0, barHeight - stackGap);
             }
           } else {
-            y = valuePos;
+            y = Math.min(valuePos, zeroY);
             // For grouped bars, offset x position
             const effectiveGroupGap = seriesCount > 1 ? groupGap : 0;
             x = bandPos + seriesIndex * (barWidth + effectiveGroupGap);
@@ -341,9 +350,10 @@ const BarInner = memo(function BarInner({
 
           // Minimum visible height — floor short/zero non-stacked bars so a
           // zero-value data point still reads as a tiny bar instead of
-          // vanishing. Grows up from the baseline. Floored bars skip the
-          // perspective trim (sub-pixel on a 3px bar; keeps the front aligned
-          // with bar-depth, which also skips trim for floored bars).
+          // vanishing. Grows up from the zero line. Non-negative only, to
+          // match bar-depth's floor. Floored bars skip the perspective trim
+          // (sub-pixel on a 3px bar; keeps the front aligned with bar-depth,
+          // which also skips trim for floored bars).
           let isFloored = false;
           if (
             !stacked &&
@@ -351,9 +361,8 @@ const BarInner = memo(function BarInner({
             value >= 0 &&
             barHeight < minBarHeight
           ) {
-            const baselineY = scale(0) ?? innerHeight;
             barHeight = minBarHeight;
-            y = baselineY - minBarHeight;
+            y = zeroY - minBarHeight;
             isFloored = true;
           }
 
@@ -368,7 +377,6 @@ const BarInner = memo(function BarInner({
             !isFloored &&
             (!stacked || isLastSeries)
           ) {
-            const baselineY = scale(0) ?? innerHeight;
             const rise = barDepthPerspectiveRise(
               barScale,
               bandWidth,
@@ -376,7 +384,7 @@ const BarInner = memo(function BarInner({
               innerWidth,
               d,
               y,
-              baselineY
+              zeroY
             );
             const trim = Math.min(rise, Math.max(0, barHeight - 1));
             y += trim;
@@ -398,6 +406,11 @@ const BarInner = memo(function BarInner({
         const effectiveRx = applyRounding ? cornerRadius : 0;
         const effectiveRy = applyRounding ? cornerRadius : 0;
 
+        let growOrigin = zeroY;
+        if (isHorizontal) {
+          growOrigin = stacked ? x : zeroX;
+        }
+
         if (animate && !isLoaded) {
           return (
             <AnimatedBar
@@ -405,9 +418,9 @@ const BarInner = memo(function BarInner({
               enterTransition={enterTransition}
               fadedOpacity={fadedOpacity}
               fill={fill}
+              growOrigin={growOrigin}
               height={barHeight}
               index={i}
-              innerHeight={innerHeight}
               isFaded={isFaded}
               isHorizontal={isHorizontal}
               key={barKey}
