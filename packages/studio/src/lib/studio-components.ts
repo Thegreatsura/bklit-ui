@@ -62,7 +62,10 @@ import {
   ringCenterControlGroup,
   ringChartControlGroups,
   sankeyChartControlGroups,
-  scatterChartControlGroups,
+  scatterInteractionControlGroup,
+  scatterJitterChartTooltipControlGroups,
+  scatterJitterControlGroup,
+  scatterPointsControlGroup,
   standardBrushControlGroups,
   standardBrushStripControlGroups,
   standardChartTooltipControlGroups,
@@ -1347,7 +1350,6 @@ export function resolveRadarComponents(
 export function resolveScatterComponents(
   state: StudioUrlState
 ): StudioComponentDefinition[] {
-  const [points, interaction] = scatterChartControlGroups;
   const chartId = "scatter.chart";
 
   const components: StudioComponentDefinition[] = [
@@ -1356,7 +1358,7 @@ export function resolveScatterComponents(
       label: "ScatterChart",
       kind: "chart",
       treeIcon: "layers",
-      controlGroups: [],
+      controlGroups: [scatterJitterControlGroup],
       design: rootPaletteDesign(false),
     },
     gridNode("scatter"),
@@ -1364,15 +1366,15 @@ export function resolveScatterComponents(
     referenceAreaNode("scatter"),
     {
       id: "scatter.desktop",
-      label: "Scatter · desktop",
+      label: state.scatterJitter ? "Scatter · fastlane" : "Scatter · desktop",
       parentId: chartId,
       kind: "series",
       listMarker: "color-dot",
       swatchColor: getEffectiveSeriesColor(state, 0),
       controlGroups: [
         seriesYAxisControlGroup(0),
-        ...(points ? [points] : []),
-        ...(interaction ? [interaction] : []),
+        scatterPointsControlGroup,
+        scatterInteractionControlGroup,
       ],
       design: { seriesIndex: 0, supportsPattern: false },
     },
@@ -1381,7 +1383,7 @@ export function resolveScatterComponents(
   if (state.scatterSecondSeries) {
     components.push({
       id: "scatter.mobile",
-      label: "Scatter · mobile",
+      label: state.scatterJitter ? "Scatter · human" : "Scatter · mobile",
       parentId: chartId,
       kind: "series",
       listMarker: "color-dot",
@@ -1395,7 +1397,10 @@ export function resolveScatterComponents(
     chartYAxisNode("scatter", "left", "YAxis · left"),
     chartYAxisNode("scatter", "right", "YAxis · right"),
     passiveNode("scatter", "xaxis", "XAxis"),
-    chartTooltipNode("scatter"),
+    chartTooltipNode(
+      "scatter",
+      state.scatterJitter ? scatterJitterChartTooltipControlGroups : undefined
+    ),
     legendNode("scatter")
   );
 

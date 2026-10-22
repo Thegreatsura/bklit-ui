@@ -1373,10 +1373,54 @@ export function sankeyCodegen(state: StudioUrlState) {
   };
 }
 
+function scatterSeriesPropsCodegen(state: StudioUrlState): string {
+  const parts = [`radius={${state.scatterRadius}}`];
+  if (state.scatterShowRings) {
+    parts.push(
+      `strokeWidth={${state.scatterRingWidth}}`,
+      `ringGap={${state.scatterRingGap}}`
+    );
+  }
+  if (state.scatterFadeOnHover) {
+    if (state.scatterInactiveOpacity !== 0.3) {
+      parts.push(`inactiveOpacity={${state.scatterInactiveOpacity}}`);
+    }
+    if (state.scatterInactiveMode === "blur") {
+      parts.push('inactiveMode="blur"');
+      if (state.scatterInactiveBlur !== 2) {
+        parts.push(`inactiveBlur={${state.scatterInactiveBlur}}`);
+      }
+    }
+  } else {
+    parts.push("fadeOnHover={false}");
+  }
+  if (!state.scatterShowActiveHighlight) {
+    parts.push("showActiveHighlight={false}");
+  }
+  return parts.join(" ");
+}
+
+function scatterJitterCodegen(state: StudioUrlState): string {
+  if (!state.scatterJitter) {
+    return "";
+  }
+  const parts = [`x: ${state.scatterJitterX}`];
+  if (state.scatterJitterY > 0) {
+    parts.push(`y: ${state.scatterJitterY}`);
+  }
+  return `\n  jitter={{ ${parts.join(", ")} }}`;
+}
+
 export function scatterCodegen(state: StudioUrlState) {
   const anim = `\n  ${cssRevealAnimationCodegen(state.animationDuration, motionSliceFromState(state))}`;
+  const isJitter = state.scatterJitter;
+  const jitter = scatterJitterCodegen(state);
+  const seriesProps = scatterSeriesPropsCodegen(state);
+  const [firstKey, secondKey] = isJitter
+    ? ["fastlane", "human"]
+    : ["desktop", "mobile"];
   const secondSeries = state.scatterSecondSeries
-    ? `\n  <Scatter dataKey="mobile" radius={${state.scatterRadius}} ringGap={${state.scatterRingGap}} strokeWidth={${state.scatterRingWidth}} fadeOnHover={${state.scatterFadeOnHover}} inactiveOpacity={${state.scatterInactiveOpacity}} showActiveHighlight={${state.scatterShowActiveHighlight}} />`
+    ? `\n  <Scatter dataKey="${secondKey}" ${seriesProps} />`
     : "";
 
   const backgroundBlock = backgroundCodegenBlock(state, "scatter");
@@ -1391,21 +1435,89 @@ export function scatterCodegen(state: StudioUrlState) {
   )
     ? ", ReferenceArea"
     : "";
+  const yAxisBlock =
+    isJitter && isStudioComponentVisible(state, "scatter.yaxis.left")
+      ? "\n  <YAxis formatValue={formatLoc} />"
+      : "";
+  const jitterImports = isJitter
+    ? `${yAxisBlock ? ", YAxis" : ""}, TooltipContent`
+    : "";
+  const chartLabelProp = isJitter ? "\n  formatXLabel={formatMonth}" : "";
+  const xAxisBlock = isJitter ? "<XAxis numTicks={12} />" : "<XAxis />";
+  // Jittered scatter hides the crosshair by default — emit only the opt-in.
+  const tooltipBlock = isJitter
+    ? `<ChartTooltip${state.scatterJitterShowCrosshair ? " showCrosshair" : ""} content={({ point }) => <PrTooltip point={point} />} />`
+    : "<ChartTooltip />";
 
   return {
-    code: `import { ScatterChart, Scatter, XAxis, ChartTooltip${gridImport}${backgroundImport}${referenceAreaImport} } from "@bklitui/ui/charts";
+    code: `import { ScatterChart, Scatter, XAxis, ChartTooltip${gridImport}${backgroundImport}${referenceAreaImport}${jitterImports} } from "@bklitui/ui/charts";
 
-<ScatterChart data={chartData}${anim}>${backgroundBlock}${gridBlock}${referenceAreaBlock}
-  <Scatter dataKey="desktop" radius={${state.scatterRadius}} ringGap={${state.scatterRingGap}} strokeWidth={${state.scatterRingWidth}} fadeOnHover={${state.scatterFadeOnHover}} inactiveOpacity={${state.scatterInactiveOpacity}} showActiveHighlight={${state.scatterShowActiveHighlight}} />${secondSeries}
-  <XAxis />
-  <ChartTooltip />
+<ScatterChart data={chartData}${anim}${jitter}${chartLabelProp}>${backgroundBlock}${gridBlock}${referenceAreaBlock}
+  <Scatter dataKey="${firstKey}" ${seriesProps} />${secondSeries}${yAxisBlock}
+  ${xAxisBlock}
+  ${tooltipBlock}
 </ScatterChart>`,
-    data: scatterChartDataSnippet(),
+    data: isJitter
+      ? scatterJitterChartDataSnippet()
+      : scatterChartDataSnippet(),
   };
 }
 
 export function scatterChartDataSnippet() {
   return `const chartData = ${JSON.stringify(scatterStudioData.slice(0, 12), null, 2)};`;
+}
+
+/** Monthly PR-size sample + helpers used by the jittered scatter codegen. */
+export function scatterJitterChartDataSnippet() {
+  return `// Lines changed per merged PR, month by month. Seeded Park–Miller PRNG —
+// identical on server and client (no Math.random).
+let state = 42;
+const random = () => {
+  state = (state * 48_271) % 2_147_483_647;
+  return state / 2_147_483_647;
+};
+
+const chartData: { date: Date; fastlane?: number; human?: number }[] = [];
+for (let month = 0; month < 12; month++) {
+  const date = new Date(2025, month, 1);
+  // Fastlane: auto-merged PRs, always < 500 LOC, skewed small
+  const fastlaneCount = 15 + Math.floor(random() * 16);
+  for (let i = 0; i < fastlaneCount; i++) {
+    const r = random();
+    chartData.push({ date, fastlane: Math.round(10 + r * r * 480) });
+  }
+  // Human reviewed: broader spread with a few large outliers
+  const humanCount = 15 + Math.floor(random() * 16);
+  for (let i = 0; i < humanCount; i++) {
+    const r = random();
+    const isOutlier = random() < 0.06;
+    chartData.push({
+      date,
+      human: Math.round(isOutlier ? 1500 + r * 1000 : 40 + r * Math.sqrt(r) * 1160),
+    });
+  }
+}
+
+const series = [
+  { key: "fastlane", label: "Fastlane (auto-merged)", color: "var(--chart-1)" },
+  { key: "human", label: "Human reviewed", color: "var(--chart-2)" },
+] as const;
+
+const shortMonthFmt = new Intl.DateTimeFormat("en-US", { month: "short" });
+const monthYearFmt = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" });
+const locFmt = new Intl.NumberFormat("en-US");
+const formatMonth = (date: Date) => shortMonthFmt.format(date);
+const formatLoc = (value: number) => (value >= 1000 ? \`\${value / 1000}k\` : String(value));
+
+function PrTooltip({ point }: { point: Record<string, unknown> }) {
+  const rows = series.flatMap(({ key, label, color }) => {
+    const value = point[key];
+    return typeof value === "number"
+      ? [{ color, label, value: \`\${locFmt.format(value)} LOC\` }]
+      : [];
+  });
+  return <TooltipContent rows={rows} title={monthYearFmt.format(point.date as Date)} />;
+}`;
 }
 
 export function lineChartDataSnippet(state: StudioUrlState) {
