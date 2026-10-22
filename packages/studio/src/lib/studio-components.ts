@@ -694,6 +694,9 @@ export function resolveBarComponents(
   const settings = barChartControlGroups.find(
     (group) => group.title === "Settings"
   );
+  const valueLabels = barChartControlGroups.find(
+    (group) => group.title === "Value labels"
+  );
   const seriesSettings = barChartControlGroups.find(
     (group) => group.title === "Series"
   );
@@ -714,7 +717,9 @@ export function resolveBarComponents(
         label: "BarChart",
         kind: "chart",
         treeIcon: "layers",
-        controlGroups: expandFirstCollapsible(settings ? [settings] : []),
+        controlGroups: expandFirstCollapsible(
+          [settings, valueLabels].filter((group) => group !== undefined)
+        ),
       },
       {
         id: "bar.grid",
@@ -734,7 +739,9 @@ export function resolveBarComponents(
       label: "BarChart",
       kind: "chart",
       treeIcon: "layers",
-      controlGroups: expandFirstCollapsible(settings ? [settings] : []),
+      controlGroups: expandFirstCollapsible(
+        [settings, valueLabels].filter((group) => group !== undefined)
+      ),
       design: rootPaletteDesign(true),
       designPlacement: "after",
     },

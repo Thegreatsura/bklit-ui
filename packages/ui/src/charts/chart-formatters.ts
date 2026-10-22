@@ -18,6 +18,9 @@ export const hmsTimeFmt = new Intl.DateTimeFormat("en-US", {
 
 // `Intl.NumberFormat.prototype.format` is a bound getter — safe to extract.
 export const intFmt = new Intl.NumberFormat("en-US").format;
+export const valueLabelFmt = new Intl.NumberFormat("en-US", {
+  maximumFractionDigits: 0,
+}).format;
 
 function isFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);

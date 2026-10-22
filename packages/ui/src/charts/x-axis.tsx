@@ -11,12 +11,16 @@ import {
 import { shortDateFmt } from "./chart-formatters";
 import { DEFAULT_Y_DOMAIN_TWEEN_MS } from "./chart-phase";
 import { LINE_LOADING_PULSE_EASE } from "./line-loading-timing";
+import {
+  type ChartLabelCount,
+  resolveResponsiveChartLabelCount,
+} from "./responsive-chart-label-count";
 
 const X_AXIS_POSITION_TWEEN_MS = DEFAULT_Y_DOMAIN_TWEEN_MS;
 
 export interface XAxisProps {
   /** Number of ticks to show (including first and last). Default: 5. */
-  numTicks?: number;
+  numTicks?: ChartLabelCount;
   /** Width of the date ticker box for fade calculation. Default: 50 */
   tickerHalfWidth?: number;
   /**
@@ -24,6 +28,8 @@ export interface XAxisProps {
    * `"domain"` — evenly spaced ticks across the time domain (may not align with hover).
    */
   tickMode?: "domain" | "data";
+  /** Optional labels aligned with data rows for the displayed ticks. */
+  labels?: string[];
 }
 
 interface AxisTick {
@@ -575,10 +581,24 @@ const XAxisInner = memo(function XAxisInner({
   numTicks = 5,
   tickerHalfWidth = 50,
   tickMode = "data",
+  labels: labelsProp,
   container,
 }: XAxisProps & { container: HTMLDivElement }) {
-  const { xScale, margin, tooltipData, data, xAccessor, dateLabels, xDomain } =
-    useChart();
+  const {
+    xScale,
+    margin,
+    tooltipData,
+    data,
+    xAccessor,
+    dateLabels: contextDateLabels,
+    xDomain,
+    width,
+  } = useChart();
+  const dateLabels = labelsProp ?? contextDateLabels;
+  const resolvedNumTicks = useMemo(
+    () => resolveResponsiveChartLabelCount(numTicks, width, 5),
+    [numTicks, width]
+  );
 
   const labelsToShow = useMemo(() => {
     const projectionExtendsScale =
@@ -587,7 +607,7 @@ const XAxisInner = memo(function XAxisInner({
     if (tickMode === "domain") {
       return buildDomainTicks({
         marginLeft: margin.left,
-        numTicks,
+        numTicks: resolvedNumTicks,
         xScale,
       });
     }
@@ -596,7 +616,7 @@ const XAxisInner = memo(function XAxisInner({
     if (projectionExtendsScale && xDomain == null) {
       return buildDomainTicks({
         marginLeft: margin.left,
-        numTicks,
+        numTicks: resolvedNumTicks,
         xScale,
       });
     }
@@ -605,7 +625,7 @@ const XAxisInner = memo(function XAxisInner({
       data,
       dateLabels,
       marginLeft: margin.left,
-      targetTickCount: numTicks,
+      targetTickCount: resolvedNumTicks,
       xAccessor,
       xScale,
     });
@@ -618,7 +638,7 @@ const XAxisInner = memo(function XAxisInner({
         xAccessor,
         xScale,
         margin.left,
-        Math.max(1, numTicks - dataTicks.length + 1)
+        Math.max(1, resolvedNumTicks - dataTicks.length + 1)
       );
     }
 
@@ -631,7 +651,7 @@ const XAxisInner = memo(function XAxisInner({
     xAccessor,
     xScale,
     margin.left,
-    numTicks,
+    resolvedNumTicks,
   ]);
 
   const isHovering = tooltipData !== null;

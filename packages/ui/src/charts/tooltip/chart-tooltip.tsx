@@ -81,6 +81,8 @@ export interface ChartTooltipProps {
   children?: React.ReactNode;
   /** Custom class name */
   className?: string;
+  /** Optional labels aligned with chart data for the x-axis ticker. */
+  dateLabels?: string[];
   /** Per-chart override for the crosshair / dot / date-pill spring. */
   springConfig?: SpringConfig;
   /**
@@ -143,6 +145,7 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
   boxSpringConfig,
   panelStyle,
   backgroundColor,
+  dateLabels: dateLabelsProp,
   exit = true,
 }: ChartTooltipInnerProps) {
   const {
@@ -155,7 +158,7 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
     lines,
     bands,
     xAccessor,
-    dateLabels,
+    dateLabels: contextDateLabels,
     containerRef,
     orientation,
     barXAccessor,
@@ -168,6 +171,7 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
     [bands]
   );
   const { tooltipSpring } = useChartConfig();
+  const dateLabels = dateLabelsProp ?? contextDateLabels;
 
   const isHorizontal = orientation === "horizontal";
   // Bar charts (any orientation) and nearest-point hover (jittered scatter)

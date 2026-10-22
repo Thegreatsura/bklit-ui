@@ -442,6 +442,21 @@ const barHorizontalData = [
   { browser: "Other", users: 90 },
 ];
 
+const barValueLabelData = [
+  { month: "Jan", orders: 720 },
+  { month: "Feb", orders: 640 },
+  { month: "Mar", orders: 810 },
+  { month: "Apr", orders: 580 },
+  { month: "May", orders: 930 },
+  { month: "Jun", orders: 700 },
+  { month: "Jul", orders: 880 },
+  { month: "Aug", orders: 760 },
+  { month: "Sep", orders: 1010 },
+  { month: "Oct", orders: 860 },
+  { month: "Nov", orders: 1120 },
+  { month: "Dec", orders: 970 },
+];
+
 const barProfitLossData = [
   { month: "Jan", profit: 4200 },
   { month: "Feb", profit: -1800 },
@@ -1594,6 +1609,39 @@ function ProfitLossLineExampleWithState() {
 function makeAreaExamples(): ChartExample[] {
   return [
     {
+      title: "Area Chart - Value Labels",
+      description:
+        "Dense 24-month, two-series area with shared, collision-aware value labels",
+      code: `<AreaChart data={chartData}>
+  <Grid horizontal />
+  <Area dataKey="desktop" showValue valueLabelMaxCount={5} />
+  <Area
+    dataKey="mobile"
+    fill="var(--chart-line-secondary)"
+    showValue
+    valueLabelMaxCount={5}
+  />
+  <XAxis />
+  <ChartTooltip />
+</AreaChart>`,
+      footer:
+        "Both series share one label count. Resize to see labels adapt to the width and skip collisions.",
+      render: () => (
+        <AreaExampleChart data={scatterMultiSeriesData}>
+          <Grid horizontal />
+          <Area dataKey="desktop" showValue valueLabelMaxCount={5} />
+          <Area
+            dataKey="mobile"
+            fill="var(--chart-line-secondary)"
+            showValue
+            valueLabelMaxCount={5}
+          />
+          <XAxis />
+          <ChartTooltip />
+        </AreaExampleChart>
+      ),
+    },
+    {
       title: "Area Chart",
       description: "Default area with gradient fill and smooth curve",
       code: `<AreaChart data={chartData}>
@@ -2010,6 +2058,26 @@ function makeAreaExamples(): ChartExample[] {
 
 function makeBarExamples(): ChartExample[] {
   return [
+    {
+      title: "Bar Chart - Value Labels",
+      description: "Order totals with automatic in-bar value labels",
+      code: `<BarChart data={chartData} xDataKey="month">
+  <Grid horizontal />
+  <Bar dataKey="orders" showValue />
+  <BarXAxis />
+  <ChartTooltip />
+</BarChart>`,
+      footer:
+        "Auto orientation keeps labels horizontal when they fit, rotates them in narrow bars and hides values that fit neither way.",
+      render: () => (
+        <BarExampleChart data={barValueLabelData} xDataKey="month">
+          <Grid horizontal />
+          <Bar dataKey="orders" showValue />
+          <BarXAxis />
+          <ChartTooltip />
+        </BarExampleChart>
+      ),
+    },
     {
       title: "Bar Chart",
       description: "Default vertical bar chart with rounded caps",
