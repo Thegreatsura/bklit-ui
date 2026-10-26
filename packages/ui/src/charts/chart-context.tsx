@@ -21,6 +21,7 @@ import {
   type SetStateAction,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
 } from "react";
@@ -258,6 +259,10 @@ export type ChartStableContextValue = Omit<
   keyof ChartHoverContextValue
 >;
 
+/** `useLayoutEffect` in the browser, `useEffect` on the server (no SSR warning). */
+const useIsomorphicLayoutEffect =
+  typeof window === "undefined" ? useEffect : useLayoutEffect;
+
 const ChartStableContext = createContext<ChartStableContextValue | null>(null);
 const ChartHoverContext = createContext<ChartHoverContextValue | null>(null);
 
@@ -422,17 +427,27 @@ export function useChartStable(): ChartStableContextValue {
 /**
  * Resolves a chart container element to use as a `createPortal` target.
  *
- * The element is captured from the ref in an effect (after mount) and kept in
- * state, so nothing reads `ref.current` during render (React Compiler
- * `react-hooks/refs`). Costs the same single post-mount render as the previous
- * `mounted` flag pattern and returns `null` during SSR / the first render.
+ * The element is captured from the ref after mount and kept in state, so
+ * nothing reads `ref.current` during render (React Compiler
+ * `react-hooks/refs`). Returns `null` during SSR / the first render.
+ *
+ * - Layout effect: when the container is a sibling or ancestor already
+ *   attached, the synchronous re-render puts portalled axes and tooltips in
+ *   the same painted frame as the plot.
+ * - Passive effect: React attaches refs child-first in the layout phase, so a
+ *   portal rendered *inside* its container (heatmap, choropleth tooltips) sees
+ *   `null` above. By the passive phase every ref is attached; this picks it up.
  */
 export function useChartPortalContainer<T extends HTMLElement>(
   containerRef: RefObject<T | null> | undefined
 ): T | null {
   const [container, setContainer] = useState<T | null>(null);
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     setContainer(containerRef?.current ?? null);
+  }, [containerRef]);
+  useEffect(() => {
+    const element = containerRef?.current ?? null;
+    setContainer((previous) => (previous === element ? previous : element));
   }, [containerRef]);
   return container;
 }
